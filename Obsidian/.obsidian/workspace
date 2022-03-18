@@ -1,0 +1,102 @@
+{
+  "main": {
+    "id": "3ee0184070630477",
+    "type": "split",
+    "children": [
+      {
+        "id": "225a57139129e2a7",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "Development.md",
+            "mode": "preview"
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "0b28927b3d73f1ca",
+    "type": "split",
+    "children": [
+      {
+        "id": "9f5bd2e764b0ebf3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "de9039c8766357fa",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "55336c5669d45a25",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": true,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 173
+  },
+  "right": {
+    "id": "c8f1dde755fa1c8f",
+    "type": "split",
+    "children": [
+      {
+        "id": "3bf6fb2e0ddaaafc",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a706f9f1cac69c26",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Development.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "225a57139129e2a7",
+  "lastOpenFiles": [
+    "Development.md",
+    "Objects/Construct.md",
+    "Objects/Orb.md",
+    "Objects/Rune.md",
+    "Objects/Core.md",
+    "Gameplay.md",
+    "Index.md",
+    "Architecture.md",
+    "World/Locations.md",
+    "World/Enemies.md"
+  ]
+}
