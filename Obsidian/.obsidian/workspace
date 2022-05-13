@@ -4,7 +4,7 @@
     "type": "split",
     "children": [
       {
-        "id": "225a57139129e2a7",
+        "id": "991686378106b7c1",
         "type": "leaf",
         "state": {
           "type": "markdown",
@@ -86,17 +86,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "225a57139129e2a7",
+  "active": "991686378106b7c1",
   "lastOpenFiles": [
     "Development.md",
-    "Objects/Construct.md",
+    "World/Objects.md",
+    "World/Enemies.md",
+    "World/Locations.md",
     "Objects/Orb.md",
     "Objects/Rune.md",
     "Objects/Core.md",
-    "Gameplay.md",
+    "Objects/Construct.md",
     "Index.md",
-    "Architecture.md",
-    "World/Locations.md",
-    "World/Enemies.md"
+    "Gameplay.md"
   ]
 }

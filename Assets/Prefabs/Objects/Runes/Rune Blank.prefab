@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 2681658496411959488}
   - component: {fileID: 5978549340536936374}
   - component: {fileID: 1610902098338293851}
-  - component: {fileID: 1148079631680242554}
   m_Layer: 0
   m_Name: Rune Blank
   m_TagString: Untagged
@@ -144,16 +143,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9574c7cc25bbcd6448e5dbcf314f3514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1148079631680242554
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3614847910881958232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bbdd066a0b816045ba4585cbfc5eb6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speedID: -1
+  _objectData: {fileID: 11400000, guid: 957061874728c3b419058706793517e7, type: 2}
+  _mf: {fileID: 1066946550377335879}
+  _cl: {fileID: 7377909104140695052}
+  _rb: {fileID: 2681658496411959488}
+  _ol: {fileID: 5978549340536936374}

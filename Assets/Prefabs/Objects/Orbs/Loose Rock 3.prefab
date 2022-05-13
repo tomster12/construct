@@ -15,7 +15,9 @@ GameObject:
   - component: {fileID: 4673470273324044155}
   - component: {fileID: 4673470273324044153}
   - component: {fileID: 4673470273324044154}
-  - component: {fileID: 4499859409102134117}
+  - component: {fileID: 6437693325843974568}
+  - component: {fileID: 1179345188427481}
+  - component: {fileID: 5768530334795457638}
   m_Layer: 0
   m_Name: Loose Rock 3
   m_TagString: Untagged
@@ -144,8 +146,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9574c7cc25bbcd6448e5dbcf314f3514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectData: {fileID: 11400000, guid: d5d85bfc6084a5846b5c5f2dde30e779, type: 2}
---- !u!114 &4499859409102134117
+  _objectData: {fileID: 11400000, guid: d5d85bfc6084a5846b5c5f2dde30e779, type: 2}
+  _mf: {fileID: 8953027734337788515}
+  _cl: {fileID: 4673470273324044152}
+  _rb: {fileID: 4673470273324044155}
+  _ol: {fileID: 4673470273324044153}
+--- !u!114 &6437693325843974568
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -154,57 +160,88 @@ MonoBehaviour:
   m_GameObject: {fileID: 4673470273324044156}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2263360c5e8c2a448b4259f6fcf85783, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d638c819f9a09244a4e011b78931947, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1179345188427481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b55f07494e76e174ca81d201a33dc1ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rockParticleGeneratorPfb: {fileID: 2164084507230441150, guid: bda918d738c22f24ca10890b8075c3da,
+    type: 3}
+  speedParticleGeneratorPfb: {fileID: 4659153260879525104, guid: 6c7df27be05f1a04a9eb4f5226e9bbdf,
+    type: 3}
+  particleLimit: 0.9
   stats:
     randomizeStats: 0
     stats:
     - name: MovementStrength
       isRandom: 0
       baseRange:
-      - 5
-      - 5
-      baseValue: 3.5
-      _finalValue: 3.5
+      - 0
+      - 0
+      baseValue: 5
+      _finalValue: 5
       affectors: []
     - name: JumpCooldown
       isRandom: 0
       baseRange:
-      - 1
-      - 1
-      baseValue: 0.65
-      _finalValue: 0.65
+      - 0
+      - 0
+      baseValue: 1
+      _finalValue: 1
       affectors: []
     - name: AttackStrength
       isRandom: 0
       baseRange:
-      - 10
-      - 10
+      - 0
+      - 0
       baseValue: 10
       _finalValue: 10
       affectors: []
     - name: AttackDuration
       isRandom: 0
       baseRange:
-      - 0.5
-      - 0.5
+      - 0
+      - 0
       baseValue: 0.5
       _finalValue: 0.5
       affectors: []
     - name: AttackCooldown
       isRandom: 0
       baseRange:
-      - 2
-      - 2
+      - 0
+      - 0
       baseValue: 2
       _finalValue: 2
       affectors: []
     - name: AimLerp
       isRandom: 0
       baseRange:
-      - 2
-      - 2
-      baseValue: 20
-      _finalValue: 20
+      - 0
+      - 0
+      baseValue: 2
+      _finalValue: 2
       affectors: []
+--- !u!114 &5768530334795457638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1f6847b1d2ec0c489adc1d8ef71aff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _baseWO: {fileID: 4673470273324044154}
+  _runeHandler: {fileID: 6437693325843974568}

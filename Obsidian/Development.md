@@ -14,11 +14,12 @@
 
 ### v0.2: Core Systems
 
-- [x] Implement different movement classes which allow the user to move different
+- [ ] Implement different movement classes which allow the user to move different
 	- [x] MovementHover for standard hovering / aiming
-	- [x] MovementHop for basic hopping along
+	- [ ] MovementHop for basic hopping along
 - [x] System for crystal attaching / detaching from orbs
 - [x] Refactor to use a generic Construct class which handles the interactions between the cores, runes, orbs
+- [x] Rework PlayerController / PlayerCamera for better management of Forging mode as well as better interaction with Construct class
 - [ ] Basic forging screen to allow better rune slotting / unslotting
 
 ### v0.3: Initial UX
@@ -30,7 +31,7 @@
 	- [ ] Highlighting rune slots when required
 
 ### v0.4: Initial Content
-- [ ] Implement destructable objects / damage system (for use with both objects as well as runes / enemies)
+- [ ] Implement [[Objects#Destructible]] / damage system (for use with both objects as well as runes / enemies)
 - [ ] Implement a skill system that runes can subscribe skills to
 - [ ] [[Rune#Blaster]] weapon skill rune to test the destructable objects and skill system
 - [ ] Basic health management for overall construct / individual orbs
@@ -49,44 +50,20 @@
 
 ## Short-term Todo
 
-- [x] Create PlayerController script which handles enabling / disabling the ConstructController / ConstructCamera, and the ForgingController / ForgingCamera script based on a GameState variable
+- [ ] Refactor all code to be clean, readable, extensible
+	- Reformat to work with visual studio
+	- Convert some to 1 line functions
+	- Ensure public / private is all set correctly
+		- Ensure correct naming of variables
+	- Add headers for all serialized values
 
-- [x] Change both camera scripts to use a prevAimedWJ and to unhighlight in the Controller, to allow for more specific control
-
-- [x] Seperate out effects on the camera so different scripts can easily access
-
-- [x] Change attachment to be based on movement
-
-- [x] Add in basic meshes for developing / vibe
-
-- [x] Update MovementHop to have:
-
-	- [x] jumpCooldown stat
-	
-	- [x] Jump to scale better with moveResist
-
-- [x] Refactor to use Construct class which deals with runes / cores / orbs
-
-	- [x] Reimplement Forging Camera / Controller
+- [x] Rework PlayerController / PlayerCamera to use a state system for ingame / forging
 
 - [ ] Add UI for objects information for orbs / runes / cores
 	
 	- [ ] This UI can change depending on the type of objects hovered
 
 - [ ] Deal with physics better on hover attachment / detachment
-
-- [ ] Create a ForgingController / ForgingCamera script which accesses ConstructController to correctly position and access current [[Core|core]] / [[Orb|orb]] / [[Rune|rune]] slots and positions during [[Index#Forging|forging]] mode
-
-	- [x] Hide UI on Forging toggle
-	
-	- [ ] Potentially use a function which gets a structured / unstructured list of all world objects in the current construct
-	
-	- [ ] Highlight objects from current construct when hovering
-	
-	- [ ] SFX For entering / exiting Forging
-
-	
-	> Ensure the [[Index#Forging|forging]] scripts are decoupled from the scripts on the individual world objects handled by the [[Construct]] script to ensure future proofing for more complex shapes
 
 ---
 
@@ -122,18 +99,24 @@
 - Into the pit
 	- Biome adversity
 	- NPC development
+- Neurovoider
+	- Modularity
+	- Varied enemies
+	- Dynamic / procedural levels
 
 
 **Open Discussion**
 
 How will gameplay loop work:
 - Roguelite runs, in which you build up a construct through single runs
-	- Short sessions in and out - doesnt allow for much ingame development of larger constructs but could benefit meta progression
-	- Longer sessions between multiple floors / rooms - bigger progression of construct but more lost inbetween each run
+	- Short sessions in and out
+		- doesnt allow for much ingame development of larger constructs but could benefit meta progression
+	- Longer sessions between multiple floors / rooms
+		- bigger progression of construct but more lost inbetween each run
 - Open world, going dungeon to dungeon / zone to zone building up 1 singular construct throughout entire playtime
 	- Incorporate mothergunship style weapon system, of taking them into missions but losing them if you die
 
-What meta game is needed:
+Potential includable meta-game:
 - NPC / shops in a hub area:
 	- Buy runes / orbs to permanently keep / 1 time use
 	- Unlock new runes orbs to be found ingame
@@ -144,57 +127,22 @@ What meta game is needed:
 
 ## Scope Creep Central
 
+- Totem that powers up rune and attacks you and you get it
+
 - Random Affixes / Modifers for orbs / runes generated / found in the world
+
 - Certain runes capable of levelling up through use, and becoming stronger
 	- This could lead into skill tree / combinations / synergies with levelled up runes
+
 - Multi-rune combinations performing different actions based on runes / positioning
 	- E.g. a rune on an orbitting orb will react different to it on a base orb, or on an orb attached to an elbow construct orb
+
 - Rune / Orb caches which can be broken and drop large amounts of runes / caches of different varieties
 	- The caches themselves could come with specific rarities
 
 ---
 
 ## Architecture
-
-### Player
-
-**PlayerController**: Updates correct *Controller*, swaps between gamestate.
-
-> **PlayerForgingController**: Update object positions.
-> 
-> - **PlayerForgingCamera**: Position camera for Forging.
-
-> **PlayerConstructController**: Send movement to the *Construct*.
-> 
->  - **PlayerConstructCamera**: Follow / rotate around the *Construct*.
-
-
-<br />
-
-### World
-
-**WorldObject**: Allows easy access to mesh, bounds, outline, rigidbody
-
-
-**Construct**: Manages core, orbs, runes, movement, aiming, attachment
-
-> **Rune Handler**: Slots *Runes*
-> 
-> - **Rune**: Holds functionality / stats
-> 
->   - **Rune Blank**: *Implementation*
-
-
-> **MovementI**: Movement / aiming and setting active / inactive
->
-> - **MovementHop**: *Implementation*
->
-> - **CoreMovementI**: Attach / detach requirement
->
->   - **MovementHover**: *Implementation*
-
-
-<br />
 
 ### Utility
 

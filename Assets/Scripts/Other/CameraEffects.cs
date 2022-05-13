@@ -6,44 +6,35 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 
-class CameraEffects : MonoBehaviour {
+class CameraEffects : MonoBehaviour
+{
 
-  // Initialize references
-  private Volume vol;
-  private Vector3 shakeOffset;
-
-
-  private void Awake() {
     // Initialize references
-    vol = GetComponent<Volume>();
-  }
+    [SerializeField] private Volume vol;
 
 
-  private void Update() {
-    transform.localPosition = shakeOffset;
-  }
-
-
-  public IEnumerator vfxShake(float time, float strength) {
-    // Shake camera over time
-    for (float t = time; t > 0.0f;) {
-      shakeOffset = Random.insideUnitSphere * (t / time) * strength;
-      t -= Time.deltaTime;
-      yield return null;
+    public IEnumerator Vfx_Shake(float time, float strength)
+    {
+        // Shake camera inside random sphere
+        for (float t = time; t > 0.0f;)
+        {
+            transform.localPosition = Random.insideUnitSphere * (t / time) * strength;
+            t -= Time.deltaTime;
+            yield return null;
+        }
     }
-  }
 
 
-  public IEnumerator vfxChromatic(float time, float strength) {
-    // Get chromatic aberration from player volume
-    ChromaticAberration c;
-    vol.profile.TryGet(out c);
-
-    // Pop and then ease out
-    for (float t = time; t > 0.0f;) {
-      c.intensity.value = Easing.easeOutSine(t / time) * strength;
-      t -= Time.deltaTime;
-      yield return null;
+    public IEnumerator Vfx_Chromatic(float time, float strength)
+    {
+        // Apply chromatic then ease out
+        ChromaticAberration c;
+        vol.profile.TryGet(out c);
+        for (float t = time; t > 0.0f;)
+        {
+            c.intensity.value = Easing.EaseOutSine(t / time) * strength;
+            t -= Time.deltaTime;
+            yield return null;
+        }
     }
-  }
 }

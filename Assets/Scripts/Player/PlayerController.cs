@@ -1,64 +1,63 @@
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
+    // Declare static, references, variables
+    public static PlayerController instance { get; private set; }
 
-  // Declare enums, references, variables
-  public enum GameState { Playing, Forging };
+    [SerializeField] private PlayerCamera playerCamera;
+    [SerializeField] private Construct playerConstruct;
 
-  private PlayerConstructController constructController;
-  private PlayerForgingController forgingController;
-
-  [SerializeField] private GameState gameState;
-
-
-  private void Awake() {
-    // Initialize references
-    constructController = GetComponent<PlayerConstructController>();
-    forgingController = GetComponent<PlayerForgingController>();
-  }
+    private Vector3 inputMoveDir;
 
 
-  private void Start() {
-    // Initialize as playing
-    setState(GameState.Playing, true);
-  }
-
-
-  private void Update() {
-    // [Toggle Forging]: on tab
-    if (Input.GetKeyDown("tab")) {
-
-      if (gameState == GameState.Playing
-      && constructController.controlledConstruct.getCoreState() != CoreState.Attaching
-      && constructController.controlledConstruct.getCoreState() != CoreState.Detaching) {
-        setState(GameState.Forging);
-
-      } else if (gameState == GameState.Forging) {
-        setState(GameState.Playing);
-      }
-    }
-  }
-
-
-  private void setState(GameState newState, bool force=false) {
-    // Ensure different state
-    if (newState == gameState && !force) return;
-
-    // Handle controllers / cameras
-    if (newState == GameState.Playing) {
-      if (forgingController.enabled) forgingController.setActive(false);
-      if (!constructController.enabled) constructController.setActive(true);
-
-    } else if (newState == GameState.Forging) {
-      if (constructController.enabled) constructController.setActive(false);
-      if (!forgingController.enabled) forgingController.setActive(true);
+    private void Awake()
+    {
+        // Handle singleton
+        if (instance != null) return;
+        instance = this;
     }
 
-    // Update gameState
-    gameState = newState;
-  }
+
+    private void Update()
+    {
+        UpdateInput();
+    }
+
+    private void UpdateInput() {
+        // [inputMoveDir]: "Horizontal" and "Vertical"
+        inputMoveDir = Vector3.zero;
+        if ((Input.GetAxisRaw("Horizontal") != 0.0f)
+        || (Input.GetAxisRaw("Vertical") != 0.0f))
+        {
+            Transform camPivot = playerCamera.GetPivot();
+            Vector3 flatForward = Vector3.ProjectOnPlane(camPivot.forward, Vector3.up).normalized;
+            inputMoveDir += camPivot.right * Input.GetAxisRaw("Horizontal");
+            inputMoveDir += flatForward * Input.GetAxisRaw("Vertical");
+        }
+
+        // [Skills]: Send skill controls
+        if (Input.GetMouseButtonDown(0)) playerConstruct.skills.Use("l");
+        if (Input.GetKeyDown("1")) playerConstruct.skills.Use("1");
+        if (Input.GetKeyDown("2")) playerConstruct.skills.Use("2");
+        if (Input.GetKeyDown("3")) playerConstruct.skills.Use("3");
+        if (Input.GetKeyDown("4")) playerConstruct.skills.Use("4");
+        if (Input.GetKeyDown("f")) playerConstruct.skills.Use("f");
+    }
+
+
+    private void FixedUpdate()
+    {
+        FixedUpdateInput();
+    }
+
+    private void FixedUpdateInput()
+    {
+        // Aim and move construct
+        if (!playerConstruct.GetContainsWO(playerCamera.aimedWO))
+            playerConstruct.AimAtPosition(playerCamera.aimedPos);
+        if (inputMoveDir != Vector3.zero) playerConstruct.MoveInDirection(inputMoveDir);
+    }
 }

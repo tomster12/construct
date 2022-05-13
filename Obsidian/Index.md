@@ -7,11 +7,7 @@
 - [[Development]]
 - [[Gameplay]]
 
-## Interaction
-
-- [[Forging]]
-
-## Objects
+## Content
 
 - [[Construct]]
 - [[Core]]
@@ -21,5 +17,6 @@
 ## World
 - [[Enemies]]
 - [[Locations]]
+- [[Objects]]
 
 ---

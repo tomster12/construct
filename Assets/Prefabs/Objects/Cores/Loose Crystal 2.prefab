@@ -94,7 +94,6 @@ GameObject:
   - component: {fileID: 4095944160437310125}
   - component: {fileID: 5249975830544360283}
   - component: {fileID: -4597087863182492658}
-  - component: {fileID: -1321745287121304953}
   m_Layer: 0
   m_Name: Loose Crystal 2
   m_TagString: Untagged
@@ -224,78 +223,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9574c7cc25bbcd6448e5dbcf314f3514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectData: {fileID: 11400000, guid: 07010178bec96b141b08be7df1620aec, type: 2}
---- !u!114 &-1321745287121304953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7930339750005150831}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0c7a8efe64c09d49a154285155a2ed2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hoverSFX: {fileID: 8300000, guid: 2a904ba49ee186644ae773226f380246, type: 3}
-  stats:
-    randomizeStats: 0
-    stats:
-    - name: hoverHeight
-      isRandom: 0
-      baseRange:
-      - 2
-      - 2
-      baseValue: 2
-      _finalValue: 2
-      affectors: []
-    - name: hoverSpeed
-      isRandom: 0
-      baseRange:
-      - 3
-      - 3
-      baseValue: 3
-      _finalValue: 3
-      affectors: []
-    - name: hoverSinRange
-      isRandom: 0
-      baseRange:
-      - 0.2
-      - 0.2
-      baseValue: 0.2
-      _finalValue: 0.2
-      affectors: []
-    - name: hoverSinFrequency
-      isRandom: 0
-      baseRange:
-      - 0.4
-      - 0.4
-      baseValue: 0.4
-      _finalValue: 0.4
-      affectors: []
-    - name: MovementStrength
-      isRandom: 0
-      baseRange:
-      - 7
-      - 7
-      baseValue: 7
-      _finalValue: 7
-      affectors: []
-    - name: MovementFriction
-      isRandom: 0
-      baseRange:
-      - 0.96
-      - 0.96
-      baseValue: 0.96
-      _finalValue: 0.96
-      affectors: []
-    - name: aimStrength
-      isRandom: 0
-      baseRange:
-      - 4
-      - 4
-      baseValue: 4
-      _finalValue: 4
-      affectors: []
-  coreAttachSFX: {fileID: 8300000, guid: 5e5554165b12a8842b3893268bac8092, type: 3}
-  coreChargeSFX: {fileID: 0}
+  _objectData: {fileID: 11400000, guid: 07010178bec96b141b08be7df1620aec, type: 2}
+  _mf: {fileID: 5974643680563741040}
+  _cl: {fileID: 3878242981582508485}
+  _rb: {fileID: 4095944160437310125}
+  _ol: {fileID: 5249975830544360283}
