@@ -14,9 +14,9 @@
 
 ### v0.2: Core Systems
 
-- [ ] Implement different movement classes which allow the user to move different
+- [x] Implement different movement classes which allow the user to move different
 	- [x] MovementHover for standard hovering / aiming
-	- [ ] MovementHop for basic hopping along
+	- [x] MovementHop for basic hopping along
 - [x] System for crystal attaching / detaching from orbs
 - [x] Refactor to use a generic Construct class which handles the interactions between the cores, runes, orbs
 - [x] Rework PlayerController / PlayerCamera for better management of Forging mode as well as better interaction with Construct class
