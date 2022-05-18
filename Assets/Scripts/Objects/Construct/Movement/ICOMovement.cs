@@ -1,5 +1,2 @@
 ﻿
-public interface ICOMovement : IMovable
-{
-
-}
+public interface ICOMovement : IMovable { }

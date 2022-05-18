@@ -6,7 +6,7 @@ using UnityEngine;
 public class SkillBindings
 {
     // Declare static, variables
-    public static List<string> bindableButtons = new List<string>() { "l", "r", "1", "2", "3", "4", "f" };
+    public static List<string> bindableButtons = new List<string>() { "_0", "_1", "1", "2", "3", "4", "f", "f" };
 
     private Dictionary<string, Skill> bindedButtons = new Dictionary<string, Skill>();
 
@@ -20,8 +20,6 @@ public class SkillBindings
         }
         return false;
     }
-
-
 
     public bool RequestBinding(Skill skill, string button, bool force=false)
     {
@@ -37,7 +35,6 @@ public class SkillBindings
         return true;
     }
 
-
     public void Unbind(string button)
     {
         // Unbind button if bound
@@ -47,7 +44,6 @@ public class SkillBindings
             bindedButtons.Remove(button);
         }
     }
-
 
     public void Unbind(Skill skill)
     {
@@ -92,7 +88,6 @@ public abstract class Skill
     public bool isBinded { get; private set; } = false;
     public SkillBindings bindings { get; private set; }
 
-    public bool isUsable { get; protected set; } = true;
     public bool isActive { get; protected set; } = false;
     public bool isCooldown { get; protected set; } = false;
     public float cooldownTimer { get; protected set; } = 0.0f;
@@ -103,7 +98,9 @@ public abstract class Skill
 
 
     public virtual void Bind(SkillBindings bindings) { }
+
     public virtual void Unbind() { }
+
 
     public virtual void Update()
     {
@@ -111,25 +108,24 @@ public abstract class Skill
         if (isCooldown)
         {
             cooldownTimer = Mathf.Max(0.0f, cooldownTimer - Time.deltaTime);
-            if (cooldownTimer == 0.0f)
-            {
-                isCooldown = false;
-                isUsable = true;
-            }
+            if (cooldownTimer == 0.0f) isCooldown = false;
         }
     }
     
+
     public virtual void Use() { }
 
 
-    protected void SetActive(bool isActive_)
+    protected virtual bool GetUsable() => !isActive && !isCooldown;
+
+    protected virtual void SetActive(bool isActive_)
     {
-        // Update active, usable, and cooldown timer
+        // Update active, cooldown timer
         isActive = isActive_;
-        if (!isActive)
+        if (!isActive && cooldownTimerMax != 0.0f)
         {
-            if (cooldownTimerMax == 0.0f) isUsable = true;
-            else cooldownTimer = cooldownTimerMax;
+            isCooldown = true;
+            cooldownTimer = cooldownTimerMax;
         }
     }
 }

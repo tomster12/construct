@@ -6,10 +6,13 @@ using TMPro;
 
 class DataViewer : MonoBehaviour
 {
-    // Declare variables
+    // Declare references, config, variables
+    [Header("References")]
     [SerializeField] private Image back;
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI descriptionText;
+    
+    [Header("Config")]
     [SerializeField] private float alphaLerp = 10.0f;
 
     private bool isActive;
@@ -21,14 +24,17 @@ class DataViewer : MonoBehaviour
 
     private void Awake()
     {
-        // Initialize game objects
+        // Initialize variables
         back.gameObject.SetActive(true);
         SetAlpha(0.0f);
     }
 
 
-    private void Update() => UpdateUI();
-
+    private void Update()
+    {
+        // Run updates
+        UpdateUI();
+    }
 
     private void UpdateUI()
     {
@@ -45,16 +51,6 @@ class DataViewer : MonoBehaviour
     }
 
 
-    private void SetAlpha(float alpha)
-    {
-        // Update color of all UI
-        currentAlpha = alpha;
-        back.color = new Color(back.color.r, back.color.g, back.color.b, currentAlpha);
-        nameText.color = new Color(nameText.color.r, nameText.color.g, nameText.color.b, currentAlpha);
-        descriptionText.color = new Color(descriptionText.color.r, descriptionText.color.g, descriptionText.color.b, currentAlpha);
-    }
-
-
     public void SetWorldObject(WorldObject targetWJ_)
     {
         // Update variables
@@ -63,6 +59,14 @@ class DataViewer : MonoBehaviour
         UpdateUI();
     }
 
+    private void SetAlpha(float alpha)
+    {
+        // Update color of all UI
+        currentAlpha = alpha;
+        back.color = new Color(back.color.r, back.color.g, back.color.b, currentAlpha);
+        nameText.color = new Color(nameText.color.r, nameText.color.g, nameText.color.b, currentAlpha);
+        descriptionText.color = new Color(descriptionText.color.r, descriptionText.color.g, descriptionText.color.b, currentAlpha);
+    }
 
     public void SetActive(bool isActive_)
     {

@@ -35,13 +35,15 @@
 - [ ] Implement a skill system that runes can subscribe skills to
 - [ ] [[Rune#Blaster]] weapon skill rune to test the destructable objects and skill system
 - [ ] Basic health management for overall construct / individual orbs
+	- [ ] Visible health bar UI
+	- [ ] Generic Damage system including teams / quantity / potential stats inclusion
 
 ### v0.5: Expanding UI
 - [ ] Dynamic UI for ingame:
 	- [ ] Hotbar for skills
-	- [ ] Resizing crosshair on hovering
-		- This could include a unique animation for expanding around hovered objects
+	- [ ] Resizing crosshair on hovering (This could include a unique animation for expanding around hovered objects)
 - [ ] Some visual indicator of health for construct / orb onscreen
+	...
 
 ### Backburner
 - [ ] Implement inverse kinematics for [[Rune#Crawl]] movement rune to test the Construct classes ability to manage Movement classes
@@ -50,20 +52,29 @@
 
 ## Short-term Todo
 
-- [ ] Refactor all code to be clean, readable, extensible
+- [x] Refactor code over to using new heirarchical construct system
+	
+	- [x] Introduce addition of skills and skillBindings
+		- [x] Update core to use
+		- [x] Update movementHop to use
+	
+	- [x] Update Movement to work with new system
+
+- [x] Refactor all code to be clean, readable, extensible
 	- Reformat to work with visual studio
 	- Convert some to 1 line functions
 	- Ensure public / private is all set correctly
 		- Ensure correct naming of variables
 	- Add headers for all serialized values
 
-- [x] Rework PlayerController / PlayerCamera to use a state system for ingame / forging
+- [x] Clean up all todos
 
-- [ ] Add UI for objects information for orbs / runes / cores
-	
-	- [ ] This UI can change depending on the type of objects hovered
+- [x] Rework PlayerController / PlayerCamera to use a state system for ingame / forging
+	- [x] Link state between controller / camera
 
 - [ ] Deal with physics better on hover attachment / detachment
+
+- [ ] Change MovementHop AttackSkill particles size based on object
 
 ---
 
@@ -103,6 +114,9 @@
 	- Modularity
 	- Varied enemies
 	- Dynamic / procedural levels
+- Dark Alliance
+	- Hidden orbs / runes acquired ingame which are then revealed afterwards
+	- Would require a specific kind of gameplay loop
 
 
 **Open Discussion**
@@ -115,6 +129,7 @@ How will gameplay loop work:
 		- bigger progression of construct but more lost inbetween each run
 - Open world, going dungeon to dungeon / zone to zone building up 1 singular construct throughout entire playtime
 	- Incorporate mothergunship style weapon system, of taking them into missions but losing them if you die
+	- Requires more thought to force variety in builds / allow for meaningfull upgrades
 
 Potential includable meta-game:
 - NPC / shops in a hub area:
@@ -135,21 +150,11 @@ Potential includable meta-game:
 	- This could lead into skill tree / combinations / synergies with levelled up runes
 
 - Multi-rune combinations performing different actions based on runes / positioning
-	- E.g. a rune on an orbitting orb will react different to it on a base orb, or on an orb attached to an elbow construct orb
+	- E.g. a rune on an orbiting orb will react different to it on a base orb, or on an orb attached to an elbow construct orb
 
 - Rune / Orb caches which can be broken and drop large amounts of runes / caches of different varieties
 	- The caches themselves could come with specific rarities
-
----
-
-## Architecture
-
-### Utility
-
-**CameraEffects**: Utility for applying effects to Camera
-
-**Easing**: Static mathematical functions
-
-**StatList**: Serialized dictionary of stats / affectors
+	- Could link well into inter-game progress / meta game
+	- Similar to dark alliance hidden things could get after runs rather than during
 
 ---

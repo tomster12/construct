@@ -7,6 +7,7 @@ public class WorldObject : MonoBehaviour
     // Declare static, references, variables
     private static float[] MOVE_RESIST = new float[] { 60.0f, 125f, 0.3f, 1.0f };
 
+    [Header("References")]
     [SerializeField] private ObjectData _objectData;
     [SerializeField] private MeshFilter _mf;
     [SerializeField] private Collider _cl;
@@ -25,8 +26,11 @@ public class WorldObject : MonoBehaviour
     public bool isHighlighted { get => ol.enabled; set => ol.enabled = value; }
 
 
-    public void Start() => CalculatePhysical();
-
+    public void Start()
+    {
+        // Intialize variables
+        CalculatePhysical();
+    }
 
     private void CalculatePhysical()
     {
@@ -39,21 +43,14 @@ public class WorldObject : MonoBehaviour
         moveResist = (1.0f - moveResist) * (WorldObject.MOVE_RESIST[3] - WorldObject.MOVE_RESIST[2]) + WorldObject.MOVE_RESIST[2];
     }
 
-
-    public void SetLayer(int layer) => SetLayer(transform, layer);
-
+    
     public float GetMaxExtent() => Mathf.Max(cl.bounds.extents.x, cl.bounds.extents.y, cl.bounds.extents.z);
 
 
+    public void SetLayer(int layer) => SetLayer(transform, layer);
+
+
     #region Static
-
-    public static void SetLayer(Transform t, int layer)
-    {
-        // Recursive transform layer update
-        t.gameObject.layer = layer;
-        foreach (Transform c in t) SetLayer(c, layer);
-    }
-
 
     public static float SignedVolumeOfTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
     {
@@ -80,6 +77,14 @@ public class WorldObject : MonoBehaviour
             volume += SignedVolumeOfTriangle(p1, p2, p3);
         }
         return Mathf.Abs(volume);
+    }
+
+
+    public static void SetLayer(Transform t, int layer)
+    {
+        // Recursive transform layer update
+        t.gameObject.layer = layer;
+        foreach (Transform c in t) SetLayer(c, layer);
     }
 
     #endregion

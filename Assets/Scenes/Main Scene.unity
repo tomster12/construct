@@ -1194,7 +1194,6 @@ GameObject:
   - component: {fileID: 1187895556}
   - component: {fileID: 1187895559}
   - component: {fileID: 1187895561}
-  - component: {fileID: 1187895562}
   - component: {fileID: 1187895560}
   m_Layer: 0
   m_Name: Player Camera
@@ -1329,41 +1328,6 @@ MonoBehaviour:
   blendDistance: 0
   weight: 1
   sharedProfile: {fileID: 11400000, guid: 5e7a9318f879c404090abf60bc826a87, type: 2}
---- !u!114 &1187895562
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1187895555}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6acacd36a1e2e4d488c660d2be7d0574, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerConstruct: {fileID: 537565138}
-  camPivot: {fileID: 783341413}
-  camOrbit: {fileID: 1902036464}
-  _cam: {fileID: 1187895557}
-  stats:
-    randomizeStats: 0
-    stats:
-    - name: rotateSpeed
-      isRandom: 0
-      baseRange:
-      - 0
-      - 0
-      baseValue: 0.5
-      _finalValue: 0.5
-      affectors: []
-    - name: offsetSpeed
-      isRandom: 0
-      baseRange:
-      - 0
-      - 0
-      baseValue: 4
-      _finalValue: 4
-      affectors: []
 --- !u!1001 &1229434881
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1665,8 +1629,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c07019cd0164eb4ab35995ed6dfd3f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 1187895562}
   playerConstruct: {fileID: 537565138}
+  camPivot: {fileID: 783341413}
+  camOrbit: {fileID: 1902036464}
+  _cam: {fileID: 1187895557}
+  camStats:
+    randomizeStats: 0
+    stats:
+    - name: rotateSpeed
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.5
+      _finalValue: 0.5
+      affectors: []
+    - name: offsetSpeed
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 4
+      _finalValue: 4
+      affectors: []
 --- !u!1001 &1550013254
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3369,6 +3354,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1151577046}
     m_Modifications:
+    - target: {fileID: 1179345188427481, guid: 514f07a7d3bd11a40b1b45bfaf2070ee, type: 3}
+      propertyPath: stats.stats.Array.data[5].baseValue
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1179345188427481, guid: 514f07a7d3bd11a40b1b45bfaf2070ee, type: 3}
+      propertyPath: stats.stats.Array.data[5]._finalValue
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4673470273324044156, guid: 514f07a7d3bd11a40b1b45bfaf2070ee,
         type: 3}
       propertyPath: m_Name

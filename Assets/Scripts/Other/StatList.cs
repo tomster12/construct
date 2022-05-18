@@ -13,7 +13,6 @@ public class StatList : ISerializationCallbackReceiver
     [HideInInspector] [SerializeField] private Dictionary<String, int> keys = new Dictionary<String, int>();
     [SerializeField] private List<Stat> stats = new List<Stat>();
 
-
     // Customer getters / setters
     public float this[string s] { get { return GetFinal(s); } set { SetBase(s, value); } }
     public float[] this[string s, bool _] { get { return GetBaseRange(s); } set { SetBaseRange(s, value); } }

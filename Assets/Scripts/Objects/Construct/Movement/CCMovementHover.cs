@@ -6,6 +6,7 @@ using UnityEngine;
 public class CCMovementHover : COMovementHover, ICCMovement
 {
     // Declare references, variables
+    [Header("References")]
     [SerializeField] private CameraEffects camFX;
     [SerializeField] private AudioClip coreAttachSFX;
     [SerializeField] private AudioClip coreChargeSFX;
@@ -23,14 +24,14 @@ public class CCMovementHover : COMovementHover, ICCMovement
     }
 
 
-    public void AttachCore(ConstructObject targetCO, Vector3 targetPos) { StartCoroutine(AttachCoreIE(targetCO, targetPos)); }
+    public void AttachCore(ICCMovementController stateController, ConstructObject targetCO, Vector3 targetPos) { StartCoroutine(AttachCoreIE(stateController, targetCO, targetPos)); }
 
-    public IEnumerator AttachCoreIE(ConstructObject targetCO, Vector3 targetPos)
+    public IEnumerator AttachCoreIE(ICCMovementController stateController, ConstructObject targetCO, Vector3 targetPos)
     {
-        if (baseCC.state == CoreState.Detached)
+        if (stateController.GetState() == CoreState.Detached)
         {
             // Turn off physics / colliders, update state
-            baseCC.state = CoreState.Attaching;
+            stateController.SetState(CoreState.Attaching);
             baseCC.baseWO.rb.useGravity = false;
             baseCC.baseWO.rb.isKinematic = true;
             baseCC.baseWO.cl.enabled = false;
@@ -53,14 +54,14 @@ public class CCMovementHover : COMovementHover, ICCMovement
             if (coreAttachSFX != null) sfxAudio.PlayOneShot(coreAttachSFX);
 
             // Update parent object, pass over control, update state
-            baseCC.state = CoreState.Attached;
+            stateController.SetState(CoreState.Attached);
             targetCO.SetConstruct(baseCC.construct);
             targetCO.SetControlled(true);
             baseCC.SetControlled(false);
             baseCC.baseWO.transform.parent = targetCO.transform;
             baseCC.baseWO.rb.useGravity = false;
             baseCC.baseWO.rb.isKinematic = true;
-            baseCC.attachedCO = targetCO;
+            stateController.SetAttachedCO(targetCO);
             overrideControl = false;
         }
     }
@@ -118,7 +119,6 @@ public class CCMovementHover : COMovementHover, ICCMovement
         float speed;
 
         // Raycast then move towards targetCO
-        // TODO: Fix and change to trigger / collision based
         while (true)
         {
             Vector3 newTargetPos = targetCO.transform.position + targetCO.transform.rotation * rawOffset;
@@ -134,14 +134,14 @@ public class CCMovementHover : COMovementHover, ICCMovement
     }
 
 
-    public void DetachCore() { StartCoroutine(DetachCoreIE()); }
+    public void DetachCore(ICCMovementController stateController) { StartCoroutine(DetachCoreIE(stateController)); }
 
-    public IEnumerator DetachCoreIE()
+    public IEnumerator DetachCoreIE(ICCMovementController stateController)
     {
-        Vector3 popDir = (baseCC.baseWO.transform.position - baseCC.attachedCO.transform.position).normalized;
+        Vector3 popDir = (baseCC.baseWO.transform.position - stateController.GetAttachedCO().transform.position).normalized;
 
         // Detach but without control
-        baseCC.state = CoreState.Detaching;
+        stateController.SetState(CoreState.Detaching);
         baseCC.baseWO.rb.isKinematic = false;
         baseCC.baseWO.rb.useGravity = true;
         baseCC.baseWO.cl.enabled = true;
@@ -154,12 +154,12 @@ public class CCMovementHover : COMovementHover, ICCMovement
         yield return new WaitForSeconds(0.5f);
 
         // Reactive moveset and angular drag
-        baseCC.state = CoreState.Detached;
-        baseCC.attachedCO.SetConstruct(null);
-        baseCC.attachedCO.SetControlled(false);
+        stateController.SetState(CoreState.Detached);
+        stateController.GetAttachedCO().SetControlled(false);
+        stateController.GetAttachedCO().SetConstruct(null);
         baseCC.SetControlled(true);
         baseCC.baseWO.rb.angularDrag = prevDrag;
-        baseCC.attachedCO = null;
+        stateController.SetAttachedCO(null);
     }
 
 

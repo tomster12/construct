@@ -5,11 +5,13 @@ using UnityEngine;
 public class ConstructObject : MonoBehaviour, IMovable
 {
     // Declare references, variables
+    [Header("References")]
     [SerializeField] protected WorldObject _baseWO;
     [SerializeField] protected RuneHandler _runeHandler;
     public WorldObject baseWO => _baseWO;
     public RuneHandler runeHandler => _runeHandler;
     private ICOMovement movement;
+
 
     public Construct construct { get; private set; }
 
@@ -53,12 +55,7 @@ public class ConstructObject : MonoBehaviour, IMovable
     public virtual void SetConstruct(Construct construct_)
     {
         // Update colliders / rigidbody and set construct
-        if (construct_ == null)
-        {
-            SetControlled(false);
-            baseWO.rb.isKinematic = false;
-            baseWO.rb.useGravity = true;
-        }
+        if (construct_ == null) SetControlled(false);
         construct = construct_;
     }
 

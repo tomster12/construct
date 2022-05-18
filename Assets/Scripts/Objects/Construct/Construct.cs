@@ -5,8 +5,9 @@ using UnityEngine;
 public class Construct : MonoBehaviour, IMovable
 {
     // Declare constants, references, variables
-    public readonly string[] abilityButtons = new string[] { "1", "2", "3", "4" };
+    public readonly string[] abilityButtons = new string[] { "_0", "1", "2", "3", "4" };
 
+    [Header("References")]
     [SerializeField] private ConstructCore core;
     
     public SkillBindings skills { get; private set; } = new SkillBindings();
@@ -14,7 +15,7 @@ public class Construct : MonoBehaviour, IMovable
 
     private void Start()
     {
-        // Initialize main parts
+        // Initialize variables
         InitConstruct();
     }
 

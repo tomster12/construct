@@ -2,18 +2,20 @@
 using UnityEngine;
 
 
-// TODO: Convert to use an attack skill
 public class COMovementHop : MonoBehaviour, ICOMovement
 {
     // Declare references, config, variables
     private static float JUMP_Z_PCT = 0.75f;
 
+    [Header("References")]
     [SerializeField] private GameObject rockParticleGeneratorPfb;
     [SerializeField] private GameObject speedParticleGeneratorPfb;
     private ConstructObject baseCO;
 
+    [Header("Config")]
     [SerializeField] private float particleLimit = 0.9f;
-    [SerializeField] private StatList stats = new StatList()
+    [SerializeField]
+    private StatList stats = new StatList()
     {
         ["MovementStrength"] = 5.0f,
         ["JumpCooldown"] = 1.0f,
@@ -23,77 +25,33 @@ public class COMovementHop : MonoBehaviour, ICOMovement
         ["AimLerp"] = 2.0f
     };
 
-    private ParticleSystem speedParticleGenerator;
     private AttackSkill attackSkill;
     private bool isControlled = false;
     private bool isGrounded = true;
-    private bool isAttacking = false;
     private float jumpTimer = 0.0f;
-    private float attackTimer = 0.0f;
-    private float attackCooldown = 0.0f;
     private Vector3 aimedDirection;
-    private Vector3 attackPoint;
 
 
     public void Awake()
     {
         // Initialize references, variables
         SetConstructObject(GetComponent<ConstructObject>());
-        speedParticleGenerator = Instantiate(speedParticleGeneratorPfb).GetComponent<ParticleSystem>();
-        speedParticleGenerator.Stop();
         attackSkill = new AttackSkill(this);
     }
 
 
     public void Update()
     {
-        // Update attack / jump timer timers
-        if (isAttacking)
-        {
-            attackTimer = Mathf.Max(attackTimer - Time.deltaTime, 0.0f);
-            if (attackTimer <= 0.0f) isAttacking = false;
-        }
-        else
-        {
-            attackCooldown = Mathf.Max(attackCooldown - Time.deltaTime, 0.0f);
-            if (isGrounded) jumpTimer = Mathf.Max(jumpTimer - Time.deltaTime, 0.0f);
-        }
-
+        // Update timers
+        if (isGrounded) jumpTimer = Mathf.Max(jumpTimer - Time.deltaTime, 0.0f);
 
         // Aim in pointing direction while airborne
-        if (!isGrounded && aimedDirection != Vector3.zero)
+        if (!attackSkill.isActive && !isGrounded && aimedDirection != Vector3.zero)
         {
             Vector3 dir = aimedDirection;
             float aimStrength = baseCO.baseWO.moveResist * stats["AimLerp"] * Time.deltaTime;
-            if (attackCooldown > 0.0f)
-            {
-                dir = (attackPoint - transform.position).normalized;
-                aimStrength *= 0.5f;
-            }
-            else if (isAttacking) aimStrength *= 2.0f;
             Quaternion dirRot = Quaternion.LookRotation(dir, transform.up);
             transform.rotation = Quaternion.Lerp(transform.rotation, dirRot, aimStrength);
-        }
-
-
-        // Activate speed particle effect when in the air for attacking
-        if (isAttacking && !isGrounded)
-        {
-            Quaternion speedDir = Quaternion.LookRotation(-baseCO.baseWO.rb.velocity, Vector3.up);
-            speedParticleGenerator.transform.position = transform.position;
-            speedParticleGenerator.transform.rotation = speedDir;
-            if (!speedParticleGenerator.isPlaying) speedParticleGenerator.Play();
-        }
-        else if (speedParticleGenerator.isPlaying) speedParticleGenerator.Stop();
-
-
-        // Aim and move towards attack point
-        if (isAttacking)
-        {
-            Vector3 dir = (attackPoint - transform.position).normalized;
-            float jumpStrength = 2.0f * stats["AttackStrength"] * baseCO.baseWO.moveResist * Time.deltaTime;
-            float aimStrength = baseCO.baseWO.moveResist * 2.0f * stats["AimLerp"] * Time.deltaTime;
-            baseCO.baseWO.rb.velocity = baseCO.baseWO.rb.velocity + dir * jumpStrength;
         }
     }
 
@@ -114,40 +72,10 @@ public class COMovementHop : MonoBehaviour, ICOMovement
         }
     }
 
-    public void AimAtPosition(Vector3 pos)
-    {
-        // Aim towards target point
-        aimedDirection = pos - transform.position;
-    }
-
-    public void Attack(Vector3 aimedPos)
-    {
-        // If grounded, and can attack
-        if (GetCanAttack())
-        {
-            // Jump towards target
-            Vector3 dir = (aimedPos - transform.position).normalized;
-            float jumpStrength = stats["AttackStrength"] * baseCO.baseWO.moveResist;
-            baseCO.baseWO.rb.velocity = baseCO.baseWO.rb.velocity + dir * jumpStrength;
-
-            // Update variables
-            attackPoint = aimedPos;
-            attackTimer = stats["AttackDuration"];
-            attackCooldown = stats["AttackCooldown"];
-            jumpTimer = stats["JumpCooldown"];
-            isGrounded = false;
-            isAttacking = true;
+    public void AimAtPosition(Vector3 pos) => aimedDirection = pos - transform.position;
 
 
-            // Setup particle generator
-            if (!speedParticleGenerator.isPlaying) speedParticleGenerator.Play();
-        }
-    }
-
-
-    public bool GetCanMove() => isGrounded && !isAttacking && jumpTimer <= 0.0f;
-
-    public bool GetCanAttack() => isGrounded && !isAttacking && attackCooldown <= 0.0f;
+    public bool GetCanMove() => isGrounded && !attackSkill.isActive && jumpTimer <= 0.0f;
 
     public bool GetControlled() => isControlled;
 
@@ -156,10 +84,12 @@ public class COMovementHop : MonoBehaviour, ICOMovement
     {
         // Update variable and bind skills
         isControlled = isControlled_;
-        if (isControlled) baseCO.construct.skills.RequestBinding(attackSkill, baseCO.construct.abilityButtons);
+        if (isControlled_) baseCO.construct.skills.RequestBinding(attackSkill, baseCO.construct.abilityButtons);
+        else baseCO.construct.skills.Unbind(attackSkill);
     }
 
     protected void SetConstructObject(ConstructObject baseCO_) { baseCO = baseCO_; }
+
 
     public void OnCollisionEnter(Collision collision)
     {
@@ -172,47 +102,117 @@ public class COMovementHop : MonoBehaviour, ICOMovement
             float mult = Mathf.Min(0.5f, baseCO.baseWO.rb.velocity.magnitude / particleLimit - 1f) * (0.2f / 0.5f) + 0.8f;
             GameObject particles = Instantiate(rockParticleGeneratorPfb);
             particles.transform.position = collision.contacts[0].point;
-            particles.transform.localScale = Vector3.one * mult * (isAttacking ? 1.0f : 0.35f);
+            particles.transform.localScale = Vector3.one * mult * (attackSkill.isActive ? 1.0f : 0.35f);
             particles.transform.rotation = Quaternion.LookRotation(collision.contacts[0].normal, Vector3.up);
-        }
-
-        // If hit something while attacking then stop
-        if (isAttacking)
-        {
-            isGrounded = true;
-            isAttacking = false;
         }
     }
 
     public void OnCollisionStay(Collision collision)
     {
         // If dragging along ground while attacking then stop if not moving
-        if ((!isGrounded || isAttacking) && collision.gameObject.tag == "Terrain")
+        if (
+            !isGrounded
+            && collision.gameObject.tag == "Terrain"
+            && baseCO.baseWO.rb.velocity.magnitude < 0.35f)
         {
-            if (baseCO.baseWO.rb.velocity.magnitude < 0.35f)
-            {
-                isGrounded = true;
-                isAttacking = false;
-            }
+            isGrounded = true;
         }
     }
 
 
-    public class AttackSkill : Skill
+    private class AttackSkill : Skill
     {
+        // Declare variables
+        private COMovementHop movement;
+        private ParticleSystem speedParticleGenerator;
+        public Vector3 attackPoint { get; private set; }
+        private float attackTimer;
+        private float attackTimerMax;
 
-        COMovementHop movement;
 
-
-        public AttackSkill(COMovementHop movement_) : base(1.2f) { movement = movement_; }
+        public AttackSkill(COMovementHop movement_) : base(movement_.stats["AttackCooldown"])
+        {
+            // Initialize variables
+            movement = movement_;
+            speedParticleGenerator = Instantiate(movement.speedParticleGeneratorPfb).GetComponent<ParticleSystem>();
+        }
 
 
         public override void Use()
         {
-            if (!isUsable) return;
+            if (!GetUsable()) return;
 
-            // Attack in mouse direction
-            movement.Attack(PlayerCamera.instance.aimedPos);
+            // Jump towards target
+            Vector3 dir = (PlayerController.instance.aimedPos - movement.transform.position).normalized;
+            float jumpStrength = movement.stats["AttackStrength"] * movement.baseCO.baseWO.moveResist;
+            movement.baseCO.baseWO.rb.velocity = movement.baseCO.baseWO.rb.velocity + dir * jumpStrength;
+
+            // Update variables
+            attackPoint = PlayerController.instance.aimedPos;
+            attackTimer = movement.stats["AttackDuration"];
+            movement.isGrounded = false;
+            SetActive(true);
+
+            // Setup particle generator
+            if (!speedParticleGenerator.isPlaying) speedParticleGenerator.Play();
+
+        }
+
+
+        public override void Update()
+        {
+            base.Update();
+
+            // Update cooldown timers
+            attackTimerMax = movement.stats["AttackDuration"];
+            cooldownTimerMax = movement.stats["AttackCooldown"];
+            attackTimer = Mathf.Max(attackTimer - Time.deltaTime, 0.0f);
+
+            // Handle active
+            if (isActive)
+            {
+                // Check if grounded or finished attacking
+                if (movement.isGrounded || attackTimer <= 0.0f) SetActive(false);
+
+                // While still in the air and attacking
+                else
+                {
+                    // Aim / move towards attack point
+                    if (movement.aimedDirection != Vector3.zero)
+                    {
+                        Vector3 dir = (attackPoint - movement.transform.position).normalized;
+                        float aimStrength = 0.5f * movement.baseCO.baseWO.moveResist * movement.stats["AimLerp"] * Time.deltaTime;
+                        float jumpStrength = 2.0f * movement.stats["AttackStrength"] * movement.baseCO.baseWO.moveResist * Time.deltaTime;
+                        Quaternion dirRot = Quaternion.LookRotation(dir, movement.transform.up);
+                        movement.transform.rotation = Quaternion.Lerp(movement.transform.rotation, dirRot, aimStrength);
+                        movement.baseCO.baseWO.rb.velocity = movement.baseCO.baseWO.rb.velocity + dir * jumpStrength;
+                    }
+
+                    // Activate speed particle effects
+                    Quaternion speedDir = Quaternion.LookRotation(-movement.baseCO.baseWO.rb.velocity, Vector3.up);
+                    speedParticleGenerator.transform.position = movement.transform.position;
+                    speedParticleGenerator.transform.rotation = speedDir;
+                    if (!speedParticleGenerator.isPlaying) speedParticleGenerator.Play();
+                }
+            }
+
+            // Disable movement particles
+            else if (speedParticleGenerator.isPlaying) speedParticleGenerator.Stop();
+        }
+
+
+        protected override bool GetUsable() => !isActive && !isCooldown && movement.isGrounded;
+
+
+        protected override void SetActive(bool isActive_)
+        {
+            base.SetActive(isActive_);
+
+            // Update timers
+            if (isActive_) attackTimer = attackTimerMax;
+
+            // Update particles
+            if (!isActive_) speedParticleGenerator.Stop();
         }
     }
 }

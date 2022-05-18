@@ -2,6 +2,4 @@
 using UnityEngine;
 
 
-public class RuneHandler : MonoBehaviour
-{
-}
+public class RuneHandler : MonoBehaviour { }

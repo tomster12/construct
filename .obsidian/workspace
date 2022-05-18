@@ -10,7 +10,7 @@
           "type": "markdown",
           "state": {
             "file": "Obsidian/Development.md",
-            "mode": "source"
+            "mode": "preview"
           }
         }
       }
@@ -52,7 +52,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 178
   },
   "right": {
     "id": "6da0774d44179682",

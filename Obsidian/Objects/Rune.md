@@ -38,6 +38,6 @@ The following is a list of all the runes planned to be implemented in the game.
 > ![[rune.png|100]]
 > - **Tags**: *Construct*
 > - **Description**: Provides the construct *2* supportive orbs in a circular pattern around the construct
-> - **Flavour Text**: *Your own little solar system*
+> - **Flavour Text**: *"Your own little solar system."*
 
 ---

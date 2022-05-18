@@ -6,10 +6,12 @@ using UnityEngine;
 public class COMovementHover : MonoBehaviour, ICOMovement
 {
     // Declare references, config, variables
+    [Header("References")]
     [SerializeField] private AudioClip hoverSFX;
     private AudioSource hoverAudio;
     private ConstructObject baseCO;
 
+    [Header("Config")]
     [SerializeField] protected StatList stats = new StatList()
     {
         ["hoverHeight"] = 2.0f,
@@ -104,22 +106,9 @@ public class COMovementHover : MonoBehaviour, ICOMovement
     }
 
 
-    private IEnumerator Sfx_FadeOut(AudioSource src, float duration)
-    {
-        // Fade out source volume
-        float startVolume = src.volume;
-        for (float t = duration; t > 0.0f;)
-        {
-            src.volume = startVolume * (t / duration);
-            t -= Time.deltaTime;
-            if (t < 0.0f) src.volume = 0.0f;
-            yield return null;
-        }
-    }
-
-
     private float GetMaxHoverHeight()
     {
+        // Calculate max hover height based on stats
         float targetY = baseCO.baseWO.GetMaxExtent() * (1.0f + 2.0f * stats["hoverHeight"]);
         targetY += 1.0f * stats["hoverSinRange"];
         return targetY;
@@ -127,6 +116,7 @@ public class COMovementHover : MonoBehaviour, ICOMovement
 
     private float GetHoverHeight()
     {
+        // Calculate current hover height
         float targetY = baseCO.baseWO.GetMaxExtent() * (1.0f + 2.0f * stats["hoverHeight"]);
         targetY += Mathf.Sin(Time.time * stats["hoverSinFrequency"] * (2 * Mathf.PI)) * stats["hoverSinRange"];
         return targetY;
@@ -144,4 +134,18 @@ public class COMovementHover : MonoBehaviour, ICOMovement
     }
 
     protected void SetConstructObject(ConstructObject baseCO_) { baseCO = baseCO_; }
+
+
+    private IEnumerator Sfx_FadeOut(AudioSource src, float duration)
+    {
+        // Fade out source volume
+        float startVolume = src.volume;
+        for (float t = duration; t > 0.0f;)
+        {
+            src.volume = startVolume * (t / duration);
+            t -= Time.deltaTime;
+            if (t < 0.0f) src.volume = 0.0f;
+            yield return null;
+        }
+    }
 }

@@ -89,14 +89,14 @@
   "active": "991686378106b7c1",
   "lastOpenFiles": [
     "Development.md",
-    "World/Objects.md",
-    "World/Enemies.md",
-    "World/Locations.md",
+    "Gameplay.md",
     "Objects/Orb.md",
-    "Objects/Rune.md",
     "Objects/Core.md",
     "Objects/Construct.md",
-    "Index.md",
-    "Gameplay.md"
+    "Objects/Rune.md",
+    "World/Enemies.md",
+    "World/Locations.md",
+    "World/Objects.md",
+    "Index.md"
   ]
 }
