@@ -11,6 +11,7 @@ public class CCMovementHover : COMovementHover, ICCMovement
     [SerializeField] private AudioClip coreAttachSFX;
     [SerializeField] private AudioClip coreChargeSFX;
     private AudioSource sfxAudio;
+
     private ConstructCore baseCC;
 
 
@@ -19,19 +20,18 @@ public class CCMovementHover : COMovementHover, ICCMovement
         base.Awake();
 
         // Initialize references
-        SetConstructCore(GetComponent<ConstructCore>());
         sfxAudio = gameObject.AddComponent<AudioSource>();
     }
 
 
-    public void AttachCore(ICCMovementController stateController, ConstructObject targetCO, Vector3 targetPos) { StartCoroutine(AttachCoreIE(stateController, targetCO, targetPos)); }
+    public void AttachCore(ConstructObject targetCO, Vector3 targetPos) { if (GetCanMove()) StartCoroutine(AttachCoreIE(targetCO, targetPos)); }
 
-    public IEnumerator AttachCoreIE(ICCMovementController stateController, ConstructObject targetCO, Vector3 targetPos)
+    public IEnumerator AttachCoreIE(ConstructObject targetCO, Vector3 targetPos)
     {
-        if (stateController.GetState() == CoreState.Detached)
+        if (baseCC.GetState() == CoreState.Detached)
         {
             // Turn off physics / colliders, update state
-            stateController.SetState(CoreState.Attaching);
+            baseCC.SetState(CoreState.Attaching);
             baseCC.baseWO.rb.useGravity = false;
             baseCC.baseWO.rb.isKinematic = true;
             baseCC.baseWO.cl.enabled = false;
@@ -54,14 +54,13 @@ public class CCMovementHover : COMovementHover, ICCMovement
             if (coreAttachSFX != null) sfxAudio.PlayOneShot(coreAttachSFX);
 
             // Update parent object, pass over control, update state
-            stateController.SetState(CoreState.Attached);
+            baseCC.SetAttachedCO(targetCO);
+            baseCC.SetControlled(false);
+            baseCC.SetState(CoreState.Attached);
+            baseCC.transform.parent = targetCO.transform;
             targetCO.SetConstruct(baseCC.construct);
             targetCO.SetControlled(true);
-            baseCC.SetControlled(false);
-            baseCC.baseWO.transform.parent = targetCO.transform;
-            baseCC.baseWO.rb.useGravity = false;
-            baseCC.baseWO.rb.isKinematic = true;
-            stateController.SetAttachedCO(targetCO);
+            targetCO.transform.parent = baseCC.construct.transform;
             overrideControl = false;
         }
     }
@@ -134,14 +133,14 @@ public class CCMovementHover : COMovementHover, ICCMovement
     }
 
 
-    public void DetachCore(ICCMovementController stateController) { StartCoroutine(DetachCoreIE(stateController)); }
+    public void DetachCore() { if (GetCanMove()) StartCoroutine(DetachCoreIE()); }
 
-    public IEnumerator DetachCoreIE(ICCMovementController stateController)
+    public IEnumerator DetachCoreIE()
     {
-        Vector3 popDir = (baseCC.baseWO.transform.position - stateController.GetAttachedCO().transform.position).normalized;
+        Vector3 popDir = (baseCC.baseWO.transform.position - baseCC.GetAttachedCO().transform.position).normalized;
 
         // Detach but without control
-        stateController.SetState(CoreState.Detaching);
+        baseCC.SetState(CoreState.Detaching);
         baseCC.baseWO.rb.isKinematic = false;
         baseCC.baseWO.rb.useGravity = true;
         baseCC.baseWO.cl.enabled = true;
@@ -154,14 +153,16 @@ public class CCMovementHover : COMovementHover, ICCMovement
         yield return new WaitForSeconds(0.5f);
 
         // Reactive moveset and angular drag
-        stateController.SetState(CoreState.Detached);
-        stateController.GetAttachedCO().SetControlled(false);
-        stateController.GetAttachedCO().SetConstruct(null);
+        baseCC.GetAttachedCO().transform.parent = baseCC.construct.transform.parent;
+        baseCC.GetAttachedCO().SetControlled(false);
+        baseCC.GetAttachedCO().SetConstruct(null);
+        baseCC.transform.parent = baseCC.construct.transform;
+        baseCC.SetState(CoreState.Detached);
         baseCC.SetControlled(true);
+        baseCC.SetAttachedCO(null);
         baseCC.baseWO.rb.angularDrag = prevDrag;
-        stateController.SetAttachedCO(null);
     }
 
 
-    private void SetConstructCore(ConstructCore baseCC_) { SetConstructObject(baseCC_); baseCC = baseCC_; }
+    public void SetCC(ConstructCore baseCC_) { SetCO(baseCC_); baseCC = baseCC_; }
 }

@@ -97,9 +97,9 @@ public abstract class Skill
     public Skill(float cooldownTimerMax_) { cooldownTimerMax = cooldownTimerMax_; }
 
 
-    public virtual void Bind(SkillBindings bindings) { }
+    public virtual void Bind(SkillBindings bindings) => isBinded = true;
 
-    public virtual void Unbind() { }
+    public virtual void Unbind() => isBinded = false;
 
 
     public virtual void Update()

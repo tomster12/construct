@@ -9,7 +9,6 @@ public class COMovementHover : MonoBehaviour, ICOMovement
     [Header("References")]
     [SerializeField] private AudioClip hoverSFX;
     private AudioSource hoverAudio;
-    private ConstructObject baseCO;
 
     [Header("Config")]
     [SerializeField] protected StatList stats = new StatList()
@@ -23,6 +22,7 @@ public class COMovementHover : MonoBehaviour, ICOMovement
         ["aimStrength"] = 4f
     };
 
+    private ConstructObject baseCO;
     protected bool isControlled = false;
     protected bool overrideControl = false;
 
@@ -30,7 +30,6 @@ public class COMovementHover : MonoBehaviour, ICOMovement
     protected virtual void Awake()
     {
         // Initialize references
-        SetConstructObject(GetComponent<ConstructObject>());
         hoverAudio = gameObject.AddComponent<AudioSource>();
 
         // Setup hover SRC
@@ -48,8 +47,8 @@ public class COMovementHover : MonoBehaviour, ICOMovement
 
     private void UpdateHover()
     {
-        if (!isControlled || overrideControl) return;
-        
+        if (!GetCanMove()) return;
+
         // Raycast downwards to find best matching hit
         float targetY, hoverStrength;
         int bestHit = -1;
@@ -87,7 +86,7 @@ public class COMovementHover : MonoBehaviour, ICOMovement
 
     public void MoveInDirection(Vector3 dir)
     {
-        if (!isControlled || overrideControl) return;
+        if (!GetCanMove()) return;
 
         // Move in the given direction
         float movePct = stats["MovementStrength"] * baseCO.baseWO.moveResist * Time.fixedDeltaTime;
@@ -96,7 +95,7 @@ public class COMovementHover : MonoBehaviour, ICOMovement
 
     public void AimAtPosition(Vector3 pos)
     {
-        if (!isControlled || overrideControl) return;
+        if (!GetCanMove()) return;
 
         // Aim at the given position rotation
         Vector3 dir = (pos - baseCO.baseWO.rb.position).normalized;
@@ -122,18 +121,23 @@ public class COMovementHover : MonoBehaviour, ICOMovement
         return targetY;
     }
 
+    public bool GetCanMove() => !overrideControl && isControlled && !baseCO.construct.isForging;
+
     public bool GetControlled() => isControlled;
-    
+
+
+    public void SetCO(ConstructObject baseCO_) { baseCO = baseCO_; }
 
     public void SetControlled(bool isControlled_)
     {
         // Set isControlled and apply vfx
         isControlled = isControlled_;
-        baseCO.baseWO.rb.useGravity = !isControlled;
+        baseCO.SetLoose(true);
+        baseCO.SetFloating(isControlled);
         if (!isControlled) StartCoroutine(Sfx_FadeOut(hoverAudio, 0.15f));
     }
 
-    protected void SetConstructObject(ConstructObject baseCO_) { baseCO = baseCO_; }
+    public void SetForging(bool isForging_) { } // TODO: Currently no forging positioning
 
 
     private IEnumerator Sfx_FadeOut(AudioSource src, float duration)

@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     private static float MAX_CAM_REACH = 100.0f;
 
     [Header("References")]
+    [SerializeField] private UIController uiController;
     [SerializeField] private Construct playerConstruct;
     [SerializeField] private Transform camPivot;
     [SerializeField] private Transform camOrbit;
@@ -131,6 +132,7 @@ public class PlayerController : MonoBehaviour
         public override void Set()
         {
             // Initialize variables
+            pcn.uiController.SetIngame(true);
             Cursor.lockState = CursorLockMode.Locked;
             currentCO = pcn.playerConstruct.GetCentreCO();
             ResetOffset();
@@ -139,6 +141,7 @@ public class PlayerController : MonoBehaviour
         public override void Unset()
         {
             // Update variables
+            pcn.uiController.SetIngame(false);
             Cursor.lockState = CursorLockMode.None;
         }
 
@@ -150,7 +153,7 @@ public class PlayerController : MonoBehaviour
             UpdateCamera();
 
             // Handle changing state
-            if (Input.GetKeyDown("tab")) pcn.SetState(pcn.forgingState);
+            if (Input.GetKeyDown("tab") && pcn.playerConstruct.GetCanForge()) pcn.SetState(pcn.forgingState);
         }
 
         private void UpdateConstruct()
@@ -237,27 +240,73 @@ public class PlayerController : MonoBehaviour
 
     private class ForgingState : State
     {
+        // Declare static, variables
+        private static float[] ZOOM_RANGE = new float[] { -35f, -3.5f };
+
+        ConstructObject currentCO;
+        private float[] zoomRange;
+
+
         public ForgingState(PlayerController pcn_) : base(pcn_) { }
 
 
         public override void Set()
         {
+            // Update construct and offset
+            pcn.uiController.SetForging(true);
+            pcn.playerConstruct.SetForging(true);
+            currentCO = pcn.playerConstruct.GetCentreCO();
+            ResetOffset();
         }
 
         public override void Unset()
         {
+            // Update construct
+            pcn.uiController.SetForging(false);
+            pcn.playerConstruct.SetForging(false);
         }
 
 
         public override void Update()
         {
+            // Run updates
+            UpdateCamera();
+
             // Handle changing state
             if (Input.GetKeyDown("tab")) pcn.SetState(pcn.ingameState);
         }
 
-
-        public override void FixedUpdate()
+        private void UpdateCamera()
         {
+            // Zoom in / out based on scroll wheel
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll != 0)
+            {
+                Vector3 local = pcn.camOrbit.transform.localPosition;
+                local.z *= (1 - scroll);
+                pcn.camOrbit.localPosition = local;
+            }
+
+            // Move camera towards centre object
+            pcn.camPivot.position = currentCO.transform.position;
+            pcn.camOrbit.localPosition = new Vector3(
+                Mathf.Lerp(pcn.camOrbit.localPosition.x, 0.0f, pcn.camStats["offsetSpeed"] * Time.deltaTime),
+                Mathf.Lerp(pcn.camOrbit.localPosition.y, 0.0f, pcn.camStats["offsetSpeed"] * Time.deltaTime),
+                Mathf.Clamp(pcn.camOrbit.localPosition.z, zoomRange[0], zoomRange[1])
+            );
+        }
+
+
+        private void ResetOffset()
+        {
+            // Update max extent and max extent based on construct
+            float maxExtent = currentCO.baseWO.GetMaxExtent();
+            zoomRange = new float[] { maxExtent * ZOOM_RANGE[0], maxExtent * ZOOM_RANGE[1] };
+            pcn.camOrbit.localPosition = new Vector3(
+                pcn.camOrbit.localPosition.x,
+                pcn.camOrbit.localPosition.y,
+                Mathf.Clamp(pcn.camOrbit.localPosition.z, zoomRange[0], zoomRange[1])
+            );
         }
     }
 }

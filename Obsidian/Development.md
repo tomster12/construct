@@ -20,7 +20,7 @@
 - [x] System for crystal attaching / detaching from orbs
 - [x] Refactor to use a generic Construct class which handles the interactions between the cores, runes, orbs
 - [x] Rework PlayerController / PlayerCamera for better management of Forging mode as well as better interaction with Construct class
-- [ ] Basic forging screen to allow better rune slotting / unslotting
+- [x] Basic forging pause capability pass through to different Construct parts
 
 ### v0.3: Initial UX
 - [ ] Add a generic / expandable system for object information for runes / orbs / cores
@@ -29,6 +29,7 @@
 - [ ] Expanding the interface for during forging:
 	- [ ] Expanding tooltip / box on hovering
 	- [ ] Highlighting rune slots when required
+	- [ ] Better positioning of Construct parts
 
 ### v0.4: Initial Content
 - [ ] Implement [[Objects#Destructible]] / damage system (for use with both objects as well as runes / enemies)
@@ -72,9 +73,13 @@
 - [x] Rework PlayerController / PlayerCamera to use a state system for ingame / forging
 	- [x] Link state between controller / camera
 
+- [x] Work on implementing Forging mode passthrough to movement / construct parts
+
 - [ ] Deal with physics better on hover attachment / detachment
 
 - [ ] Change MovementHop AttackSkill particles size based on object
+
+- [ ] Potentially move certain functions on ConstructObject and ConstructCore into relevant IHandle class which only allows certain other scripts such as movement / construct to call them
 
 ---
 

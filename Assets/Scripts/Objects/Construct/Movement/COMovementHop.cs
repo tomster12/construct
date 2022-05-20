@@ -35,7 +35,7 @@ public class COMovementHop : MonoBehaviour, ICOMovement
     public void Awake()
     {
         // Initialize references, variables
-        SetConstructObject(GetComponent<ConstructObject>());
+        SetCO(GetComponent<ConstructObject>());
         attackSkill = new AttackSkill(this);
     }
 
@@ -58,37 +58,45 @@ public class COMovementHop : MonoBehaviour, ICOMovement
 
     public void MoveInDirection(Vector3 dir)
     {
-        // If can currently attack
-        if (GetCanMove())
-        {
-            // Hop in the given direction
-            float jumpStrength = stats["MovementStrength"] * baseCO.baseWO.moveResist;
-            baseCO.baseWO.rb.velocity = baseCO.baseWO.rb.velocity + new Vector3(0.0f, jumpStrength * JUMP_Z_PCT, 0.0f);
-            baseCO.baseWO.rb.velocity = baseCO.baseWO.rb.velocity + dir * jumpStrength;
+        if (!GetCanMove()) return;
 
-            // Update variables
-            jumpTimer = stats["JumpCooldown"];
-            isGrounded = false;
-        }
+        // Hop in the given direction
+        float jumpStrength = stats["MovementStrength"] * baseCO.baseWO.moveResist;
+        baseCO.baseWO.rb.velocity = baseCO.baseWO.rb.velocity + new Vector3(0.0f, jumpStrength * JUMP_Z_PCT, 0.0f);
+        baseCO.baseWO.rb.velocity = baseCO.baseWO.rb.velocity + dir * jumpStrength;
+
+        // Update variables
+        jumpTimer = stats["JumpCooldown"];
+        isGrounded = false;
     }
 
-    public void AimAtPosition(Vector3 pos) => aimedDirection = pos - transform.position;
+    public void AimAtPosition(Vector3 pos)
+    {
+        if (!GetCanMove()) return;
+
+        // Update aimed direction
+        aimedDirection = pos - transform.position;
+    }
 
 
-    public bool GetCanMove() => isGrounded && !attackSkill.isActive && jumpTimer <= 0.0f;
+    public bool GetCanMove() => isControlled && isGrounded && !attackSkill.isActive && jumpTimer <= 0.0f;
 
     public bool GetControlled() => isControlled;
 
+
+    public void SetCO(ConstructObject baseCO_) { baseCO = baseCO_; }
 
     public void SetControlled(bool isControlled_)
     {
         // Update variable and bind skills
         isControlled = isControlled_;
-        if (isControlled_) baseCO.construct.skills.RequestBinding(attackSkill, baseCO.construct.abilityButtons);
-        else baseCO.construct.skills.Unbind(attackSkill);
+        baseCO.SetLoose(true);
+        baseCO.SetFloating(false);
+        if (isControlled && !attackSkill.isBinded) baseCO.construct.skills.RequestBinding(attackSkill, baseCO.construct.abilityButtons);
+        else if (attackSkill.isBinded) baseCO.construct.skills.Unbind(attackSkill);
     }
 
-    protected void SetConstructObject(ConstructObject baseCO_) { baseCO = baseCO_; }
+    public void SetForging(bool isForging_) { } // TODO: Currently no forging positioning
 
 
     public void OnCollisionEnter(Collision collision)

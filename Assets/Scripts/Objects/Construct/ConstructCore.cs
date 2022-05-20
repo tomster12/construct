@@ -1,20 +1,9 @@
 
-using System;
 using System.Collections;
 using UnityEngine;
 
 
 public enum CoreState { Detached, Attaching, Attached, Detaching };
-
-
-public interface ICCMovementController
-{
-    CoreState GetState();
-    ConstructObject GetAttachedCO();
-
-    void SetState(CoreState state_);
-    void SetAttachedCO(ConstructObject attachedCO_);
-}
 
 
 public class ConstructCore : ConstructObject
@@ -33,7 +22,7 @@ public class ConstructCore : ConstructObject
         base.Awake();
 
         // Initialize references and variables
-        SetCMovement(GetComponent<ICCMovement>());
+        SetCCMovement(GetComponent<ICCMovement>());
         attachSkill = new AttachSkill(this);
         detachSkill = new DetachSkill(this);
     }
@@ -60,19 +49,48 @@ public class ConstructCore : ConstructObject
 
     public override ConstructObject GetCentreCO() => state == CoreState.Attached ? attachedCO.GetCentreCO() : this;
 
+    public CoreState GetState() => state;
+
+    public ConstructObject GetAttachedCO() => attachedCO;
+
 
     public override void SetControlled(bool isControlled_)
     {
         base.SetControlled(isControlled_);
 
         // Bind skills to construct
-        if (isControlled_) construct.skills.RequestBinding(attachSkill, "f", true); // This may break in the future
+        if (isControlled_)
+        {
+            if (state == CoreState.Detached && !attachSkill.isBinded) construct.skills.RequestBinding(attachSkill, "f", true);
+            else if (state == CoreState.Attached && !detachSkill.isBinded) construct.skills.RequestBinding(detachSkill, "f", true);
+        }
     }
 
-    private void SetCMovement(ICCMovement movement_) { SetOMovement(movement_); movement = movement_;  }
+    public override void SetForging(bool isForging_)
+    {
+        // Update state and rb values
+        base.SetForging(isForging_);
+        if (state == CoreState.Attached) attachedCO.SetForging(isForging_);
+        if (!isForging_) SetState(state);
+    }
+
+    private void SetCCMovement(ICCMovement movement_) { SetCOMovement(movement_); movement = movement_; movement_.SetCC(this); }
+
+    public void SetState(CoreState state_)
+    {
+        // Update state and rb values
+        state = state_;
+        if (state == CoreState.Attached)
+        {
+            SetLoose(false);
+            SetFloating(true);
+        }
+    }
+
+    public void SetAttachedCO(ConstructObject attachedCO_) => attachedCO = attachedCO_; 
 
 
-    private class AttachSkill : Skill, ICCMovementController
+    private class AttachSkill : Skill
     {
         // Declare variables
         private ConstructCore core;
@@ -94,7 +112,7 @@ public class ConstructCore : ConstructObject
         public override void Update()
         {
             // Check if hovering new potential WO
-            if (core.state == CoreState.Detached)
+            if (core.state == CoreState.Detached && core.construct.GetCanUseSkill())
             {
                 hoveredPos = PlayerController.instance.aimedPos;
                 WorldObject aimedWO = PlayerController.instance.aimedWO;
@@ -131,6 +149,7 @@ public class ConstructCore : ConstructObject
 
 
         public override void Use() => core.StartCoroutine(UseIE());
+        
         private IEnumerator UseIE()
         {
             if (!GetUsable()) yield break;
@@ -140,26 +159,21 @@ public class ConstructCore : ConstructObject
             {
                 // Attach core then replace skill
                 SetActive(true);
-                yield return core.movement.AttachCoreIE(this, hoveredCO, hoveredPos);
+                yield return core.movement.AttachCoreIE(hoveredCO, hoveredPos);
                 core.construct.skills.RequestBinding(core.detachSkill, "f", true);
                 SetActive(false);
             }
         }
 
 
-        protected override bool GetUsable() => base.GetUsable() && hoveredCO != null;
+        protected override bool GetUsable() => base.GetUsable() && hoveredCO != null && core.construct.GetCanUseSkill();
 
         public CoreState GetState() => core.state;
 
         public ConstructObject GetAttachedCO() => core.attachedCO;
-    
-
-        public void SetState(CoreState state_) => core.state = state_;
-
-        public void SetAttachedCO(ConstructObject attachedCO_) => core.attachedCO = attachedCO_;
     }
 
-    private class DetachSkill : Skill, ICCMovementController
+    private class DetachSkill : Skill
     {
         // Declare variables
         private ConstructCore core;
@@ -177,7 +191,7 @@ public class ConstructCore : ConstructObject
             if (core.state == CoreState.Attached)
             {
                 SetActive(true);
-                yield return core.movement.DetachCoreIE(this);
+                yield return core.movement.DetachCoreIE();
                 core.construct.skills.RequestBinding(core.attachSkill, "f", true);
                 SetActive(false);
             }
@@ -187,10 +201,5 @@ public class ConstructCore : ConstructObject
         public CoreState GetState() => core.state;
 
         public ConstructObject GetAttachedCO() => core.attachedCO;
-        
-
-        public void SetState(CoreState state_) => core.state = state_;
-
-        public void SetAttachedCO(ConstructObject attachedCO_) => core.attachedCO = attachedCO_;
     }
 }

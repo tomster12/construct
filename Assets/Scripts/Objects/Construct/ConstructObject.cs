@@ -12,14 +12,13 @@ public class ConstructObject : MonoBehaviour, IMovable
     public RuneHandler runeHandler => _runeHandler;
     private ICOMovement movement;
 
-
     public Construct construct { get; private set; }
 
 
     protected virtual void Awake()
     {
         // Initialize references
-        SetOMovement(GetComponent<ICOMovement>());
+        SetCOMovement(GetComponent<ICOMovement>());
     }
 
 
@@ -35,6 +34,8 @@ public class ConstructObject : MonoBehaviour, IMovable
         if (construct != null && movement != null) movement.AimAtPosition(pos);
     }
 
+    
+    public bool GetControlled() => movement != null && movement.GetControlled();
 
     public virtual bool GetContainsWO(WorldObject checkWO) => baseWO == checkWO;
 
@@ -42,15 +43,6 @@ public class ConstructObject : MonoBehaviour, IMovable
 
     public virtual ConstructObject GetCentreCO() => this;
 
-    public bool GetControlled() => movement != null && movement.GetControlled();
-    
-
-    public virtual void SetControlled(bool isControlled_)
-    {
-        // Only allow controllable if has movement and construct
-        if (movement == null || (isControlled_ && construct == null)) return;
-        movement.SetControlled(isControlled_);
-    }
 
     public virtual void SetConstruct(Construct construct_)
     {
@@ -59,5 +51,25 @@ public class ConstructObject : MonoBehaviour, IMovable
         construct = construct_;
     }
 
-    protected void SetOMovement(ICOMovement movement_) { movement = movement_; }
+    public virtual void SetControlled(bool isControlled_)
+    {
+        // Only allow controllable if has movement and construct
+        if (movement == null || (isControlled_ && construct == null)) return;
+        movement.SetControlled(isControlled_);
+    }
+
+    public virtual void SetForging(bool isForging_)
+    {
+        // Update movement and rb values
+        SetLoose(false);
+        SetFloating(true);
+        movement.SetForging(isForging_);
+        if (!isForging_) SetControlled(movement.GetControlled());
+    }
+
+    protected void SetCOMovement(ICOMovement movement_) { movement = movement_; movement_.SetCO(this); }
+
+    public virtual void SetLoose(bool isLoose) => baseWO.rb.isKinematic = !isLoose;
+ 
+    public virtual void SetFloating(bool isFloating) => baseWO.rb.useGravity = !isFloating;
 }
