@@ -49,9 +49,9 @@ public class Construct : MonoBehaviour, IMovable
 
     public ConstructObject GetCentreCO() => core.GetCentreCO();
 
-    public bool GetCanUseSkill() => !isForging;
+    public bool GetCanForge() => core.GetCanForge();
 
-    public bool GetCanForge() => core.GetState() == CoreState.Detached || core.GetState() == CoreState.Attached;
+    public bool GetCanUseSkill() => !isForging;
 
 
     private void SetCore(ConstructCore core_) { core = core_; core.SetConstruct(this); }

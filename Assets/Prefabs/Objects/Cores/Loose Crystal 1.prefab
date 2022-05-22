@@ -225,8 +225,8 @@ MonoBehaviour:
       baseRange:
       - 0
       - 0
-      baseValue: 0.96
-      _finalValue: 0.96
+      baseValue: 2.5
+      _finalValue: 2.5
       affectors: []
     - name: aimStrength
       isRandom: 0

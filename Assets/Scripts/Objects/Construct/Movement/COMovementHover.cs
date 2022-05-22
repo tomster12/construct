@@ -18,12 +18,13 @@ public class COMovementHover : MonoBehaviour, ICOMovement
         ["hoverSinRange"] = 0.2f,
         ["hoverSinFrequency"] = 0.4f,
         ["MovementStrength"] = 7f,
-        ["MovementFriction"] = 0.96f,
+        ["MovementFriction"] = 2.5f,
         ["aimStrength"] = 4f
     };
 
     private ConstructObject baseCO;
     protected bool isControlled = false;
+    protected bool isGrounded = false;
     protected bool overrideControl = false;
 
 
@@ -49,34 +50,28 @@ public class COMovementHover : MonoBehaviour, ICOMovement
     {
         if (!GetCanMove()) return;
 
-        // Raycast downwards to find best matching hit
+        // Oscillate above closest reasonable surface
         float targetY, hoverStrength;
-        int bestHit = -1;
-        RaycastHit[] hits = Physics.RaycastAll(transform.position, Vector3.down, GetMaxHoverHeight() * 1.5f);
-        for (int i = 0; i < hits.Length; i++)
+        LayerMask layer = LayerMask.GetMask("Environment");
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, GetMaxHoverHeight() * 1.5f, layer))
         {
-            if (hits[i].transform == transform) continue;
-            if (bestHit == -1 || hits[i].distance < hits[bestHit].distance) bestHit = i;
+            isGrounded = true;
+            targetY = hit.point.y + GetHoverHeight();
+            hoverStrength = stats["hoverSpeed"] * baseCO.baseWO.moveResist * Time.fixedDeltaTime;
         }
 
         // No valid hit so float downwards
-        if (bestHit == -1)
-        {
-            targetY = transform.position.y - 1.0f;
-            hoverStrength = baseCO.baseWO.moveResist * Time.fixedDeltaTime;
-        }
-
-        // Oscillate above closest reasonable surface
         else
         {
-            targetY = hits[bestHit].point.y + GetHoverHeight();
-            hoverStrength = stats["hoverSpeed"] * baseCO.baseWO.moveResist * Time.fixedDeltaTime;
+            isGrounded = false;
+            targetY = transform.position.y - 1.0f;
+            hoverStrength = baseCO.baseWO.moveResist * Time.fixedDeltaTime;
         }
 
         // Lerp position, and apply friction to movement
         float lerpedY = Mathf.Lerp(transform.position.y, targetY, hoverStrength);
         transform.position = new Vector3(transform.position.x, lerpedY, transform.position.z);
-        baseCO.baseWO.rb.velocity = baseCO.baseWO.rb.velocity * stats["MovementFriction"];
+        baseCO.baseWO.rb.velocity -= baseCO.baseWO.rb.velocity * stats["MovementFriction"] * Time.fixedDeltaTime;
 
         // Update hover SFX volume
         float targetHoverVolume = Mathf.Min(baseCO.baseWO.rb.velocity.magnitude / 3f, 1.0f) * 0.25f + 0.15f;
@@ -105,6 +100,10 @@ public class COMovementHover : MonoBehaviour, ICOMovement
     }
 
 
+    public bool GetControlled() => isControlled;
+
+    public bool GetCanForge() => isGrounded;
+
     private float GetMaxHoverHeight()
     {
         // Calculate max hover height based on stats
@@ -122,8 +121,6 @@ public class COMovementHover : MonoBehaviour, ICOMovement
     }
 
     public bool GetCanMove() => !overrideControl && isControlled && !baseCO.construct.isForging;
-
-    public bool GetControlled() => isControlled;
 
 
     public void SetCO(ConstructObject baseCO_) { baseCO = baseCO_; }

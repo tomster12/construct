@@ -18,68 +18,69 @@
 	- [x] MovementHover for standard hovering / aiming
 	- [x] MovementHop for basic hopping along
 - [x] System for crystal attaching / detaching from orbs
-- [x] Refactor to use a generic Construct class which handles the interactions between the cores, runes, orbs
-- [x] Rework PlayerController / PlayerCamera for better management of Forging mode as well as better interaction with Construct class
+- [x] Refactor main components:
+	- [x] Generic Construct class which handles the interactions between the cores, runes, orbs
+	- [x] PlayerController / PlayerCamera for better management of Forging mode as well as better interaction with Construct class
+- [x] Implement a skill system that runes can subscribe skills to
 - [x] Basic forging pause capability pass through to different Construct parts
 
 ### v0.3: Initial UX
 - [ ] Add a generic / expandable system for object information for runes / orbs / cores
 - [ ] Create a UI that dynamically shows information for hovered world objects - This will change and work correctly for each type of object information data
-- [ ] Better camera scripts for clipping / moving in front of objects
-- [ ] Expanding the interface for during forging:
+- [x] Better camera for ingame:
+	- [x] Smoother movement with clearer positioning
+	- [x] clipping / moving in front of objects
+	- [x] Fix jittery desync between camera / construct
+- [ ] Expanding forging mode:
+	- [x] Better checking of whether can enter forging
+	- [ ] Better position / rotation of construct and camera
 	- [ ] Expanding tooltip / box on hovering
 	- [ ] Highlighting rune slots when required
-	- [ ] Better positioning of Construct parts
+- [ ] Simple grass shader with wind and movement out of the way
 
 ### v0.4: Initial Content
 - [ ] Implement [[Objects#Destructible]] / damage system (for use with both objects as well as runes / enemies)
-- [ ] Implement a skill system that runes can subscribe skills to
 - [ ] [[Rune#Blaster]] weapon skill rune to test the destructable objects and skill system
-- [ ] Basic health management for overall construct / individual orbs
-	- [ ] Visible health bar UI
-	- [ ] Generic Damage system including teams / quantity / potential stats inclusion
+- [ ] Energy system for use by skills from runes e.t.c that can deplete / regeneration
+- [ ] Health for individual orbs / overall construct:
+	- [ ] Abstract Damage class capable of broadcasting to other objects
+	- [ ] Teams to allow for friendly / enemies to damage / not damage each other
+	...
 
 ### v0.5: Expanding UI
-- [ ] Dynamic UI for ingame:
-	- [ ] Hotbar for skills
-	- [ ] Resizing crosshair on hovering (This could include a unique animation for expanding around hovered objects)
-- [ ] Some visual indicator of health for construct / orb onscreen
+- [ ] Hotbar for skills including active / cooldown / usable
+- [ ] Specific contextual crosshairs where skills can add to the crosshair on specific conditions and show keybinds / animations of possible actions
+- [ ] Show visually whether in forging mode and keybinding
+- [ ] Show health / energy visually for each construct part
 	...
 
 ### Backburner
 - [ ] Implement inverse kinematics for [[Rune#Crawl]] movement rune to test the Construct classes ability to manage Movement classes
 
+- [ ] Better physics handling for:
+	- [ ] Runes in rune slots
+	- [ ] Cores while detaching
+	- [ ] Movement hop with attack skill
+
 ---
 
 ## Short-term Todo
 
-- [x] Refactor code over to using new heirarchical construct system
-	
-	- [x] Introduce addition of skills and skillBindings
-		- [x] Update core to use
-		- [x] Update movementHop to use
-	
-	- [x] Update Movement to work with new system
+- [ ] Set forging camera local z to preset zoom amount
 
-- [x] Refactor all code to be clean, readable, extensible
-	- Reformat to work with visual studio
-	- Convert some to 1 line functions
-	- Ensure public / private is all set correctly
-		- Ensure correct naming of variables
-	- Add headers for all serialized values
+- [ ] Update ForgingState to use new IngameState logic for camera
 
-- [x] Clean up all todos
-
-- [x] Rework PlayerController / PlayerCamera to use a state system for ingame / forging
-	- [x] Link state between controller / camera
-
-- [x] Work on implementing Forging mode passthrough to movement / construct parts
-
-- [ ] Deal with physics better on hover attachment / detachment
+- [ ] Update calculated zoom range with new smoother camera system
 
 - [ ] Change MovementHop AttackSkill particles size based on object
 
-- [ ] Potentially move certain functions on ConstructObject and ConstructCore into relevant IHandle class which only allows certain other scripts such as movement / construct to call them
+### Ideas
+
+- Construct Shape variable written to from RuneHandler  
+  
+- Pass certain bits to Shape such as SetForging etc
+
+- Potentially move certain functions on ConstructObject and ConstructCore into relevant IHandle class which only allows certain other scripts such as movement / construct to call them
 
 ---
 
@@ -89,9 +90,13 @@
 
 - [x] Can forge during detachment
 
-- [ ] Rune slots have no collision
-
 - [ ] MovementHover core jab can hit other objects
+	- This issue morphed into that if the object rotates then you jab through it
+	- Basically need to redo / bug fix the jab final positioning
+
+- [ ] Clip through the floor on detachment of core
+
+- [ ] Movement hop not correctly calculating isGrounded
 
 ---
 
@@ -120,8 +125,11 @@
 	- Varied enemies
 	- Dynamic / procedural levels
 - Dark Alliance
-	- Hidden orbs / runes acquired ingame which are then revealed afterwards
+	- Hidden orbs / runes / loot acquired ingame which are then revealed afterwards
 	- Would require a specific kind of gameplay loop
+- Nimbatus
+	- Can choose to make construct before entering the level
+	- Similar to mothergunship of going into levels risk / reward of getting new stuff
 
 
 **Open Discussion**

@@ -90,13 +90,13 @@
   "lastOpenFiles": [
     "Development.md",
     "Gameplay.md",
+    "World/Locations.md",
     "Objects/Orb.md",
+    "Objects/Rune.md",
     "Objects/Core.md",
     "Objects/Construct.md",
-    "Objects/Rune.md",
+    "Interaction/Forging.md",
     "World/Enemies.md",
-    "World/Locations.md",
-    "World/Objects.md",
-    "Index.md"
+    "World/Objects.md"
   ]
 }

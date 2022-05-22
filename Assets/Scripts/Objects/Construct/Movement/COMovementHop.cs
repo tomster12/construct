@@ -79,9 +79,12 @@ public class COMovementHop : MonoBehaviour, ICOMovement
     }
 
 
-    public bool GetCanMove() => isControlled && isGrounded && !attackSkill.isActive && jumpTimer <= 0.0f;
 
     public bool GetControlled() => isControlled;
+
+    public bool GetCanForge() => isGrounded && !attackSkill.isActive;
+
+    public bool GetCanMove() => isControlled && isGrounded && !attackSkill.isActive && jumpTimer <= 0.0f;
 
 
     public void SetCO(ConstructObject baseCO_) { baseCO = baseCO_; }

@@ -43,6 +43,8 @@ public class ConstructObject : MonoBehaviour, IMovable
 
     public virtual ConstructObject GetCentreCO() => this;
 
+    public virtual bool GetCanForge() => movement.GetCanForge();
+
 
     public virtual void SetConstruct(Construct construct_)
     {

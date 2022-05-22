@@ -49,6 +49,10 @@ public class ConstructCore : ConstructObject
 
     public override ConstructObject GetCentreCO() => state == CoreState.Attached ? attachedCO.GetCentreCO() : this;
 
+    public override bool GetCanForge() => base.GetCanForge()
+        && (state == CoreState.Detached || state == CoreState.Attached)
+        && (state == CoreState.Attached ? attachedCO.GetCanForge() : true);
+
     public CoreState GetState() => state;
 
     public ConstructObject GetAttachedCO() => attachedCO;

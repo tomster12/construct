@@ -21,7 +21,10 @@ public class PlayerController : MonoBehaviour
     private StatList camStats = new StatList()
     {
         ["rotateSpeed"] = 0.5f,
-        ["offsetSpeed"] = 4.0f
+        ["followSpeed"] = 15.0f,
+        ["offsetSpeed"] = 6.0f,
+        ["zoomSpeed"] = 4.0f,
+        ["clipDistance"] = 0.2f
     };
 
     private IngameState ingameState;
@@ -89,6 +92,13 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    private void LateUpdate()
+    {
+        // Run late updates
+        state.LateUpdate();
+    }
+
+
     public Transform GetPivot() => camPivot;
 
 
@@ -113,6 +123,7 @@ public class PlayerController : MonoBehaviour
 
         public virtual void Update() { }
         public virtual void FixedUpdate() { }
+        public virtual void LateUpdate() { }
     }
 
     private class IngameState : State
@@ -124,6 +135,7 @@ public class PlayerController : MonoBehaviour
         private ConstructObject currentCO;
         private float[] zoomRange;
         private Vector3 camOffset;
+        private float lastPivotUpdateTime;
 
 
         public IngameState(PlayerController pcn_) : base(pcn_) { }
@@ -190,26 +202,26 @@ public class PlayerController : MonoBehaviour
                 ResetOffset();
             }
 
-            // Rotate based on mouse movement
+            // Update pivot position and rotation
             pcn.camPivot.Rotate(0, Input.GetAxis("Mouse X") * pcn.camStats["rotateSpeed"], 0, Space.World);
             pcn.camPivot.Rotate(-Input.GetAxis("Mouse Y") * pcn.camStats["rotateSpeed"], 0, 0, Space.Self);
 
-            // Zoom in / out based on scroll wheel
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (scroll != 0)
+            // Zoom in / out offset z based on scroll wheel
+            float zoom = Input.GetAxis("Mouse ScrollWheel");
+            if (zoom != 0.0f) camOffset.z = Mathf.Clamp(camOffset.z + zoom * pcn.camStats["zoomSpeed"], zoomRange[0], zoomRange[1]);
+
+            // Raycast out towards target offset position to prevent clipping
+            Vector3 rayDir = pcn.camPivot.rotation * camOffset;
+            LayerMask layer = LayerMask.GetMask("Environment");
+            if (Physics.Raycast(pcn.camPivot.position, rayDir, out RaycastHit hit, camOffset.magnitude, layer))
             {
-                Vector3 local = pcn.camOrbit.transform.localPosition;
-                local.z *= (1 - scroll);
-                pcn.camOrbit.localPosition = local;
+                Vector3 clampedDir = (hit.point - pcn.camPivot.position);
+                Vector3 clampedPos = pcn.camPivot.position + clampedDir + clampedDir.normalized * -pcn.camStats["clipDistance"];
+                pcn.camOrbit.position = clampedPos;
             }
 
-            // Update pivot and orbit location
-            pcn.camPivot.position = currentCO.transform.position;
-            pcn.camOrbit.localPosition = new Vector3(
-                Mathf.Lerp(pcn.camOrbit.localPosition.x, camOffset.x, pcn.camStats["offsetSpeed"] * Time.deltaTime),
-                Mathf.Lerp(pcn.camOrbit.localPosition.y, camOffset.y, pcn.camStats["offsetSpeed"] * Time.deltaTime),
-                Mathf.Clamp(pcn.camOrbit.localPosition.z, zoomRange[0], zoomRange[1])
-            );
+            // No clipping so lerp offset towards target offset
+            else pcn.camOrbit.localPosition = Vector3.Lerp(pcn.camOrbit.localPosition, camOffset, pcn.camStats["offsetSpeed"] * Time.deltaTime);
         }
 
 
@@ -217,6 +229,7 @@ public class PlayerController : MonoBehaviour
         {
             // Run fixed updates
             FixedUpdateConstruct();
+            FixedUpdateCamera();
         }
 
         private void FixedUpdateConstruct() {
@@ -225,16 +238,28 @@ public class PlayerController : MonoBehaviour
             if (inputMoveDir != Vector3.zero) pcn.playerConstruct.MoveInDirection(inputMoveDir);
         }
 
+        private void FixedUpdateCamera() => UpdatePivotPosition();
+
+
+        private void UpdatePivotPosition()
+        {
+            // Calculate delta time and update position
+            float deltaTime = Time.time - lastPivotUpdateTime;
+            lastPivotUpdateTime = Time.time;
+            pcn.camPivot.position = Vector3.Lerp(pcn.camPivot.position, currentCO.transform.position, pcn.camStats["followSpeed"] * deltaTime);
+        }
+
 
         private void ResetOffset()
         {
-            // Update max extent and max extent based on construct
+            // Update zoom range and target offset based on current CO max extent
             float maxExtent = currentCO.baseWO.GetMaxExtent();
             zoomRange = new float[] { maxExtent * ZOOM_RANGE[0], maxExtent * ZOOM_RANGE[1] };
-            float xOff = maxExtent * 0.8f;
-            float yOff = maxExtent * 1.1f;
-            float zOff = Mathf.Clamp(pcn.camOrbit.transform.localPosition.z, zoomRange[0], zoomRange[1]);
-            camOffset = new Vector3(xOff, yOff, zOff);
+            camOffset = new Vector3(
+                Mathf.Max(0.25f, maxExtent + 0.2f),
+                Mathf.Max(0.48f, maxExtent + 0.25f),
+                Mathf.Clamp(pcn.camOrbit.localPosition.z, zoomRange[0], zoomRange[1])
+            );
         }
     }
 
@@ -243,6 +268,7 @@ public class PlayerController : MonoBehaviour
         // Declare static, variables
         private static float[] ZOOM_RANGE = new float[] { -35f, -3.5f };
 
+        private float inputZoom;
         ConstructObject currentCO;
         private float[] zoomRange;
 
@@ -279,16 +305,18 @@ public class PlayerController : MonoBehaviour
         private void UpdateCamera()
         {
             // Zoom in / out based on scroll wheel
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (scroll != 0)
+            inputZoom += Input.GetAxis("Mouse ScrollWheel");
+            if (inputZoom != 0)
             {
                 Vector3 local = pcn.camOrbit.transform.localPosition;
-                local.z *= (1 - scroll);
+                float change = inputZoom * pcn.camStats["zoomSpeed"] * Time.deltaTime;
+                local.z += change;
+                inputZoom -= change;
                 pcn.camOrbit.localPosition = local;
             }
 
             // Move camera towards centre object
-            pcn.camPivot.position = currentCO.transform.position;
+            pcn.camPivot.position = Vector3.Lerp(pcn.camPivot.position, currentCO.transform.position, pcn.camStats["followSpeed"] * Time.deltaTime);
             pcn.camOrbit.localPosition = new Vector3(
                 Mathf.Lerp(pcn.camOrbit.localPosition.x, 0.0f, pcn.camStats["offsetSpeed"] * Time.deltaTime),
                 Mathf.Lerp(pcn.camOrbit.localPosition.y, 0.0f, pcn.camStats["offsetSpeed"] * Time.deltaTime),
