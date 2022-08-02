@@ -32,7 +32,7 @@ class CameraEffects : MonoBehaviour
         vol.profile.TryGet(out c);
         for (float t = time; t > 0.0f;)
         {
-            c.intensity.value = Easing.EaseOutSine(t / time) * strength;
+            c.intensity.value = Util.Easing.EaseOutSine(t / time) * strength;
             t -= Time.deltaTime;
             yield return null;
         }

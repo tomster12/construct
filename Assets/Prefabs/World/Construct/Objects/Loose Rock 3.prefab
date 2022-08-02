@@ -1,0 +1,249 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4673470273324044156
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5444940869530785222}
+  - component: {fileID: 8953027734337788515}
+  - component: {fileID: 6619020433494404777}
+  - component: {fileID: 4673470273324044152}
+  - component: {fileID: 4673470273324044155}
+  - component: {fileID: 4673470273324044153}
+  - component: {fileID: 4673470273324044154}
+  - component: {fileID: 6437693325843974568}
+  - component: {fileID: 5768530334795457638}
+  - component: {fileID: 1179345188427481}
+  m_Layer: 0
+  m_Name: Loose Rock 3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5444940869530785222
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.6031181, y: -0.11800283, z: 2.361047}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &8953027734337788515
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Mesh: {fileID: 8204137566577028532, guid: e4a8e59dee8022f409ae05c842aaa1f0, type: 3}
+--- !u!23 &6619020433494404777
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2c88d8aba8dfd1848ac5071356eb8355, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!64 &4673470273324044152
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 8204137566577028532, guid: e4a8e59dee8022f409ae05c842aaa1f0, type: 3}
+--- !u!54 &4673470273324044155
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 4
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &4673470273324044153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &4673470273324044154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9574c7cc25bbcd6448e5dbcf314f3514, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mf: {fileID: 8953027734337788515}
+  _cl: {fileID: 4673470273324044152}
+  _rb: {fileID: 4673470273324044155}
+  _ol: {fileID: 4673470273324044153}
+--- !u!114 &6437693325843974568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d638c819f9a09244a4e011b78931947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5768530334795457638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1f6847b1d2ec0c489adc1d8ef71aff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dataLabelPrefab: {fileID: 1098028696901874369, guid: c93200d9cd9dd454e9075e962eb00fbe,
+    type: 3}
+  _baseWO: {fileID: 4673470273324044154}
+  _runeHandler: {fileID: 6437693325843974568}
+  _objectData: {fileID: 11400000, guid: 37dde869fa8bf3b44b51453b4d79a0fa, type: 2}
+--- !u!114 &1179345188427481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673470273324044156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b55f07494e76e174ca81d201a33dc1ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rockParticleGeneratorPfb: {fileID: 2164084507230441150, guid: bda918d738c22f24ca10890b8075c3da,
+    type: 3}
+  speedParticleGeneratorPfb: {fileID: 4659153260879525104, guid: 6c7df27be05f1a04a9eb4f5226e9bbdf,
+    type: 3}
+  particleLimit: 0.9
+  stats:
+    randomizeStats: 0
+    stats:
+    - name: MovementForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 5
+      _finalValue: 5
+      affectors: []
+    - name: AimForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 2
+      _finalValue: 2
+      affectors: []
+    - name: MovementCooldown
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 1
+      _finalValue: 1
+      affectors: []
+    - name: AttackStrength
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 10
+      _finalValue: 10
+      affectors: []
+    - name: AttackDuration
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.5
+      _finalValue: 0.5
+      affectors: []
+    - name: AttackCooldown
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 2
+      _finalValue: 2
+      affectors: []

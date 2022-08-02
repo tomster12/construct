@@ -19,24 +19,28 @@
 	- [x] MovementHop for basic hopping along
 - [x] System for crystal attaching / detaching from orbs
 - [x] Refactor main components:
-	- [x] Generic Construct class which handles the interactions between the cores, runes, orbs
+	- [x] Generic Construct class which handles the interactions between objects / runes
 	- [x] PlayerController / PlayerCamera for better management of Forging mode as well as better interaction with Construct class
 - [x] Implement a skill system that runes can subscribe skills to
 - [x] Basic forging pause capability pass through to different Construct parts
 
-### v0.3: Initial UX
-- [ ] Add a generic / expandable system for object information for runes / orbs / cores
-- [ ] Create a UI that dynamically shows information for hovered world objects - This will change and work correctly for each type of object information data
+### v0.3: Initial UX and UI
 - [x] Better camera for ingame:
 	- [x] Smoother movement with clearer positioning
 	- [x] clipping / moving in front of objects
-	- [x] Fix jittery desync between camera / construct
+- [x] Develop a generic system for data for runes / orbs / cores
+- [x] Initial Element data structure to handle keeping track of images, colors, names, and other config values
+- [ ] Create a dynamic UI that dynamically shows data for:
+	- [x] Objects
+	- [x] Runes
+	- [ ] Cores
 - [ ] Expanding forging mode:
 	- [x] Better checking of whether can enter forging
-	- [ ] Better position / rotation of construct and camera
-	- [ ] Expanding tooltip / box on hovering
-	- [ ] Highlighting rune slots when required
-- [ ] Simple grass shader with wind and movement out of the way
+	- [x] Better position / rotation of construct and camera
+	- [x] Highlight with UI on hover using the above system
+	- [ ] Highlighting rune slots when available / free
+- [x] Better feel for objects, involving weight / movement resist / movement calculation
+- [ ] Clean up physics / movement bugs as well as tune values for gameplay feel
 
 ### v0.4: Initial Content
 - [ ] Implement [[Objects#Destructible]] / damage system (for use with both objects as well as runes / enemies)
@@ -45,7 +49,13 @@
 - [ ] Health for individual orbs / overall construct:
 	- [ ] Abstract Damage class capable of broadcasting to other objects
 	- [ ] Teams to allow for friendly / enemies to damage / not damage each other
-	...
+- [ ] Initial meshes / materials:
+	- [ ] Terrain generic standard grassy forest-like environment
+	- [ ] Environment for rocky ruins with barrels / chests
+- [ ] Visual and audio updates:
+	- [ ] Simple grass shader with wind and movement out of the way
+	- [ ] Add SFX for all common actions / interactions with constrtuct / menus
+	- [ ] Update particle effects for MovementHop and add basic ones for MovementHover
 
 ### v0.5: Expanding UI
 - [ ] Hotbar for skills including active / cooldown / usable
@@ -66,13 +76,17 @@
 
 ## Short-term Todo
 
-- [ ] Set forging camera local z to preset zoom amount
+- [x] Set forging camera local z to preset zoom amount
 
-- [ ] Update ForgingState to use new IngameState logic for camera
+- [x] Update ForgingState to use new IngameState logic for camera
 
-- [ ] Update calculated zoom range with new smoother camera system
+- [x] Update calculated zoom range with new smoother camera system
 
 - [ ] Change MovementHop AttackSkill particles size based on object
+
+- [x] Sort out weights / moveResist etc with RigidBody and WorldObject
+
+- [x] Capability of rotating around construct
 
 ### Ideas
 
@@ -80,7 +94,13 @@
   
 - Pass certain bits to Shape such as SetForging etc
 
-- Potentially move certain functions on ConstructObject and ConstructCore into relevant IHandle class which only allows certain other scripts such as movement / construct to call them
+- Specifies focused construct object in forging mode  
+
+- Can switch between objects and camera moves  
+
+- Orb / Shape specific attachment, such as for 2-part top and bottom shape etc  
+  
+Orbs with preset shapes which the above accommodates for
 
 ---
 
@@ -96,7 +116,9 @@
 
 - [ ] Clip through the floor on detachment of core
 
-- [ ] Movement hop not correctly calculating isGrounded
+- [x] Movement hop not correctly calculating isGrounded
+
+- [ ] Can highlight core while attaching
 
 ---
 
@@ -130,6 +152,8 @@
 - Nimbatus
 	- Can choose to make construct before entering the level
 	- Similar to mothergunship of going into levels risk / reward of getting new stuff
+- Sundered
+	- Randomly, procedurally generated rooms in preset dungeon
 
 
 **Open Discussion**

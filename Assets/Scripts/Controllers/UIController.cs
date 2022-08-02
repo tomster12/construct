@@ -6,8 +6,7 @@ public class UIController : MonoBehaviour
 {
     // Declare references
     [Header("References")]
-    [SerializeField] private DataViewer dataViewer;
-    [SerializeField] private PlayerController playerController;
+    //[SerializeField] private PlayerController playerController;
     [SerializeField] private GameObject ingameUI;
     [SerializeField] private GameObject forgingUI;
 

@@ -4,13 +4,14 @@
     "type": "split",
     "children": [
       {
-        "id": "ee80dc0de4e801e5",
+        "id": "9111e07aacaf255f",
         "type": "leaf",
         "state": {
           "type": "markdown",
           "state": {
             "file": "Obsidian/Development.md",
-            "mode": "preview"
+            "mode": "preview",
+            "source": false
           }
         }
       }
@@ -86,7 +87,7 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "ee80dc0de4e801e5",
+  "active": "9111e07aacaf255f",
   "lastOpenFiles": [
     "Obsidian/Development.md",
     "Obsidian/Index.md"
