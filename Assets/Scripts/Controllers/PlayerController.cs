@@ -53,14 +53,14 @@ public class PlayerController : MonoBehaviour
     public bool canHighlight;
     public Dictionary<IHoverableState, bool> allowedHoverableStates;
     private HashSet<IHoverable> nearbyIH;
-    public Vector3 aimedPos { get; private set; }
-    public Vector3 prevAimedPos { get; private set; }
-    public Transform aimedT { get; private set; }
-    public Transform prevAimedT { get; private set; }
     public IHoverable aimedIH { get; private set; }
-    public IHoverable prevAimedIH { get; private set; }
+    public Vector3 aimedPos { get; private set; }
+    public Transform aimedT { get; private set; }
     public WorldObject aimedWO { get; private set; }
     public ConstructObject aimedCO { get; private set; }
+    public IHoverable prevAimedIH { get; private set; }
+    public Vector3 prevAimedPos { get; private set; }
+    public Transform prevAimedT { get; private set; }
 
 
     private void Awake()
@@ -372,7 +372,6 @@ public class PlayerController : MonoBehaviour
         private bool prevHoverableCanHighlight;
         private bool prevHoverableLooseState;
         private bool prevHoverableConstructedState;
-
 
 
         public ForgingState(PlayerController pcn_) : base(pcn_) { }

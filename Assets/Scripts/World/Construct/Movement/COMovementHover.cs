@@ -123,7 +123,7 @@ public class COMovementHover : MonoBehaviour, ICOMovement
         baseCO.baseWO.rb.rotation = Quaternion.Lerp(baseCO.baseWO.rb.rotation, dirRot, rotAcc);
     }
 
-
+    
     public bool GetControlled() => isControlled;
 
     public bool GetCanForge() => isGrounded;
