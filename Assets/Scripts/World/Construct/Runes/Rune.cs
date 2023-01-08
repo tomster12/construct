@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class Rune : MonoBehaviour, IHoverable, IInspectable
+public class Rune : MonoBehaviour, IHighlightable, IInspectable
 {
     // Declare references, variables
     [Header("Prefabs")]
@@ -24,7 +24,6 @@ public class Rune : MonoBehaviour, IHoverable, IInspectable
         GenerateDataLabel();
     }
 
-
     protected virtual void GenerateDataLabel()
     {
         // Instantiate data label
@@ -38,36 +37,40 @@ public class Rune : MonoBehaviour, IHoverable, IInspectable
     public Vector3 GetCentrePosition() => transform.position;
 
 
-    public Vector3 GetHoverablePosition() => GetCentrePosition();
+    #region - IHoverable
 
-    public bool GetHoverableHighlighted() => baseWO.isHighlighted;
+    public Vector3 GetIHPosition() => GetCentrePosition();
 
-    public IHoverableState GetHoverableState() => IHoverableState.LOOSE;
+    public bool GetIHHovered() => baseWO.isHighlighted;
+
+    public IHighlightableState GetIHState() => IHighlightableState.LOOSE;
 
 
-    public Sprite GetInspectableIconSprite() => inspectableIcon;
+    public Sprite GetIIIconSprite() => inspectableIcon;
 
-    public string GetInspectableName() => "Rune";
+    public string GetIIName() => "Rune";
 
-    public string GetInspectableDescription() => "A standard rune for use with a construct.";
+    public string GetIIDescription() => "A standard rune for use with a construct.";
 
-    public Element GetInspectableElement() => element;
+    public Element GetIIElement() => element;
 
-    public virtual List<string> GetInspectableAttributes() => new List<string>()
+    public virtual List<string> GetIIAttributes() => new List<string>()
     {
         "Damage: 10",
         "Crit. Chance: 0%",
         "Energy Cost: 15"
     };
 
-    public virtual List<string> GetInspectableModifiers() => new List<string>();
+    public virtual List<string> GetIIModifiers() => new List<string>();
 
-    public Vector3 GetInspectablePosition() => GetCentrePosition();
+    public Vector3 GetIIPosition() => GetCentrePosition();
 
-    public float GetInspectableMass() => 0.0f;
+    public float GetIIMass() => 0.0f;
 
 
-    public void SetHoverableNearby(bool isNearby) => inspectableLabel.SetNearby(isNearby);
+    public void SetIHNearby(bool isNearby) => inspectableLabel.SetNearby(isNearby);
 
-    public void SetHoverableHighlighted(bool isHighlighted) { inspectableLabel.SetHighlighted(isHighlighted); baseWO.isHighlighted = isHighlighted; }
+    public void SetIHHighlighted(bool isHighlighted) { inspectableLabel.SetHighlighted(isHighlighted); baseWO.isHighlighted = isHighlighted; }
+
+    #endregion
 }

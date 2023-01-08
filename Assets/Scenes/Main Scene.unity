@@ -43,7 +43,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,6 +118,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -491,6 +493,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 421514801}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &425057760 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6034437251916207678, guid: 6e98cec698baa1b42af344572d26a259,
+    type: 3}
+  m_PrefabInstance: {fileID: 5598773498745111677}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b55f07494e76e174ca81d201a33dc1ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &502671638
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -625,7 +639,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81863d1a8762d374c8b3cf09a594e646, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  core: {fileID: 2596124815980446870}
+  _core: {fileID: 2596124815980446870}
 --- !u!4 &700333844 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 45d47fd9f0982764c9fe54e06e3a829b,
@@ -890,12 +904,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0
   m_ClearDepth: 1
+  m_AllowXRRendering: 1
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
@@ -1110,6 +1126,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 824157930}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &846417939 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4797429006944311471, guid: 9f707ffcccd094a40a3f92d5692f925b,
+    type: 3}
+  m_PrefabInstance: {fileID: 4797429006944311467}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b238af5af19fd894c8ea16f373b1c439, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &846458463
 GameObject:
   m_ObjectHideFlags: 0
@@ -1191,6 +1219,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!223 &846458467
 Canvas:
   m_ObjectHideFlags: 0
@@ -1819,12 +1848,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0
   m_ClearDepth: 1
+  m_AllowXRRendering: 1
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
@@ -2069,6 +2100,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!4 &1244658151
@@ -2292,6 +2324,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2355,7 +2388,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiController: {fileID: 846458468}
-  _playerConstruct: {fileID: 537565138}
+  _construct: {fileID: 537565138}
   camPivot: {fileID: 783341413}
   camOrbit: {fileID: 1902036464}
   _cam: {fileID: 1187895557}
@@ -2399,7 +2432,7 @@ MonoBehaviour:
       _finalValue: 10
       affectors: []
   showNearby: 0
-  canHighlight: 0
+  showHighlighted: 0
 --- !u!1001 &1550013254
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3532,6 +3565,31 @@ PrefabInstance:
       objectReference: {fileID: 1187895560}
     - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
         type: 3}
+      propertyPath: _movement
+      value: 
+      objectReference: {fileID: 2596124815980446874}
+    - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
+        type: 3}
+      propertyPath: coreAttach
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
+        type: 3}
+      propertyPath: coreDetach
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
+        type: 3}
+      propertyPath: _coreAttach
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
+        type: 3}
+      propertyPath: _coreDetach
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
+        type: 3}
       propertyPath: _objectData
       value: 
       objectReference: {fileID: 0}
@@ -3546,6 +3604,11 @@ PrefabInstance:
       propertyPath: inspectableIcon
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
+        type: 3}
+      propertyPath: _inherentMovement
+      value: 
+      objectReference: {fileID: 2596124815980446874}
     - target: {fileID: 6910207892686875202, guid: 0ee97315760257541abeedcd979a0f5e,
         type: 3}
       propertyPath: inspectableLabelPrefab
@@ -3586,7 +3649,8 @@ PrefabInstance:
       propertyPath: coreStats.stats.Array.data[1].baseRange.Array.size
       value: 2
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5049686652869293659, guid: 0ee97315760257541abeedcd979a0f5e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 0ee97315760257541abeedcd979a0f5e, type: 3}
 --- !u!114 &2596124815980446870 stripped
 MonoBehaviour:
@@ -3594,12 +3658,94 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 2596124815980446869}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 2596124815980446871}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d72a0860449b2541b0c6f8124322615, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2596124815980446871 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2938071069643155041, guid: 0ee97315760257541abeedcd979a0f5e,
+    type: 3}
+  m_PrefabInstance: {fileID: 2596124815980446869}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2596124815980446874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2596124815980446871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b238af5af19fd894c8ea16f373b1c439, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isTransitioning: 0
+  hoverSFX: {fileID: 8300000, guid: 2a904ba49ee186644ae773226f380246, type: 3}
+  stats:
+    randomizeStats: 0
+    stats:
+    - name: MovementForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 7
+      _finalValue: 7
+      affectors: []
+    - name: AimForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 4
+      _finalValue: 4
+      affectors: []
+    - name: MovementDrag
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 2.5
+      _finalValue: 2.5
+      affectors: []
+    - name: HoverHeight
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 2
+      _finalValue: 2
+      affectors: []
+    - name: HoverSinRange
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.2
+      _finalValue: 0.2
+      affectors: []
+    - name: HoverSinFrequency
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.4
+      _finalValue: 0.4
+      affectors: []
+    - name: HoverForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 3
+      _finalValue: 3
+      affectors: []
+  camFX: {fileID: 1187895560}
+  coreAttachSFX: {fileID: 8300000, guid: 5e5554165b12a8842b3893268bac8092, type: 3}
+  coreChargeSFX: {fileID: 0}
 --- !u!4 &3582371118312046563 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4134680118710682594, guid: 8be64f94b1e3fb946bc81e2f79b69483,
@@ -3843,10 +3989,30 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 4797429006944311470, guid: 9f707ffcccd094a40a3f92d5692f925b,
         type: 3}
+      propertyPath: _inherentMovement
+      value: 
+      objectReference: {fileID: 846417939}
+    - target: {fileID: 4797429006944311470, guid: 9f707ffcccd094a40a3f92d5692f925b,
+        type: 3}
       propertyPath: inspectableLabelPrefab
       value: 
       objectReference: {fileID: 1098028696901874369, guid: c93200d9cd9dd454e9075e962eb00fbe,
         type: 3}
+    - target: {fileID: 4797429006944311471, guid: 9f707ffcccd094a40a3f92d5692f925b,
+        type: 3}
+      propertyPath: camFX
+      value: 
+      objectReference: {fileID: 1187895560}
+    - target: {fileID: 4797429006944311471, guid: 9f707ffcccd094a40a3f92d5692f925b,
+        type: 3}
+      propertyPath: hoverSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: 2a904ba49ee186644ae773226f380246, type: 3}
+    - target: {fileID: 4797429006944311471, guid: 9f707ffcccd094a40a3f92d5692f925b,
+        type: 3}
+      propertyPath: coreAttachSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: 5e5554165b12a8842b3893268bac8092, type: 3}
     - target: {fileID: 4979113387319524339, guid: 9f707ffcccd094a40a3f92d5692f925b,
         type: 3}
       propertyPath: m_RootOrder
@@ -3988,6 +4154,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: f893ba10e34e7cf4a9ef360840512e31,
         type: 3}
+    - target: {fileID: 5348168653165746772, guid: 6e98cec698baa1b42af344572d26a259,
+        type: 3}
+      propertyPath: _inherentMovement
+      value: 
+      objectReference: {fileID: 425057760}
     - target: {fileID: 5348168653165746772, guid: 6e98cec698baa1b42af344572d26a259,
         type: 3}
       propertyPath: inspectableLabelPrefab

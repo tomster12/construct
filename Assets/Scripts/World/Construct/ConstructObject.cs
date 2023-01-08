@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class ConstructObject : MonoBehaviour, IMovable, IHoverable, IInspectable
+public class ConstructObject : MonoBehaviour, IHighlightable, IInspectable
 {
     // Declare references, variables
     [Header("Prefabs")]
+    [SerializeField] protected ConstructMovement _inherentMovement;
     [SerializeField] private GameObject inspectableLabelPrefab;
+    public ConstructMovement inherentMovement => _inherentMovement;
 
     [Header("References")]
     [SerializeField] protected Sprite inspectableIcon;
@@ -17,7 +19,7 @@ public class ConstructObject : MonoBehaviour, IMovable, IHoverable, IInspectable
     public WorldObject baseWO => _baseWO;
     public RuneHandler runeHandler => _runeHandler;
     public ObjectData objectData => _objectData;
-    private ICOMovement movement;
+    public bool isConstructed => construct != null;
 
     public Construct construct { get; private set; }
     public InspectableLabel inspectableLabel { get; private set; }
@@ -25,17 +27,15 @@ public class ConstructObject : MonoBehaviour, IMovable, IHoverable, IInspectable
 
     protected virtual void Awake()
     {
-        // Initialize references
-        SetCOMovement(GetComponent<ICOMovement>());
+        // Assign object to movement
+        if (inherentMovement != null) inherentMovement.SetObject(this);
     }
-
 
     protected virtual void Start()
     {
         // Initialize label
         GenerateDataLabel();
     }
-
 
     protected virtual void GenerateDataLabel()
     {
@@ -47,26 +47,20 @@ public class ConstructObject : MonoBehaviour, IMovable, IHoverable, IInspectable
     }
 
 
-    public virtual void MoveInDirection(Vector3 dir)
-    {
-        // Only move if on construct and has movement
-        if (construct != null && movement != null) movement.MoveInDirection(dir);
-    }
+    public virtual void SetConstruct(Construct construct_) => construct = construct_;
 
-    public virtual void AimAtPosition(Vector3 pos)
-    {
-        // Only aim if on construct and has movement
-        if (construct != null && movement != null) movement.AimAtPosition(pos);
-    }
+    public virtual void SetLoose(bool isLoose) => baseWO.rb.isKinematic = !isLoose;
 
-    
-    public bool GetControlled() => movement != null && movement.GetControlled();
+    public virtual void SetFloating(bool isFloating) => baseWO.rb.useGravity = !isFloating;
+
+    public virtual void SetColliding(bool toCollide) => baseWO.cl.enabled = toCollide;
+
+
+    #region Helper
 
     public virtual bool GetContainsWO(WorldObject checkWO) => baseWO == checkWO;
 
     public virtual bool GetContainsCO(ConstructObject checkCO) => checkCO == this;
-
-    public virtual bool GetCanForge() => movement.GetCanForge();
 
     public virtual ConstructObject GetCentreCO() => this;
 
@@ -74,67 +68,47 @@ public class ConstructObject : MonoBehaviour, IMovable, IHoverable, IInspectable
 
     public virtual Quaternion GetForwardRot() => Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.forward, Vector3.up), Vector3.up);
 
-
-    public Vector3 GetHoverablePosition() => GetCentrePosition();
-
-    public bool GetHoverableHighlighted() => baseWO.isHighlighted;
-
-    public IHoverableState GetHoverableState() => (construct != null || GetControlled()) ? IHoverableState.CONSTRUCTED : IHoverableState.LOOSE;
+    #endregion
 
 
-    public Sprite GetInspectableIconSprite() => inspectableIcon;
+    #region IHoverable
 
-    public string GetInspectableName() => objectData.name;
-    
-    public string GetInspectableDescription() => objectData.description;
+    public Vector3 GetIHPosition() => GetCentrePosition();
 
-    public Element GetInspectableElement() => objectData.element;
+    public bool GetIHHovered() => baseWO.isHighlighted;
 
-    public virtual List<string> GetInspectableAttributes() => new List<string>()
+    public IHighlightableState GetIHState() => construct != null ? IHighlightableState.CONSTRUCTED : IHighlightableState.LOOSE;
+
+
+    public void SetIHNearby(bool isNearby) { if (inspectableLabel != null) inspectableLabel.SetNearby(isNearby); }
+
+    public void SetIHHighlighted(bool isHighlighted) { if (inspectableLabel != null) inspectableLabel.SetHighlighted(isHighlighted); baseWO.isHighlighted = isHighlighted; }
+
+    #endregion
+
+
+    #region IInspectable
+
+    public Sprite GetIIIconSprite() => inspectableIcon;
+
+    public string GetIIName() => objectData.name;
+
+    public string GetIIDescription() => objectData.description;
+
+    public Element GetIIElement() => objectData.element;
+
+    public virtual List<string> GetIIAttributes() => new List<string>()
     {
         "Health: " + objectData.health,
         "Energy: " + objectData.energy + " (" + objectData.energyRegen + "/s)",
         "Slots: " + objectData.slotCount
     };
 
-    public virtual List<string> GetInspectableModifiers() => new List<string>() { "Rapid (+10% Speed)", "Energetic (+15% e. regen)" };
+    public virtual List<string> GetIIModifiers() => new List<string>() { "Rapid (+10% Speed)", "Energetic (+15% e. regen)" };
 
-    public Vector3 GetInspectablePosition() => GetCentrePosition();
+    public Vector3 GetIIPosition() => GetCentrePosition();
 
-    public float GetInspectableMass() => baseWO.rb.mass;
+    public float GetIIMass() => baseWO.rb.mass;
 
-
-    public virtual void SetConstruct(Construct construct_)
-    {
-        // Update colliders / rigidbody and set construct
-        if (construct_ == null) SetControlled(false);
-        construct = construct_;
-    }
-
-    public virtual void SetControlled(bool isControlled_)
-    {
-        // Only allow controllable if has movement and construct
-        if (movement == null || (isControlled_ && construct == null)) return;
-        movement.SetControlled(isControlled_);
-    }
-
-    public virtual void SetForging(bool isForging_)
-    {
-        // Update movement and rb values
-        SetLoose(false);
-        SetFloating(true);
-        movement.SetForging(isForging_);
-        if (!isForging_) SetControlled(movement.GetControlled());
-    }
-
-    protected void SetCOMovement(ICOMovement movement_) { movement = movement_; movement_.SetCO(this); }
-
-    public virtual void SetLoose(bool isLoose) => baseWO.rb.isKinematic = !isLoose;
- 
-    public virtual void SetFloating(bool isFloating) => baseWO.rb.useGravity = !isFloating;
-
-
-    public void SetHoverableNearby(bool isNearby) { if (inspectableLabel != null) inspectableLabel.SetNearby(isNearby); }
-
-    public void SetHoverableHighlighted(bool isHighlighted) { if (inspectableLabel != null) inspectableLabel.SetHighlighted(isHighlighted); baseWO.isHighlighted = isHighlighted; }
+    #endregion
 }

@@ -8,19 +8,6 @@ using System.Collections.Generic;
 public enum LabelState { ICON, TITLE, INFO }
 
 
-public interface IInspectable
-{
-    Sprite GetInspectableIconSprite();
-    string GetInspectableName();
-    string GetInspectableDescription();
-    Element GetInspectableElement();
-    List<string> GetInspectableAttributes();
-    List<string> GetInspectableModifiers();
-    Vector3 GetInspectablePosition();
-    float GetInspectableMass();
-}
-
-
 public class InspectableLabel : MonoBehaviour
 {
     // Declare references, variables
@@ -125,8 +112,8 @@ public class InspectableLabel : MonoBehaviour
 
         // Lerp canvas position to set offset
         Vector2 targetOffset = GetCurrentStateOffset();
-        Vector3 currentCentre = inspectedObject.GetInspectablePosition();
-        Vector3 playerCentre = PlayerController.instance.GetHoverableTarget();
+        Vector3 currentCentre = inspectedObject.GetIIPosition();
+        Vector3 playerCentre = PlayerController.instance.GetBillboardTarget();
         float maskWorldWidth = mask.rect.width * canvas.transform.localScale.x;
         float offsetHeight = GetCurrentStateSize(LabelState.TITLE).y * canvas.transform.localScale.y;
         Vector3 up = Vector3.up;
@@ -213,17 +200,17 @@ public class InspectableLabel : MonoBehaviour
         UpdateDynamics(true, true, false);
 
         // Update all content values
-        icon.sprite = inspectedObject.GetInspectableIconSprite();
-        contentName.text = inspectedObject.GetInspectableName();
-        contentDescription.text = inspectedObject.GetInspectableDescription();
-        SetAttributeStrings(inspectedObject.GetInspectableAttributes());
-        contentElementImage.texture = inspectedObject.GetInspectableElement().sprite.texture;
-        contentElementName.text = inspectedObject.GetInspectableElement().name;
-        contentElementName.color = inspectedObject.GetInspectableElement().color;
-        if (inspectedObject.GetInspectableMass() != 0.0f)
-            contentWeight.text = inspectedObject.GetInspectableMass() + "kg";
+        icon.sprite = inspectedObject.GetIIIconSprite();
+        contentName.text = inspectedObject.GetIIName();
+        contentDescription.text = inspectedObject.GetIIDescription();
+        SetAttributeStrings(inspectedObject.GetIIAttributes());
+        contentElementImage.texture = inspectedObject.GetIIElement().sprite.texture;
+        contentElementName.text = inspectedObject.GetIIElement().name;
+        contentElementName.color = inspectedObject.GetIIElement().color;
+        if (inspectedObject.GetIIMass() != 0.0f)
+            contentWeight.text = inspectedObject.GetIIMass() + "kg";
         else contentWeight.text = "";
-        SetModifierStrings(inspectedObject.GetInspectableModifiers());
+        SetModifierStrings(inspectedObject.GetIIModifiers());
     }
 
     public void SetAttributeStrings(List<string> attributeStrings)
@@ -287,17 +274,8 @@ public class InspectableLabel : MonoBehaviour
 
         if (isHighlighted)
         {
-            if (!isNearby)
-            {
-                state = LabelState.INFO;
-                expandTimer = expandTime;
-                UpdateDynamics(true, true, false);
-            }
-            else
-            {
-                state = LabelState.TITLE;
-                expandTimer = 0.0f;
-            }
+            state = LabelState.TITLE;
+            expandTimer = 0.0f;
         }
         else if (isNearby)
         {
