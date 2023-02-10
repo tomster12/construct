@@ -15,7 +15,7 @@ public class Construct : MonoBehaviour, IMovable
     public ConstructMovement movement { get; private set; }
     public SkillBindings skills { get; private set; } = new SkillBindings(new List<string>() { "_0", "1", "2", "3", "4", "f" });
     public ConstructState? state { get; private set; }
-    public bool isBlocking => (movement != null && movement.isBlocking) || core.isBlocking;
+    public bool isBlocking => core.isBlocking;
     public bool canUseSkill => state == ConstructState.ACTIVE && !isBlocking;
 
 
@@ -40,21 +40,21 @@ public class Construct : MonoBehaviour, IMovable
     }
 
 
-    public void MoveInDirection(Vector3 dir) => movement?.MoveInDirection(dir);
-    
-    public void AimAtPosition(Vector3 pos) => movement?.AimAtPosition(pos);
+    public void MoveInDirection(Vector3 dir) { if (!isBlocking) movement?.MoveInDirection(dir); }
+
+    public void AimAtPosition(Vector3 pos) { if (!isBlocking) movement?.AimAtPosition(pos); }
 
 
     public bool GetStateAccessible(ConstructState state_)
-    {
-        // Gate keeper for changing state
-        if (isBlocking) return false;
-        bool accessible = false;
-        if (state_ == ConstructState.LOOSE) accessible = state == null || state == ConstructState.ACTIVE;
-        if (state_ == ConstructState.ACTIVE) accessible = (state == ConstructState.LOOSE && movement != null) || state == ConstructState.FORGING;
-        if (state_ == ConstructState.FORGING) accessible = state == ConstructState.ACTIVE && (core.state == CoreState.Detached || core.state == CoreState.Attached);
-        return accessible;
-    }
+        {
+            // Gate keeper for changing state
+            if (isBlocking) return false;
+            bool accessible = false;
+            if (state_ == ConstructState.LOOSE) accessible = state == null || state == ConstructState.ACTIVE;
+            if (state_ == ConstructState.ACTIVE) accessible = (state == ConstructState.LOOSE && movement != null) || state == ConstructState.FORGING;
+            if (state_ == ConstructState.FORGING) accessible = state == ConstructState.ACTIVE && (core.state == CoreState.Detached || core.state == CoreState.Attached);
+            return accessible;
+        }
 
 
     private void SetCore(ConstructCore core_) { _core = core_; core.SetConstruct(this); }
@@ -73,12 +73,7 @@ public class Construct : MonoBehaviour, IMovable
         return true;
     }
 
-    public void OverwriteMovement(ConstructMovement movement_)
-    {
-        // Overwrite movement and enable if needed
-        movement = movement_;
-        if (movement != null) movement.SetActive(state == ConstructState.ACTIVE);
-    }
+    public void OverwriteMovement(ConstructMovement movement_) => movement = movement_;
 
 
     #region Helper

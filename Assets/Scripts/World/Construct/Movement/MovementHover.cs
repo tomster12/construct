@@ -287,6 +287,7 @@ public class MovementHover : ConstructCoreMovement
 
         // Detach but without control
         Vector3 popDir = (controlledCC.baseWO.transform.position - controlledCC.attachedCO.transform.position).normalized;
+        SetTransitioning(true);
         controlledCC.SetFloating(false);
         controlledCC.SetLoose(true);
         controlledCC.SetColliding(true);
@@ -300,6 +301,7 @@ public class MovementHover : ConstructCoreMovement
         controlledCC.baseWO.rb.angularDrag = prevDrag;
 
         // Reactive movement
+        SetTransitioning(false);
         SetActive(true);
     }
 

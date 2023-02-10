@@ -20,6 +20,7 @@ public class ConstructCore : ConstructObject
     public bool canAttach(ConstructObject checkCO) => canTransition && isDetached && inherentCoreMovement.isActive && (checkCO != null && !checkCO.isConstructed);
     public bool canDetach => canTransition && isAttached;
 
+
     protected override void Awake()
     {
         // Assign core to movement
@@ -47,9 +48,11 @@ public class ConstructCore : ConstructObject
         transform.parent = attachedCO.transform;
 
         // Add object to construct and set movement
-        attachedCO.SetConstruct(construct);
         attachedCO.transform.parent = construct.transform;
+        attachedCO.SetConstruct(construct);
+        attachedCO.inherentMovement?.SetConstruct(construct);
         construct.OverwriteMovement(attachedCO.inherentMovement);
+        attachedCO.inherentMovement?.SetActive(true);
     }
 
 
@@ -67,13 +70,13 @@ public class ConstructCore : ConstructObject
         // Remove object from construct and parent to world
         construct.movement?.SetActive(false);
         attachedCO.SetConstruct(null);
+        attachedCO.inherentMovement?.SetConstruct(null);
         attachedCO.transform.parent = construct.transform.parent;
+        construct.OverwriteMovement(inherentCoreMovement);
 
         // Add core back to construct and overwrite movement
         transform.parent = construct.transform;
-        construct.OverwriteMovement(inherentCoreMovement);
         attachedCO = null;
-
     }
 
 
@@ -82,6 +85,7 @@ public class ConstructCore : ConstructObject
         base.SetConstruct(construct_);
 
         // As a core overwrite movement
+        inherentMovement.SetConstruct(construct);
         construct.OverwriteMovement(inherentMovement);
     }
 

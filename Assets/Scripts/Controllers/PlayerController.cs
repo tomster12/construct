@@ -104,15 +104,14 @@ public class PlayerController : MonoBehaviour
     private State state;
     private HashSet<IHighlightable> nearbyIH = new HashSet<IHighlightable>();
     public HoveredData hovered { get; private set; } = new HoveredData();
-    // TODO: Update access
-    public Dictionary<IHighlightableState, bool> highlightable = new Dictionary<IHighlightableState, bool>()
+    private Dictionary<IHighlightableState, bool> highlightable = new Dictionary<IHighlightableState, bool>()
     {
         [IHighlightableState.INTERACTABLE] = true,
         [IHighlightableState.CONSTRUCTED] = false,
         [IHighlightableState.LOOSE] = false
     };
-    public bool showNearby;
-    public bool showHighlighted;
+    private bool showNearby;
+    private bool showHighlighted;
 
 
     private void Awake()
@@ -238,7 +237,6 @@ public class PlayerController : MonoBehaviour
 
     private class IngameState : State
     {
-        // Declare static, variables
         private static float[] ZOOM_RANGE = new float[] { -35f, -3.5f };
 
         private Vector3 inputMoveDir;
@@ -286,12 +284,17 @@ public class PlayerController : MonoBehaviour
 
         private void UpdateUI()
         {
-             //pcn.showNearby = pcn.construct.core.state == CoreState.Detached || pcn.construct.core.state == CoreState.Attaching;
-             //pcn.showHighlighted = pcn.construct.core.state == CoreState.Detached || pcn.construct.core.state == CoreState.Attaching;
-             //PlayerController.instance.highlightable[IHighlightableState.LOOSE] = true;
-            // PlayerController.instance.showNearby = false;
-            // PlayerController.instance.showHighlighted = false;
-            // PlayerController.instance.highlightable[IHighlightableState.LOOSE] = false;
+            // Update highlightable / hoverable
+            if (pcn.construct.core.state == CoreState.Detached || pcn.construct.core.state == CoreState.Attaching)
+            {
+                pcn.showNearby = true;
+                PlayerController.instance.highlightable[IHighlightableState.LOOSE] = true;
+            }
+            else
+            {
+                pcn.showNearby = false;
+                PlayerController.instance.highlightable[IHighlightableState.LOOSE] = false;
+            }
         }
 
         private void UpdateConstruct()
@@ -403,11 +406,6 @@ public class PlayerController : MonoBehaviour
         private Quaternion prevRot;
         private float prevLocalZ;
 
-        private bool prevHoverableShowNearby;
-        private bool prevHoverableshowHighlighted;
-        private bool prevHoverableLooseState;
-        private bool prevHoverableConstructedState;
-
 
         public ForgingState(PlayerController pcn_) : base(pcn_) { }
 
@@ -425,10 +423,6 @@ public class PlayerController : MonoBehaviour
             pcn.camPivot.rotation = Quaternion.AngleAxis(180, Vector3.up) * centreCO.GetForwardRot();
             prevLocalZ = pcn.camOrbit.localPosition.z;
 
-            prevHoverableShowNearby = pcn.showNearby;
-            prevHoverableshowHighlighted = pcn.showHighlighted;
-            prevHoverableLooseState = pcn.highlightable[IHighlightableState.LOOSE];
-            prevHoverableConstructedState = pcn.highlightable[IHighlightableState.CONSTRUCTED];
 
             pcn.showNearby = false;
             pcn.showHighlighted = true;
@@ -441,11 +435,6 @@ public class PlayerController : MonoBehaviour
             // Set camera variables
             pcn.camPivot.rotation = prevRot;
             pcn.camOrbit.localPosition = new Vector3(pcn.camOrbit.localPosition.x, pcn.camOrbit.localPosition.y, prevLocalZ);
-
-            pcn.showNearby = prevHoverableShowNearby;
-            pcn.showHighlighted = prevHoverableshowHighlighted;
-            pcn.highlightable[IHighlightableState.LOOSE] = prevHoverableLooseState;
-            pcn.highlightable[IHighlightableState.CONSTRUCTED] = prevHoverableConstructedState;
         }
 
 

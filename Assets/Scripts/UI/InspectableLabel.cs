@@ -62,7 +62,6 @@ public class InspectableLabel : MonoBehaviour
         ResetDynamics();
     }
 
-
     private void ResetDynamics()
     {
         // Intialize with default values
@@ -118,8 +117,7 @@ public class InspectableLabel : MonoBehaviour
         float offsetHeight = GetCurrentStateSize(LabelState.TITLE).y * canvas.transform.localScale.y;
         Vector3 up = Vector3.up;
         Vector3 right = Vector3.Cross(up, currentCentre - playerCentre).normalized;
-        Vector3 targetPosition = currentCentre + offset * (right * targetOffset.x + up * targetOffset.y);
-        targetPosition += offsetHeight * up;
+        Vector3 targetPosition = currentCentre + offset * (right * targetOffset.x + up * targetOffset.y) + offsetHeight * up;
         if (state == LabelState.INFO) targetPosition += maskWorldWidth * 0.5f * right;
         float positionPct = setPos ? 1.0f : posLerp * Time.deltaTime;
         Vector3 lerpedPosition = Vector3.Lerp(canvas.transform.position, targetPosition, positionPct);

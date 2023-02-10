@@ -13,8 +13,9 @@ public interface IMovable
 
 public abstract class ConstructMovement : MonoBehaviour
 {
+    protected Construct construct;
     protected ConstructObject controlledCO;
-    public bool isConstructed => controlledCO != null;
+    public bool isConstructed => construct != null;
     public bool isActive { get; private set; } = false;
     public bool isPaused { get; private set; } = false;
     public bool isTransitioning = false;
@@ -26,15 +27,21 @@ public abstract class ConstructMovement : MonoBehaviour
     public abstract void AimAtPosition(Vector3 pos);
 
 
+    public virtual void SetConstruct(Construct construct_)
+    {
+        if ((construct_ != null && isConstructed) || isActive || isTransitioning) throw new System.Exception("Cannot SetConstruct() if isConstructed or isActive or isTransitioning");
+        construct = construct_;
+    }
+
     public virtual void SetObject(ConstructObject controlledCO_)
     {
-        if (isConstructed || isActive || isTransitioning) throw new System.Exception("Cannot SetObject() if isConstructed or isActive or isTransitioning");
+        if (isActive || isTransitioning) throw new System.Exception("Cannot SetObject() if isActive or isTransitioning");
         controlledCO = controlledCO_;
     }
 
     public virtual void SetActive(bool isActive_)
     {
-        if (!isConstructed || isTransitioning) throw new System.Exception("Cannot SetActive() if !isConstructed or isTransitioning");
+        if ((isActive_ && !isConstructed) || isTransitioning) throw new System.Exception("Cannot SetActive() if !isConstructed or isTransitioning");
         isActive = isActive_;
     }
 
@@ -46,7 +53,7 @@ public abstract class ConstructMovement : MonoBehaviour
 
     protected virtual void SetTransitioning(bool isTransitioning_)
     {
-        if (!isConstructed || isPaused) throw new System.Exception("Cannot SetTransitioning() if !isConstucted || isPaused");
+        if (isPaused) throw new System.Exception("Cannot SetTransitioning() if isPaused");
         isTransitioning = isTransitioning_;
     }
 }
