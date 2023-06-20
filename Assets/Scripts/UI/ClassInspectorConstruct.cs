@@ -9,14 +9,15 @@ public class ClassInspectorConstruct : ClassInspector
 
     private void Start()
     {
-        AddVariable("isBlocking", "false");
+        AddVariable("canMove", "false");
         AddVariable("canUseSkill", "false");
+        AddVariable("isBlocking", "false");
     }
-
 
     private void Update()
     {
-        SetVariable("isBlocking", construct.isBlocking.ToString());
+        SetVariable("canMove", construct.canMove.ToString());
         SetVariable("canUseSkill", construct.canUseSkill.ToString());
+        SetVariable("isBlocking", construct.isBlocking.ToString());
     }
 }

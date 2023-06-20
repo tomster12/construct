@@ -3,8 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System;
 
-
+[Serializable]
 public enum LabelState { ICON, TITLE, INFO }
 
 
@@ -24,8 +25,12 @@ public class InspectableLabel : MonoBehaviour
     [SerializeField] private GameObject modifierPfb;
 
     [Header("Content Elements")]
+    [SerializeField] private RectTransform contentIcon;
     [SerializeField] private TextMeshProUGUI contentName;
     [SerializeField] private TextMeshProUGUI contentDescription;
+    [SerializeField] private RectTransform contentRarityIndicatorParent;
+    [SerializeField] private Image contentRarityIndicator;
+    [SerializeField] private Image contentProgressBar;
     [SerializeField] private VerticalLayoutGroup contentAttributeLayout;
     [SerializeField] private RawImage contentElementImage;
     [SerializeField] private TextMeshProUGUI contentElementName;
@@ -37,23 +42,25 @@ public class InspectableLabel : MonoBehaviour
     [SerializeField] private float infoCanvasScale = 0.008f;
     [SerializeField] private float iconBaseSize = 40f;
     [SerializeField] private float iconSmallSize = 25f;
+    [SerializeField] private float rarityBarExtra = 8f;
     [SerializeField] private float sizeUpLerp = 8f;
     [SerializeField] private float sizeDownLerp = 14.5f;
     [SerializeField] private float posLerp = 7f;
     [SerializeField] private float alphaLerp = 10f;
-    [SerializeField] private float expandTime = 1.0f;
-    [SerializeField] private Vector2 iconOffset = new Vector2(0.0f, 1.0f);
-    [SerializeField] private Vector2 titleOffset = new Vector2(0.0f, 1.0f);
-    [SerializeField] private Vector2 infoOffset = new Vector2(1.0f, 1.0f);
+    [SerializeField] private float expandHoverOffset = 0.8f;
+    [SerializeField] private float expandHoverTime = 0.55f;
     [SerializeField] private float iconAlpha = 0.4f;
     [SerializeField] private float standardAlpha = 1.0f;
 
     private IInspectable inspectedObject;
+    private LabelState state;
     private float offset;
-    [SerializeField] private bool isNearby;
-    [SerializeField] private bool isHighlighted;
-    [SerializeField] private LabelState state;
-    private float expandTimer = 0.0f;
+    private float distanceScale = 1.0f;
+    private bool isNearby;
+    private bool isHighlighted;
+    private float hoverTimer = 0.0f;
+
+    [SerializeField] float[] DISTANCE_MAP = new float[] { 0.5f, 2.0f, 0.5f, 1.0f };
 
 
     private void Awake()
@@ -61,6 +68,7 @@ public class InspectableLabel : MonoBehaviour
         // Initialize variables
         ResetDynamics();
     }
+
 
     private void ResetDynamics()
     {
@@ -75,20 +83,20 @@ public class InspectableLabel : MonoBehaviour
     private void Update()
     {
         // Run update functions
-        UpdateExpansion();
+        UpdateState();
         UpdateDynamics();
     }
 
-    private void UpdateExpansion()
+    private void UpdateState()
     {
         // Update expansion timer
-        if (isNearby && isHighlighted && expandTimer < expandTime)
+        if (isNearby && isHighlighted && (hoverTimer - expandHoverOffset) < expandHoverTime)
         {
-            expandTimer += Time.deltaTime;
-            if (expandTimer >= expandTime)
+            hoverTimer += Time.deltaTime;
+            if ((hoverTimer - expandHoverOffset) >= expandHoverTime)
             {
                 state = LabelState.INFO;
-                expandTimer = expandTime;
+                hoverTimer = expandHoverOffset + expandHoverTime;
             }
         }
 
@@ -106,18 +114,23 @@ public class InspectableLabel : MonoBehaviour
 
         // Aim canvas same direction as player camera
         Camera playerCam = PlayerController.instance.cam;
+        Vector3 billboardDir = PlayerController.instance.GetBillboardDirection();
         transform.up = Vector3.up;
-        transform.forward = transform.position - playerCam.transform.position;
+        transform.forward = billboardDir;
 
-        // Lerp canvas position to set offset
-        Vector2 targetOffset = GetCurrentStateOffset();
-        Vector3 currentCentre = inspectedObject.GetIIPosition();
-        Vector3 playerCentre = PlayerController.instance.GetBillboardTarget();
+        // Calculate distanceScale
+        Vector3 billboardPos = PlayerController.instance.GetBillboardTarget();
+        float dist = Vector3.Distance(billboardPos, transform.position);
+        distanceScale = Util.ConstrainMap(dist, DISTANCE_MAP[0], DISTANCE_MAP[1], DISTANCE_MAP[2], DISTANCE_MAP[3]);
+        
+        // Lerp canvas position to set offsets
+        float horizontalOffset = (state == LabelState.INFO ? 1.0f : 0.0f) * distanceScale;
+        Vector3 currentCentre = inspectedObject.II_GetPosition();
         float maskWorldWidth = mask.rect.width * canvas.transform.localScale.x;
         float offsetHeight = GetCurrentStateSize(LabelState.TITLE).y * canvas.transform.localScale.y;
         Vector3 up = Vector3.up;
-        Vector3 right = Vector3.Cross(up, currentCentre - playerCentre).normalized;
-        Vector3 targetPosition = currentCentre + offset * (right * targetOffset.x + up * targetOffset.y) + offsetHeight * up;
+        Vector3 right = Vector3.Cross(up, billboardDir).normalized;
+        Vector3 targetPosition = currentCentre + offset * (up + right * horizontalOffset) + offsetHeight * up;
         if (state == LabelState.INFO) targetPosition += maskWorldWidth * 0.5f * right;
         float positionPct = setPos ? 1.0f : posLerp * Time.deltaTime;
         Vector3 lerpedPosition = Vector3.Lerp(canvas.transform.position, targetPosition, positionPct);
@@ -135,8 +148,21 @@ public class InspectableLabel : MonoBehaviour
         Vector2 iconLerpedSize = Vector2.Lerp(icon.rectTransform.rect.size, Vector2.one * iconSize, iconSizePct);
         icon.rectTransform.sizeDelta = iconLerpedSize;
 
+        // lerp rarity bar
+        Vector2 rarityBarSize = contentRarityIndicator.rectTransform.rect.size;
+        float rarityBarIconDiffX = icon.rectTransform.localPosition.x - (layout.padding.left - rarityBarExtra);
+        rarityBarSize.x = (state == LabelState.ICON ? rarityBarIconDiffX * 2 : contentRarityIndicatorParent.sizeDelta.x + rarityBarExtra * 2);
+        Vector2 lerpedRarityBarSize = Vector2.Lerp(contentRarityIndicator.rectTransform.rect.size, rarityBarSize, sizePct);
+        contentRarityIndicator.rectTransform.sizeDelta = lerpedRarityBarSize;
+        contentRarityIndicator.rectTransform.anchoredPosition = new Vector2(-rarityBarExtra, 0.5f);
+
+        // Lerp progress bar
+        float pct = Util.Easing.EaseOutSine(Mathf.Clamp01((hoverTimer - expandHoverOffset) / expandHoverTime));
+        contentProgressBar.rectTransform.sizeDelta = new Vector2(pct * contentRarityIndicator.rectTransform.sizeDelta.x, contentProgressBar.rectTransform.sizeDelta.y);
+        contentProgressBar.rectTransform.anchoredPosition = new Vector2(-rarityBarExtra, -0.5f);
+
         // Lerp canvas scale
-        Vector3 targetScale = Vector3.one * (state == LabelState.INFO ? infoCanvasScale : baseCanvasScale);
+        Vector3 targetScale = Vector3.one * (state == LabelState.INFO ? infoCanvasScale : baseCanvasScale) * distanceScale;
         float scalePct = setSize ? 1.0f : sizeUpLerp * Time.deltaTime;
         canvas.transform.localScale = Vector3.Lerp(canvas.transform.localScale, targetScale, scalePct);
 
@@ -148,18 +174,7 @@ public class InspectableLabel : MonoBehaviour
         canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, targetAlpha, alphaPct);
     }
 
-
-    private Vector2 GetCurrentStateOffset()
-    {
-        switch (state)
-        {
-            case LabelState.ICON: return iconOffset;
-            case LabelState.TITLE: return titleOffset;
-            case LabelState.INFO: return infoOffset;
-        }
-        return Vector2.zero;
-    }
-
+    
     private Vector2 GetCurrentStateSize(LabelState? overrideState = null)
     {
         switch (overrideState == null ? state : overrideState.Value)
@@ -167,17 +182,18 @@ public class InspectableLabel : MonoBehaviour
             case LabelState.ICON:
                 return new Vector2(
                     layout.padding.left + layout.spacing + contentName.rectTransform.rect.height,
-                    layout.padding.top + layout.spacing + contentName.rectTransform.rect.height);
+                    layout.padding.top + layout.spacing * 2 + contentName.rectTransform.rect.height);
 
             case LabelState.TITLE:
                 return new Vector2(
                     background.rect.width,
-                    layout.padding.top + layout.spacing + contentName.rectTransform.rect.height);
+                    layout.padding.top + layout.spacing * 2 + contentName.rectTransform.rect.height);
 
             case LabelState.INFO:
                 return new Vector2(background.rect.width, background.rect.height);
 
-            default: return Vector2.zero;
+            default:
+                return Vector2.zero;
         }
     }
 
@@ -198,17 +214,17 @@ public class InspectableLabel : MonoBehaviour
         UpdateDynamics(true, true, false);
 
         // Update all content values
-        icon.sprite = inspectedObject.GetIIIconSprite();
-        contentName.text = inspectedObject.GetIIName();
-        contentDescription.text = inspectedObject.GetIIDescription();
-        SetAttributeStrings(inspectedObject.GetIIAttributes());
-        contentElementImage.texture = inspectedObject.GetIIElement().sprite.texture;
-        contentElementName.text = inspectedObject.GetIIElement().name;
-        contentElementName.color = inspectedObject.GetIIElement().color;
-        if (inspectedObject.GetIIMass() != 0.0f)
-            contentWeight.text = inspectedObject.GetIIMass() + "kg";
+        icon.sprite = inspectedObject.II_GetIconSprite();
+        contentName.text = inspectedObject.II_GetName();
+        contentDescription.text = inspectedObject.II_GetDescription();
+        SetAttributeStrings(inspectedObject.II_GetAttributes());
+        contentElementImage.texture = inspectedObject.II_GetElement().sprite.texture;
+        contentElementName.text = inspectedObject.II_GetElement().name;
+        contentElementName.color = inspectedObject.II_GetElement().color;
+        if (inspectedObject.II_GetMass() != 0.0f)
+            contentWeight.text = inspectedObject.II_GetMass() + "kg";
         else contentWeight.text = "";
-        SetModifierStrings(inspectedObject.GetIIModifiers());
+        SetModifierStrings(inspectedObject.II_GetModifiers());
     }
 
     public void SetAttributeStrings(List<string> attributeStrings)
@@ -259,7 +275,7 @@ public class InspectableLabel : MonoBehaviour
         if (isNearby)
         {
             state = LabelState.ICON;
-            expandTimer = 0.0f;
+            hoverTimer = 0.0f;
             UpdateDynamics(true, true, false);
         }
     }
@@ -273,12 +289,12 @@ public class InspectableLabel : MonoBehaviour
         if (isHighlighted)
         {
             state = LabelState.TITLE;
-            expandTimer = 0.0f;
+            hoverTimer = 0.0f;
         }
         else if (isNearby)
         {
             state = LabelState.ICON;
-            expandTimer = 0.0f;
+            hoverTimer = 0.0f;
         }
     }
 }

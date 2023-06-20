@@ -55,6 +55,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -79,6 +80,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &7930339750005150831
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,13 +134,14 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7930339750005150831}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 2
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -163,6 +166,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!64 &3878242981582508485
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -223,7 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9574c7cc25bbcd6448e5dbcf314f3514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _objectData: {fileID: 11400000, guid: 07010178bec96b141b08be7df1620aec, type: 2}
   _mf: {fileID: 5974643680563741040}
   _cl: {fileID: 3878242981582508485}
   _rb: {fileID: 4095944160437310125}

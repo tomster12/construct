@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 4673470273324044155}
   - component: {fileID: 4673470273324044153}
   - component: {fileID: 4673470273324044154}
-  - component: {fileID: 6437693325843974568}
   - component: {fileID: 5768530334795457638}
   - component: {fileID: 1179345188427481}
   m_Layer: 0
@@ -55,13 +54,14 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4673470273324044156}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 2
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -86,6 +86,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!64 &4673470273324044152
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -150,18 +151,6 @@ MonoBehaviour:
   _cl: {fileID: 4673470273324044152}
   _rb: {fileID: 4673470273324044155}
   _ol: {fileID: 4673470273324044153}
---- !u!114 &6437693325843974568
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4673470273324044156}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d638c819f9a09244a4e011b78931947, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5768530334795457638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,11 +163,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1f6847b1d2ec0c489adc1d8ef71aff6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataLabelPrefab: {fileID: 1098028696901874369, guid: c93200d9cd9dd454e9075e962eb00fbe,
-    type: 3}
+  _inherentMovement: {fileID: 0}
   _baseWO: {fileID: 4673470273324044154}
-  _runeHandler: {fileID: 6437693325843974568}
+  _runeHandler: {fileID: 0}
   _objectData: {fileID: 11400000, guid: 37dde869fa8bf3b44b51453b4d79a0fa, type: 2}
+  inspectableLabelPrefab: {fileID: 0}
+  inspectableIcon: {fileID: 21300000, guid: f893ba10e34e7cf4a9ef360840512e31, type: 3}
 --- !u!114 &1179345188427481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,6 +181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b55f07494e76e174ca81d201a33dc1ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controlledCO: {fileID: 0}
   rockParticleGeneratorPfb: {fileID: 2164084507230441150, guid: bda918d738c22f24ca10890b8075c3da,
     type: 3}
   speedParticleGeneratorPfb: {fileID: 4659153260879525104, guid: 6c7df27be05f1a04a9eb4f5226e9bbdf,

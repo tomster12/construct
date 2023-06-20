@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Reflection;
 
 
 [Serializable]
@@ -28,7 +29,6 @@ public class StatList : ISerializationCallbackReceiver
         else return stats[keys[name]].baseValue;
     }
 
-
     public void SetBase(string name, float value)
     {
         // Create a new stat, otherwise set current
@@ -47,7 +47,6 @@ public class StatList : ISerializationCallbackReceiver
         if (!keys.ContainsKey(name)) return new float[] { 0.0f, 0.0f };
         else return stats[keys[name]].baseRange;
     }
-
 
     public void SetBaseRange(string name, float[] range)
     {
@@ -76,7 +75,6 @@ public class StatList : ISerializationCallbackReceiver
         else return stats[keys[name]].AddAffector(value, mult);
     }
 
-
     public bool RemoveAffector(string name, int id)
     {
         // Tell stat to add affector, default to false
@@ -97,59 +95,46 @@ public class StatList : ISerializationCallbackReceiver
 
     public void OnAfterDeserialize()
     {
+
         // Add new keys if stats longer
         if (stats.Count > keys.Count)
         {
             for (int i = keys.Count; i < stats.Count; i++)
             {
                 stats[i].name = stats[i - 1].name + "(1)";
-                keys[stats[i].name] = i;
             }
         }
 
-        // Loop over current keys
-        Dictionary<string, int> newKeys = new Dictionary<string, int>();
-        foreach (KeyValuePair<string, int> entry in keys)
+        // Recalculate keys mapping
+        keys.Clear();
+        for (int i = 0; i < stats.Count; i++)
         {
-            int index = entry.Value;
-
-            // As long as stat still exists
-            if (index < stats.Count)
-            {
-
-                // Rewrite corrected stat key
-                string name = stats[index].name;
-                newKeys[name] = index;
-
-                // Randomize if needed
-                if (stats[index].isRandom && randomizeStats) stats[index].Randomize();
-            }
+            keys[stats[i].name] = i;
+            if (stats[i].isRandom && randomizeStats) stats[i].Randomize();
         }
-
-        // Update variables
         randomizeStats = false;
-        keys = newKeys;
     }
 
 
     [CustomPropertyDrawer(typeof(Stat))]
     public class StatDrawer : PropertyDrawer
     {
-
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             // Include variable height
             float height = EditorGUIUtility.singleLineHeight;
 
             // Add height of affector foldout
-            float size = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing);
             if (property.FindPropertyRelative("affectors").isExpanded)
-                height += size * (property.FindPropertyRelative("affectors").arraySize + 1);
+            {
+                int rowCount = Mathf.Max(property.FindPropertyRelative("affectors").arraySize, 1);
+                float affectorHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing);
+                height += affectorHeight * (rowCount + 2);
+            }
 
             // Return height
             return height;
         }
-
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -166,49 +151,63 @@ public class StatList : ISerializationCallbackReceiver
             // Normal stat
             if (!isRandom)
             {
-                EditorGUI.PropertyField(new Rect(position.x + 30, position.y, affExp ? (position.width - 30) : 55, lh),
-                  property.FindPropertyRelative("affectors"), includeChildren: true);                       // [ 30 ->  85]
-
-                EditorGUI.PropertyField(new Rect(position.x + 90, position.y, (position.width - 90 - 95), lh),
-                  property.FindPropertyRelative("name"), GUIContent.none);                                  // [ 90 -> -95]
-
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 90, position.y, 30, lh),
-                  property.FindPropertyRelative("baseValue"), GUIContent.none);                             // [-90 -> -60]
-
+                EditorGUI.PropertyField( // [ 15 -> 135 ]
+                    new Rect(position.x + 15, position.y, 120, lh),
+                    property.FindPropertyRelative("affectors"), includeChildren: true
+                );
+                EditorGUI.PropertyField( // [ 140 -> -95 ]
+                    new Rect(position.x + 140, position.y, (position.width - 140 - 95), lh),
+                    property.FindPropertyRelative("name"), GUIContent.none
+                );
+                EditorGUI.PropertyField( // [ -90 -> -60 ]
+                    new Rect(position.x + position.width - 90, position.y, 30, lh),
+                    property.FindPropertyRelative("baseValue"), GUIContent.none
+                );
                 GUI.enabled = false;
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 55, position.y, 30, lh),
-                  property.FindPropertyRelative("_finalValue"), GUIContent.none);                           // [-55 -> -25]
+                EditorGUI.PropertyField( // [ -55 -> -30 ]
+                    new Rect(position.x + position.width - 55, position.y, 30, lh),
+                    property.FindPropertyRelative("_finalValue"), GUIContent.none
+                );
                 GUI.enabled = true;
-
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 20, position.y, 20, lh),
-                  property.FindPropertyRelative("isRandom"), GUIContent.none);                              // [-20 -> -00]
-
-                // Random stat
+                EditorGUI.PropertyField(// [ -20 -> 0 ]
+                    new Rect(position.x + position.width - 20, position.y, 20, lh),
+                    property.FindPropertyRelative("isRandom"), GUIContent.none
+                );
             }
+
+            // Random stat
             else
             {
-                EditorGUI.PropertyField(new Rect(position.x + 30, position.y, affExp ? (position.width - 30) : 55, lh),
-                  property.FindPropertyRelative("affectors"), includeChildren: true);                       // [ 30  ->   85]
-
-                EditorGUI.PropertyField(new Rect(position.x + 90, position.y, (position.width - 90 - 165), lh),
-                  property.FindPropertyRelative("name"), GUIContent.none);                                  // [ 90  -> -165]
-
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 160, position.y, 30, lh),
-                  property.FindPropertyRelative("baseRange").GetArrayElementAtIndex(0), GUIContent.none);   // [-160 -> -130]
-
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 125, position.y, 30, lh),
-                  property.FindPropertyRelative("baseRange").GetArrayElementAtIndex(1), GUIContent.none);   // [-125 ->  -95]
-
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 90, position.y, 30, lh),
-                  property.FindPropertyRelative("baseValue"), GUIContent.none);                             // [ -90 ->  -60]
-
+                EditorGUI.PropertyField( // [ 30  -> 85 ]
+                    new Rect(position.x + 15, position.y, 120, lh),
+                    property.FindPropertyRelative("affectors"), includeChildren: true
+                );
+                EditorGUI.PropertyField( // [ 90  -> -165 ]
+                    new Rect(position.x + 140, position.y, (position.width - 140 - 165), lh),
+                    property.FindPropertyRelative("name"), GUIContent.none
+                );
+                EditorGUI.PropertyField( // [ -160 -> -130 ]
+                    new Rect(position.x + position.width - 160, position.y, 30, lh),
+                    property.FindPropertyRelative("baseRange").GetArrayElementAtIndex(0), GUIContent.none
+                );
+                EditorGUI.PropertyField( // [ -125 ->  -95 ]
+                    new Rect(position.x + position.width - 125, position.y, 30, lh),
+                    property.FindPropertyRelative("baseRange").GetArrayElementAtIndex(1), GUIContent.none
+                );
+                EditorGUI.PropertyField( // [ -90 ->  -60 ]
+                    new Rect(position.x + position.width - 90, position.y, 30, lh),
+                    property.FindPropertyRelative("baseValue"), GUIContent.none
+                );
                 GUI.enabled = false;
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 55, position.y, 30, lh),
-                  property.FindPropertyRelative("_finalValue"), GUIContent.none);                           // [ -55 ->  -25]
+                EditorGUI.PropertyField( // [ -55 -> -25 ]
+                    new Rect(position.x + position.width - 55, position.y, 30, lh),
+                    property.FindPropertyRelative("_finalValue"), GUIContent.none
+                );
                 GUI.enabled = true;
-
-                EditorGUI.PropertyField(new Rect(position.x + position.width - 20, position.y, 20, lh),
-                  property.FindPropertyRelative("isRandom"), GUIContent.none);                              // [ -20 ->   -0]
+                EditorGUI.PropertyField( // [ -20 -> -0 ]
+                    new Rect(position.x + position.width - 20, position.y, 20, lh),
+                    property.FindPropertyRelative("isRandom"), GUIContent.none
+                );
             }
 
             // Reload indent, end property
@@ -221,7 +220,6 @@ public class StatList : ISerializationCallbackReceiver
     [CustomPropertyDrawer(typeof(Affector))]
     public class AffectorDrawer : PropertyDrawer
     {
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             // Begin property / label at position, cache indent, get variable
@@ -232,15 +230,18 @@ public class StatList : ISerializationCallbackReceiver
 
             // Draw properties
             GUI.enabled = false;
-            EditorGUI.PropertyField(new Rect(position.x, position.y, 30, lh),
-              property.FindPropertyRelative("id"), GUIContent.none);                                      // [  0 ->  30]
+            EditorGUI.PropertyField( // [  0 ->  30]
+                new Rect(position.x, position.y, 30, lh),
+                property.FindPropertyRelative("id"), GUIContent.none);
             GUI.enabled = true;
-
-            EditorGUI.PropertyField(new Rect(position.x + 35, position.y, (position.width - 35 - 25), lh),
-              property.FindPropertyRelative("amount"), GUIContent.none);                                  // [ 35 -> -25]
-
-            EditorGUI.PropertyField(new Rect(position.x + position.width - 20, position.y, 20, lh),
-              property.FindPropertyRelative("mult"), GUIContent.none);                                    // [-20 ->  -0]
+            EditorGUI.PropertyField( // [ 35 -> -25]
+                new Rect(position.x + 35, position.y, (position.width - 35 - 25), lh),
+                property.FindPropertyRelative("amount"), GUIContent.none
+            );
+            EditorGUI.PropertyField( // [-20 ->  -0]
+                new Rect(position.x + position.width - 20, position.y, 20, lh),
+                property.FindPropertyRelative("mult"), GUIContent.none
+            );
 
             // Reload indent, end property
             EditorGUI.indentLevel = indent;
@@ -256,7 +257,6 @@ public class StatList : ISerializationCallbackReceiver
     {
         // Declare static, variables
         private static System.Random R = new System.Random();
-        private static int NEXT_AFFECTOR_ID = 1;
 
         [SerializeField] public string name = "";
         [SerializeField] public bool isRandom = false;
@@ -276,7 +276,6 @@ public class StatList : ISerializationCallbackReceiver
             CalculateFinal();
         }
 
-
         public Stat(string name_, float[] baseRange_)
         {
             // Initialize variables
@@ -294,7 +293,6 @@ public class StatList : ISerializationCallbackReceiver
             if (isRandom) baseValue = baseRange[0] + (float)R.NextDouble() * (baseRange[1] - baseRange[0]);
         }
 
-
         private float CalculateFinal()
         {
             // Recalculate the final value - addition then multiplication
@@ -304,15 +302,13 @@ public class StatList : ISerializationCallbackReceiver
             return _finalValue;
         }
 
-
         public int AddAffector(float value, bool mult)
         {
             // Put an affector in with a given type and value
-            Affector aff = new Affector(NEXT_AFFECTOR_ID++, value, mult);
+            Affector aff = new Affector(value, mult);
             affectors.Add(aff);
             return aff.id;
         }
-
 
         public bool RemoveAffector(int id)
         {
@@ -329,12 +325,16 @@ public class StatList : ISerializationCallbackReceiver
     [Serializable]
     private class Affector
     {
-        [SerializeField] public int id;
+        private static int NEXT_AFFECTOR_ID = 1;
+
+        [SerializeField] public int id = -1;
         [SerializeField] public float amount = 0.0f;
         [SerializeField] public bool mult = false;
 
-        public Affector(int id_) { id = id_; }
-        public Affector(int id_, float amount_, bool mult_) { id = id_; amount = amount_; mult = mult_; }
+
+        public Affector() { id = NEXT_AFFECTOR_ID++; }
+        public Affector(float amount_, bool mult_) { id = NEXT_AFFECTOR_ID++; amount = amount_; mult = mult_; }
+
 
         public float Affect(float value) => mult ? (value * amount) : (value + amount);
     }

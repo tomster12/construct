@@ -7,10 +7,17 @@ using UnityEngine.Rendering.Universal;
 
 class CameraEffects : MonoBehaviour
 {
+    public static CameraEffects instance { get; private set; }
 
     // Initialize references
     [Header("References")]
     [SerializeField] private Volume vol;
+
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
 
     public IEnumerator Vfx_Shake(float time, float strength)

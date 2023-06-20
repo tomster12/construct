@@ -15,9 +15,8 @@ GameObject:
   - component: {fileID: 5599741621151703972}
   - component: {fileID: 493833736717395438}
   - component: {fileID: 8112258505789309867}
-  - component: {fileID: 2259627442807805756}
   - component: {fileID: 6910207892686875202}
-  - component: {fileID: 5049686652869293659}
+  - component: {fileID: 2596124815980446874}
   m_Layer: 0
   m_Name: Loose Crystal 1
   m_TagString: Untagged
@@ -56,13 +55,14 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2938071069643155041}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 2
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -87,6 +87,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!64 &1362583151538932757
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -151,18 +152,6 @@ MonoBehaviour:
   _cl: {fileID: 1362583151538932757}
   _rb: {fileID: 5599741621151703972}
   _ol: {fileID: 493833736717395438}
---- !u!114 &2259627442807805756
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2938071069643155041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d638c819f9a09244a4e011b78931947, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &6910207892686875202
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,10 +164,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d72a0860449b2541b0c6f8124322615, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _inherentMovement: {fileID: 2596124815980446874}
   _baseWO: {fileID: 8112258505789309867}
-  _runeHandler: {fileID: 2259627442807805756}
+  _runeHandler: {fileID: 0}
   _objectData: {fileID: 0}
---- !u!114 &5049686652869293659
+  inspectableLabelPrefab: {fileID: 0}
+  inspectableIcon: {fileID: 0}
+--- !u!114 &2596124815980446874
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -187,28 +179,70 @@ MonoBehaviour:
   m_GameObject: {fileID: 2938071069643155041}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef0623920d6ad6a4286039612af12ca1, type: 3}
+  m_Script: {fileID: 11500000, guid: b238af5af19fd894c8ea16f373b1c439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverSFX: {fileID: 0}
+  controlledCC: {fileID: 6910207892686875202}
+  controlledCO: {fileID: 6910207892686875202}
+  hoverSFX: {fileID: 8300000, guid: 2a904ba49ee186644ae773226f380246, type: 3}
   stats:
     randomizeStats: 0
     stats:
-    - name: MovementForce
+    - name: MovementWalkForce
       isRandom: 0
       baseRange:
       - 0
       - 0
-      baseValue: 7
-      _finalValue: 7
+      baseValue: 6
+      _finalValue: 6
+      affectors: []
+    - name: MovementSprintForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 11
+      _finalValue: 11
+      affectors: []
+    - name: MovementSprintTimer
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 1
+      _finalValue: 1
+      affectors: []
+    - name: WalkTilt
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.12
+      _finalValue: 0.12
+      affectors: []
+    - name: SprintTilt
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.25
+      _finalValue: 0.25
       affectors: []
     - name: AimForce
       isRandom: 0
       baseRange:
       - 0
       - 0
-      baseValue: 4
-      _finalValue: 4
+      baseValue: 100
+      _finalValue: 100
+      affectors: []
+    - name: TiltForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 100
+      _finalValue: 100
       affectors: []
     - name: MovementDrag
       isRandom: 0
@@ -231,16 +265,16 @@ MonoBehaviour:
       baseRange:
       - 0
       - 0
-      baseValue: 0.2
-      _finalValue: 0.2
+      baseValue: 0.14
+      _finalValue: 0.14
       affectors: []
     - name: HoverSinFrequency
       isRandom: 0
       baseRange:
       - 0
       - 0
-      baseValue: 0.4
-      _finalValue: 0.4
+      baseValue: 0.6
+      _finalValue: 0.6
       affectors: []
     - name: HoverForce
       isRandom: 0
@@ -250,7 +284,6 @@ MonoBehaviour:
       baseValue: 3
       _finalValue: 3
       affectors: []
-  camFX: {fileID: 0}
   coreAttachSFX: {fileID: 8300000, guid: 5e5554165b12a8842b3893268bac8092, type: 3}
   coreChargeSFX: {fileID: 0}
 --- !u!1 &4472640853496875036
@@ -308,6 +341,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -332,3 +366,4 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}

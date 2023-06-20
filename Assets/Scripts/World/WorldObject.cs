@@ -5,7 +5,7 @@ using UnityEngine;
 public class WorldObject : MonoBehaviour
 {
     // Declare static, references, variables
-    private static float[] MASS_RESIST_MAP = new float[] { 1.0f, 5.0f, 1.0f, 2.0f };
+    private static float[] MASS_RESIST_MAP = new float[] { 1.0f, 10.0f, 1.0f, 2.0f };
 
     [Header("References")]
     [SerializeField] private MeshFilter _mf;
@@ -32,14 +32,19 @@ public class WorldObject : MonoBehaviour
     {
         // Calculate physical properties
         volume = VolumeOfMesh(mf.sharedMesh);
-        moveResist = 1.0f / Util.Map(rb.mass, MASS_RESIST_MAP[0], MASS_RESIST_MAP[1], MASS_RESIST_MAP[2], MASS_RESIST_MAP[3]);
+        moveResist = 1.0f / Util.ConstrainMap(rb.mass, MASS_RESIST_MAP[0], MASS_RESIST_MAP[1], MASS_RESIST_MAP[2], MASS_RESIST_MAP[3]);
     }
-
     
+
     public float GetMaxExtent() => Mathf.Max(cl.bounds.extents.x, cl.bounds.extents.y, cl.bounds.extents.z);
 
-
     public void SetLayer(int layer) => Util.SetLayer(transform, layer);
+
+    public virtual void SetLoose(bool isLoose) => rb.isKinematic = !isLoose;
+
+    public virtual void SetFloating(bool isFloating) => rb.useGravity = !isFloating;
+
+    public virtual void SetColliding(bool toCollide) => cl.enabled = toCollide;
 
 
     #region Static

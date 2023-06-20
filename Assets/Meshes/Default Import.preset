@@ -197,6 +197,10 @@ Preset:
     value: 1
     objectReference: {fileID: 0}
   - target: {fileID: 0}
+    propertyPath: bakeAxisConversion
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
     propertyPath: m_PreserveHierarchy
     value: 0
     objectReference: {fileID: 0}
@@ -214,7 +218,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: meshOptimizationFlags
-    value: -1
+    value: 0
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: indexFormat
@@ -231,6 +235,18 @@ Preset:
   - target: {fileID: 0}
     propertyPath: secondaryUVHardAngle
     value: 88
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: secondaryUVMarginMethod
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: secondaryUVMinLightmapResolution
+    value: 40
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: secondaryUVMinObjectScale
+    value: 1
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: secondaryUVPackMargin
@@ -353,6 +369,14 @@ Preset:
     value: 0
     objectReference: {fileID: 0}
   - target: {fileID: 0}
+    propertyPath: m_AddHumanoidExtraRootOnlyWhenUsingAvatar
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_RemapMaterialsIfMaterialImportModeIsNone
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
     propertyPath: m_AdditionalBone
     value: 0
     objectReference: {fileID: 0}
@@ -368,3 +392,4 @@ Preset:
     propertyPath: m_AssetBundleVariant
     value: 
     objectReference: {fileID: 0}
+  m_ExcludedProperties: []

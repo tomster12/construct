@@ -13,6 +13,8 @@ static class Util
 
     static public float Map(float v, float a0, float a1, float b0, float b1) => b0 + (b1 - b0) * (v - a0) / (a1 - a0);
 
+    static public float ConstrainMap(float v, float a0, float a1, float b0, float b1) => Mathf.Clamp(b0 + (b1 - b0) * (v - a0) / (a1 - a0), b0, b1);
+
 
     public static void SetLayer(Transform t, int layer)
     {

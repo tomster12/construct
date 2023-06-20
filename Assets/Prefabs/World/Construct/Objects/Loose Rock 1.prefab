@@ -87,13 +87,14 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5643728942614585673}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 2
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -118,6 +119,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!64 &3270258338292908397
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -194,6 +196,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d638c819f9a09244a4e011b78931947, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slots:
+  - {fileID: 7283030643648396035}
 --- !u!114 &4797429006944311470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,11 +210,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1f6847b1d2ec0c489adc1d8ef71aff6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataLabelPrefab: {fileID: 1098028696901874369, guid: c93200d9cd9dd454e9075e962eb00fbe,
-    type: 3}
+  _inherentMovement: {fileID: 4797429006944311471}
   _baseWO: {fileID: 6594574831241376472}
   _runeHandler: {fileID: 4797429006944311472}
   _objectData: {fileID: 11400000, guid: 37dde869fa8bf3b44b51453b4d79a0fa, type: 2}
+  inspectableLabelPrefab: {fileID: 1098028696901874369, guid: c93200d9cd9dd454e9075e962eb00fbe,
+    type: 3}
+  inspectableIcon: {fileID: 21300000, guid: f893ba10e34e7cf4a9ef360840512e31, type: 3}
 --- !u!114 &4797429006944311471
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,25 +229,67 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b238af5af19fd894c8ea16f373b1c439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverSFX: {fileID: 0}
+  controlledCC: {fileID: 0}
+  controlledCO: {fileID: 4797429006944311470}
+  hoverSFX: {fileID: 8300000, guid: 2a904ba49ee186644ae773226f380246, type: 3}
   stats:
     randomizeStats: 0
     stats:
-    - name: MovementForce
+    - name: MovementWalkForce
       isRandom: 0
       baseRange:
       - 0
       - 0
-      baseValue: 7
-      _finalValue: 7
+      baseValue: 6
+      _finalValue: 6
+      affectors: []
+    - name: MovementSprintForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 11
+      _finalValue: 11
+      affectors: []
+    - name: MovementSprintTimer
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 1
+      _finalValue: 1
+      affectors: []
+    - name: WalkTilt
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.06
+      _finalValue: 0.06
+      affectors: []
+    - name: SprintTilt
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 0.15
+      _finalValue: 0.15
       affectors: []
     - name: AimForce
       isRandom: 0
       baseRange:
       - 0
       - 0
-      baseValue: 4
-      _finalValue: 4
+      baseValue: 100
+      _finalValue: 100
+      affectors: []
+    - name: TiltForce
+      isRandom: 0
+      baseRange:
+      - 0
+      - 0
+      baseValue: 100
+      _finalValue: 100
       affectors: []
     - name: MovementDrag
       isRandom: 0
@@ -283,6 +331,8 @@ MonoBehaviour:
       baseValue: 3
       _finalValue: 3
       affectors: []
+  coreAttachSFX: {fileID: 8300000, guid: 5e5554165b12a8842b3893268bac8092, type: 3}
+  coreChargeSFX: {fileID: 0}
 --- !u!1001 &7603512012746027463
 PrefabInstance:
   m_ObjectHideFlags: 0

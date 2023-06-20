@@ -11,7 +11,6 @@ public class ClassInspector : MonoBehaviour
     private Dictionary<string, ClassInspectorVariable> variables = new Dictionary<string, ClassInspectorVariable>();
 
 
-
     public void AddVariable(string name, string value)
     {
         // Check variable not in already
@@ -20,7 +19,7 @@ public class ClassInspector : MonoBehaviour
         // Create variable
         GameObject go = Instantiate(variablePrefab);
         ClassInspectorVariable goS = go.GetComponent<ClassInspectorVariable>();
-        go.transform.parent = transform;
+        go.transform.SetParent(transform);
         goS.nameText.text = name;
         variables[name] = goS;
     }

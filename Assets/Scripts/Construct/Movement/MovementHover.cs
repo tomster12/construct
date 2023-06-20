@@ -5,9 +5,17 @@ using UnityEngine;
 
 public class MovementHover : ConstructCoreMovement
 {
+    private void Awake()
+    {
+        ObjectAwake();
+        CoreAwake();
+    }
+
+
     #region Object Movement
 
     [Header("References")]
+    [SerializeField] protected ConstructObject controlledCO;
     [SerializeField] private AudioClip hoverSFX;
     private AudioSource hoverAudio;
     private AudioSource sfxAudio;
@@ -15,20 +23,29 @@ public class MovementHover : ConstructCoreMovement
     [Header("Config")]
     [SerializeField] protected StatList stats = new StatList()
     {
-        ["MovementForce"] = 7.0f,
-        ["AimForce"] = 4.0f,
+        ["MovementWalkForce"] = 5.0f,
+        ["MovementSprintForce"] = 8.0f,
+        ["MovementSprintTimer"] = 1.0f,
+        ["WalkTilt"] = 0.12f,
+        ["SprintTilt"] = 0.25f,
+        ["AimForce"] = 100.0f,
+        ["TiltForce"] = 100.0f,
         ["MovementDrag"] = 2.5f,
         ["HoverHeight"] = 2.0f,
-        ["HoverSinRange"] = 0.2f,
-        ["HoverSinFrequency"] = 0.4f,
+        ["HoverSinRange"] = 0.1f,
+        ["HoverSinFrequency"] = 0.25f,
         ["HoverForce"] = 3.0f
     };
 
     private Vector3 groundPosition;
+    private Vector3 movementDir;
+    private float sprintTimer = 0.0f;
     public bool isGrounded { get; private set; } = false;
+    public bool isMoving { get; private set; } = false;
+    public bool isSprinting => sprintTimer >= stats["MovementSprintTimer"];
 
 
-    private void Awake()
+    private void ObjectAwake()
     {
         // Initialize references
         hoverAudio = gameObject.AddComponent<AudioSource>();
@@ -47,7 +64,7 @@ public class MovementHover : ConstructCoreMovement
 
     private void FixedUpdate()
     {
-        if (!isConstructed || !isActive || isTransitioning) return;
+        if (!isAssigned || !isActive || isTransitioning) return;
         FixedUpdateActive();
         FixedUpdatePaused();
     }
@@ -79,11 +96,25 @@ public class MovementHover : ConstructCoreMovement
         // Lerp height and apply drag
         float lerpedY = Mathf.Lerp(transform.position.y, targetY, hoverPct);
         controlledCO.baseWO.rb.position = new Vector3(transform.position.x, lerpedY, transform.position.z);
-        controlledCO.baseWO.rb.velocity -= (controlledCO.baseWO.rb.velocity * stats["MovementDrag"]) * Time.fixedDeltaTime;
+        controlledCO.baseWO.rb.AddForce(-controlledCO.baseWO.rb.velocity * stats["MovementDrag"] * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
         // Update hover SFX volume
         float targetHoverVolume = Mathf.Min(controlledCO.baseWO.rb.velocity.magnitude / 3f, 1.0f) * 0.25f + 0.15f;
         hoverAudio.volume += (targetHoverVolume - hoverAudio.volume) * 0.08f;
+
+        // Lean with a sprint
+        if (isMoving)
+        {
+            float tiltAmount = isSprinting ? stats["SprintTilt"] : stats["WalkTilt"];
+            Vector3 axis = -Vector3.Cross(movementDir, Vector3.up).normalized;
+            float torqueAmount = stats["TiltForce"] * tiltAmount * controlledCO.baseWO.moveResist;
+            controlledCO.baseWO.rb.AddTorque(axis * torqueAmount, ForceMode.Acceleration);
+        }
+
+        // Handle sprint timer
+        if (isMoving) sprintTimer += Time.deltaTime;
+        else sprintTimer = 0.0f;
+        isMoving = false;
     }
 
     private void FixedUpdatePaused()
@@ -104,55 +135,78 @@ public class MovementHover : ConstructCoreMovement
 
     public override void MoveInDirection(Vector3 dir)
     {
-        if (!isConstructed || !isActive || isPaused || isTransitioning) return;
+        if (!isAssigned || !isActive || isPaused || isTransitioning) return;
 
         // Move in the given direction
-        float moveAcc = stats["MovementForce"] * controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
-        controlledCO.baseWO.rb.velocity = controlledCO.baseWO.rb.velocity + dir.normalized * moveAcc;
+        float force = isSprinting ? stats["MovementSprintForce"] : stats["MovementWalkForce"];
+        float moveAcc = force * controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
+        controlledCO.baseWO.rb.AddForce(dir.normalized * moveAcc, ForceMode.VelocityChange);
+        movementDir = dir;
+        isMoving = true;
     }
 
     public override void AimAtPosition(Vector3 pos)
     {
-        if (!isConstructed || !isActive || isPaused || isTransitioning) return;
+        if (!isAssigned || !isActive || isPaused || isTransitioning) return;
 
         // Aim at the given position rotation
-        float rotAcc = stats["AimForce"] * controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
-        Vector3 dir = (pos - controlledCO.baseWO.rb.position).normalized;
-        Quaternion dirRot = Quaternion.LookRotation(dir, Vector3.up);
-        controlledCO.baseWO.rb.rotation = Quaternion.Lerp(controlledCO.baseWO.rb.rotation, dirRot, rotAcc);
+        Quaternion newRot = Quaternion.LookRotation((pos - controlledCO.baseWO.rb.position).normalized, Vector3.up);
+        float adjustFactor = stats["AimForce"] * controlledCO.baseWO.moveResist;
+        Quaternion rotTorque = newRot * Quaternion.Inverse(controlledCO.baseWO.rb.rotation);
+        Vector3 rotTorqueVec = new Vector3(rotTorque.x, rotTorque.y, rotTorque.z) * adjustFactor;
+        controlledCO.baseWO.rb.AddTorque(rotTorqueVec, ForceMode.Acceleration);
+
+        //float dampenFactor = 0.8f;
+        //Vector3 dampenTorqueVec = -controlledCO.baseWO.rb.angularVelocity * dampenFactor;
+        //controlledCO.baseWO.rb.AddTorque(dampenTorqueVec, ForceMode.Acceleration);
+
+        //var x = Vector3.Cross(currentDir.normalized, newDir.normalized);
+        //float theta = Mathf.Asin(x.magnitude);
+        //var w = x.normalized * theta / Time.fixedDeltaTime;
+        //var q = transform.rotation * rigidbody.inertiaTensorRotation;
+        //var t = q * Vector3.Scale(rigidbody.inertiaTensor, Quaternion.Inverse(q) * w);
+        //rigidbody.AddTorque(t - rigidbody.angularVelocity, ForceMode.Impulse);
     }
 
-    
+
     private float GetHoverHeight(float pct)
     {
-        if (!isConstructed) return 0.0f;
+        if (!isAssigned) return 0.0f;
 
         // Calculate current hover height based on pct
         float targetY = controlledCO.baseWO.GetMaxExtent() * (1.0f + 2.0f * stats["HoverHeight"]);
         targetY += Mathf.Sin(pct) * stats["HoverSinRange"];
         return targetY;
     }
-    
+
     private float GetMaxHoverHeight() => GetHoverHeight(1.0f);
-    
+
     private float GetCurrentHoverHeight() => GetHoverHeight(Time.time * stats["HoverSinFrequency"] * (2 * Mathf.PI));
 
 
-    public override void SetActive(bool isActive_)
+    public override bool SetActive(bool isActive_)
     {
-        // Set to loose and floating
-        base.SetActive(isActive_);
-        controlledCO.SetLoose(true);
-        controlledCO.SetFloating(isActive);
+        if (!base.SetActive(isActive_)) return false;
+
+        // Update state
+        if (isActive) controlledCO.SetControlledBy(this);
+        else controlledCO.SetControlledBy(null);
+
+        // Update physics and play sfx
+        controlledCO.baseWO.SetLoose(true);
+        controlledCO.baseWO.SetFloating(isActive);
         if (!isActive) StartCoroutine(Sfx_FadeOut(hoverAudio, 0.15f));
+        return true;
     }
 
-    public override void SetPaused(bool isPaused_)
+    public override bool SetPaused(bool isPaused_)
     {
-        // Set back to active state
-        base.SetPaused(isPaused_);
-        controlledCO.SetLoose(!isPaused);
-        controlledCO.SetFloating(true);
+        if (!base.SetPaused(isPaused_)) return false;
+
+        // Update physics
+        controlledCO.baseWO.SetLoose(!isPaused);
+        controlledCO.baseWO.SetFloating(true);
+        return true;
     }
 
 
@@ -175,45 +229,47 @@ public class MovementHover : ConstructCoreMovement
     #region Core Movement
 
     [Header("References")]
-    [SerializeField] private CameraEffects camFX;
     [SerializeField] private AudioClip coreAttachSFX;
     [SerializeField] private AudioClip coreChargeSFX;
 
 
-    public override IEnumerator IE_Attach(ConstructObject targetCO)
+    private void CoreAwake()
     {
-        if (isBlocking) yield break;
+        // Initialize shape
+        shapeCoreAttachment = gameObject.AddComponent<ShapeHoverAttachment>();
+    }
 
+
+    protected override IEnumerator _IE_RunAttach(ConstructObject targetCO)
+    {
         // Turn off physics / colliders, update state
-        SetTransitioning(true);
-        controlledCC.SetFloating(true);
-        controlledCC.SetLoose(false);
-        controlledCC.SetColliding(false);
+        controlledCC.baseWO.SetFloating(true);
+        controlledCC.baseWO.SetLoose(false);
+        controlledCC.baseWO.SetColliding(false);
         if (coreChargeSFX != null) sfxAudio.PlayOneShot(coreChargeSFX);
 
         // Move backwards, start spinning and point at targetCO
-        Vector3 targetPos = PlayerController.instance.hovered.pos;
-        Coroutine moveBackwardsCR = StartCoroutine(_AttachCoreIEMoveBackwards(targetCO, targetPos));
-        Coroutine lookAtCR = StartCoroutine(_AttachCoreIELookAt(targetCO, targetPos));
+        Vector3 targetPos = PlayerController.instance.hovered.hoveredPos;
+        Coroutine moveBackwardsCR = StartCoroutine(_IE_AttachMoveBackwards(targetCO, targetPos));
+        Coroutine lookAtCR = StartCoroutine(_IE_AttachLookAt(targetCO, targetPos));
         yield return moveBackwardsCR;
         yield return lookAtCR;
 
         // Jab forwards into targetCO
-        Coroutine jabIntoCR = StartCoroutine(_AttachCoreIEJabInto(targetCO, targetPos));
+        Coroutine jabIntoCR = StartCoroutine(_IE_AttachJabInto(targetCO, targetPos));
         yield return jabIntoCR;
 
         // Update variables, Play VFX (chromatic aberration / camera shake) and play SFX
-        SetTransitioning(false);
-        SetActive(false);
-        StartCoroutine(camFX.Vfx_Shake(0.15f, 0.05f));
-        StartCoroutine(camFX.Vfx_Chromatic(0.4f, 0.65f));
+        StartCoroutine(CameraEffects.instance.Vfx_Shake(0.15f, 0.08f));
+        StartCoroutine(CameraEffects.instance.Vfx_Chromatic(0.4f, 0.65f));
         if (coreAttachSFX != null) sfxAudio.PlayOneShot(coreAttachSFX);
 
-        // Deactivate movement
-        SetActive(false);
+        // Create core attachment shape
+        shapeCoreAttachment.SetAttachingCC(controlledCC);
+        shapeCoreAttachment.SetAttachedCO(targetCO);
     }
 
-    private IEnumerator _AttachCoreIEMoveBackwards(ConstructObject targetCO, Vector3 targetPos)
+    private IEnumerator _IE_AttachMoveBackwards(ConstructObject targetCO, Vector3 targetPos)
     {
         // Initialize variables
         Vector3 rawOffset = Quaternion.Inverse(targetCO.transform.rotation) * (targetPos - targetCO.transform.position);
@@ -236,7 +292,7 @@ public class MovementHover : ConstructCoreMovement
         }
     }
 
-    private IEnumerator _AttachCoreIELookAt(ConstructObject targetCO, Vector3 targetPos)
+    private IEnumerator _IE_AttachLookAt(ConstructObject targetCO, Vector3 targetPos)
     {
         // Initialize variables
         Vector3 rawOffset = Quaternion.Inverse(targetCO.transform.rotation) * (targetPos - targetCO.transform.position);
@@ -258,7 +314,7 @@ public class MovementHover : ConstructCoreMovement
         }
     }
 
-    private IEnumerator _AttachCoreIEJabInto(ConstructObject targetCO, Vector3 targetPos)
+    private IEnumerator _IE_AttachJabInto(ConstructObject targetCO, Vector3 targetPos)
     {
         // Initialize variables
         Vector3 rawOffset = Quaternion.Inverse(targetCO.transform.rotation) * (targetPos - targetCO.transform.position);
@@ -281,16 +337,13 @@ public class MovementHover : ConstructCoreMovement
     }
 
 
-    public override IEnumerator IE_Detach()
+    protected override IEnumerator _IE_RunDetach()
     {
-        if (isBlocking) yield break;
-
         // Detach but without control
-        Vector3 popDir = (controlledCC.baseWO.transform.position - controlledCC.attachedCO.transform.position).normalized;
-        SetTransitioning(true);
-        controlledCC.SetFloating(false);
-        controlledCC.SetLoose(true);
-        controlledCC.SetColliding(true);
+        Vector3 popDir = (controlledCC.baseWO.transform.position - controlledCC.shapeCoreAttachment.attachedCO.transform.position).normalized;
+        controlledCC.baseWO.SetFloating(false);
+        controlledCC.baseWO.SetLoose(true);
+        controlledCC.baseWO.SetColliding(true);
 
         // Apply popping force and torque and wait 0.5s
         float prevDrag = controlledCC.baseWO.rb.angularDrag;
@@ -299,10 +352,6 @@ public class MovementHover : ConstructCoreMovement
         controlledCC.baseWO.rb.AddTorque(controlledCC.transform.right * 15.0f, ForceMode.VelocityChange); // FIX
         yield return new WaitForSeconds(0.5f);
         controlledCC.baseWO.rb.angularDrag = prevDrag;
-
-        // Reactive movement
-        SetTransitioning(false);
-        SetActive(true);
     }
 
     #endregion
