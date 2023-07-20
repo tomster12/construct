@@ -43,7 +43,7 @@ public class PlayerForgingController : MonoBehaviour
         // Set centre target position if found ground
         if (firstHit != -1)
         {
-            centreTargetPos = hits[firstHit].point + Vector3.up * mainOrbWJ.getMaxExtent() * 5.0f;
+            centreTargetPos = hits[firstHit].point + Vector3.up * mainOrbWJ.maxExtent * 5.0f;
         }
 
         // Set target rotation

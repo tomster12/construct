@@ -94,14 +94,14 @@ public class MovementHover : MonoBehaviour, CoreMovementI
 
     private float getMaxHoverHeight()
     {
-        float targetY = selfWJ.getMaxExtent() * (1.0f + 2.0f * stats["hoverHeight"]);
+        float targetY = selfWJ.maxExtent * (1.0f + 2.0f * stats["hoverHeight"]);
         targetY += 1.0f * stats["hoverSinRange"];
         return targetY;
     }
 
     private float getHoverHeight()
     {
-        float targetY = selfWJ.getMaxExtent() * (1.0f + 2.0f * stats["hoverHeight"]);
+        float targetY = selfWJ.maxExtent * (1.0f + 2.0f * stats["hoverHeight"]);
         targetY += Mathf.Sin(Time.time * stats["hoverSinFrequency"] * (2 * Mathf.PI)) * stats["hoverSinRange"];
         return targetY;
     }

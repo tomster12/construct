@@ -9,7 +9,10 @@ public class Rune : MonoBehaviour, IHighlightable, IInspectable
     [Header("References")]
     [SerializeField] protected Element element;
     [SerializeField] protected WorldObject _baseWO;
+    [SerializeField] protected RuneData _runeData;
+
     public WorldObject baseWO => _baseWO;
+    public RuneData runeData => _runeData;
 
     private RuneHandler slottedRuneHandler;
     private bool isSlotted => slottedRuneHandler != null;
@@ -24,69 +27,64 @@ public class Rune : MonoBehaviour, IHighlightable, IInspectable
 
     public Vector3 GetCentrePosition() => transform.position;
 
-
     public void SetSlotted(RuneHandler runeHandler)
     {
         slottedRuneHandler = runeHandler;
-        baseWO.SetColliding(!isSlotted);
-        baseWO.SetLoose(!isSlotted);
-        baseWO.SetFloating(isSlotted);
+        baseWO.isColliding = !isSlotted;
+        baseWO.isLoose = !isSlotted;
+        baseWO.isFloating = isSlotted;
 
     }
 
 
     #region IHoverable
 
-    public Vector3 IH_GetPosition() => GetCentrePosition();
+    public Vector3 IHGetPosition() => GetCentrePosition();
 
-    public bool IH_GetHighlighted() => baseWO.isHighlighted;
+    public bool IHGetHighlighted() => baseWO.isHighlighted;
 
-    public IHighlightableState IH_GetState() => isSlotted ? IHighlightableState.CONSTRUCTED : IHighlightableState.INACTIVE;
+    public ObjectType IHGetObjectType() => isSlotted ? ObjectType.CONSTRUCTED_CO : ObjectType.LOOSE_CO;
 
-    public void IH_SetNearby(bool isNearby) => inspectableLabel.SetNearby(isNearby);
+    public void IHSetNearby(bool isNearby) => inspectableLabel.SetNearby(isNearby);
 
-    public void IH_SetHighlighted(bool isHighlighted) { inspectableLabel.SetHighlighted(isHighlighted); baseWO.isHighlighted = isHighlighted; }
+    public void IHSetHighlighted(bool isHighlighted) { inspectableLabel.SetHighlighted(isHighlighted); baseWO.isHighlighted = isHighlighted; }
 
     #endregion
 
 
     #region IInspectable
 
-    [Header("Inspectable References")]
-    [SerializeField] private GameObject inspectableLabelPrefab;
-    [SerializeField] protected Sprite inspectableIcon;
-
     public InspectableLabel inspectableLabel { get; private set; }
 
     protected virtual void GenerateInspectableLabel()
     {
         // Instantiate data label
-        if (inspectableLabelPrefab == null) return;
-        GameObject inspectableLabelGO = Instantiate(inspectableLabelPrefab);
+        if (runeData.inspectableLabelPrefab == null) return;
+        GameObject inspectableLabelGO = Instantiate(runeData.inspectableLabelPrefab);
         inspectableLabel = inspectableLabelGO.GetComponent<InspectableLabel>();
-        inspectableLabel.SetObject(this, baseWO.GetMaxExtent());
+        inspectableLabel.SetObject(this, baseWO.maxExtent);
     }
 
-    public Sprite II_GetIconSprite() => inspectableIcon;
+    public Sprite IIGetIconSprite() => runeData.inspectableIcon;
 
-    public string II_GetName() => "Rune";
+    public string IIGetName() => runeData.name; // "Rune";
 
-    public string II_GetDescription() => "A standard rune for use with a construct.";
+    public string IIGetDescription() => runeData.description; // "A standard rune for use with a construct.";
 
-    public Element II_GetElement() => element;
+    public Element IIGetElement() => runeData.element;
 
-    public virtual List<string> II_GetAttributes() => new List<string>()
+    public virtual List<string> IIGetAttributes() => new List<string>()
     {
         "Damage: 10",
         "Crit. Chance: 0%",
         "Energy Cost: 15"
     };
 
-    public virtual List<string> II_GetModifiers() => new List<string>();
+    public virtual List<string> IIGetModifiers() => new List<string>();
 
-    public Vector3 II_GetPosition() => GetCentrePosition();
+    public Vector3 IIGetPosition() => GetCentrePosition();
 
-    public float II_GetMass() => 0.0f;
+    public float IIGetMass() => 0.0f;
 
     #endregion
 }

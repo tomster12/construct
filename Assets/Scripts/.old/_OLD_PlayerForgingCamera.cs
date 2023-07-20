@@ -53,7 +53,7 @@ public class PlayerForgingCamera : MonoBehaviour
         {
             // Update camera positioning
             followTfm = pcl.mainConstruct.mainOrbWJ.transform;
-            followOffset = Vector3.back * pcl.mainConstruct.mainOrbWJ.getMaxExtent() * 10.0f;
+            followOffset = Vector3.back * pcl.mainConstruct.mainOrbWJ.maxExtent * 10.0f;
             targetRotation = Quaternion.Euler(0.0f, followTfm.rotation.eulerAngles.y, 0.0f);
 
             // Unlock camera

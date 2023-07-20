@@ -127,7 +127,7 @@ public class PlayerConstructCamera : MonoBehaviour
     private void updateCamOffset()
     {
         // Set the cameras offset based on a max extent
-        float maxExtent = followConstruct.mainOrbWJ.getMaxExtent();
+        float maxExtent = followConstruct.mainOrbWJ.maxExtent;
         zoomRange = new float[] { maxExtent * ZOOM_RANGE[0], maxExtent * ZOOM_RANGE[1] };
         float xOff = maxExtent * 0.8f;
         float yOff = maxExtent * 1.1f;

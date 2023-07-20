@@ -15,8 +15,7 @@ public class MovementHop : ConstructObjectMovement
 
     [Header("Config")]
     [SerializeField] private float particleLimit = 0.9f;
-    [SerializeField]
-    private StatList stats = new StatList()
+    [SerializeField] private StatList stats = new StatList()
     {
         ["MovementForce"] = 5.0f,
         ["AimForce"] = 2.0f,
@@ -26,10 +25,11 @@ public class MovementHop : ConstructObjectMovement
         ["AttackCooldown"] = 2.0f
     };
 
-    private float jumpTimer = 0.0f;
-    private Vector3 aimedDirection;
-    private bool isGrounded = true;
     public override bool isBlocking => !isGrounded;
+
+    private float jumpTimer = 0.0f;
+    private bool isGrounded = true;
+    private Vector3 aimedDirection;
 
 
     public void Update()
@@ -48,7 +48,6 @@ public class MovementHop : ConstructObjectMovement
             transform.rotation = Quaternion.Lerp(transform.rotation, dirRot, rotAcc);
         }
     }
-
 
     public override void MoveInDirection(Vector3 dir)
     {
@@ -70,33 +69,6 @@ public class MovementHop : ConstructObjectMovement
 
         // Update aimed direction
         aimedDirection = pos - transform.position;
-    }
-
-
-    public override bool SetActive(bool isActive_)
-    {
-        if (!base.SetActive(isActive_)) return false;
-
-        // Update state
-        if (isActive) controlledCO.SetControlledBy(this);
-        else controlledCO.SetControlledBy(null);
-
-        // Update physics
-        controlledCO.baseWO.SetLoose(true);
-        controlledCO.baseWO.SetFloating(false);
-        return true;
-    }
-
-    public override bool SetPaused(bool isPaused_)
-    {
-        if (!base.SetPaused(isPaused_)) return false;
-
-        // Offset upwards
-        if (isPaused) controlledCO.baseWO.transform.position += Vector3.up * controlledCO.baseWO.GetMaxExtent() * 1.5f;
-        else controlledCO.baseWO.transform.position -= Vector3.up * controlledCO.baseWO.GetMaxExtent() * 1.5f;
-        controlledCO.baseWO.SetLoose(!isPaused);
-        controlledCO.baseWO.SetFloating(isPaused);
-        return true;
     }
 
 
@@ -126,5 +98,32 @@ public class MovementHop : ConstructObjectMovement
         {
             isGrounded = true;
         }
+    }
+
+
+    public override bool SetActive(bool isActive_)
+    {
+        if (!base.SetActive(isActive_)) return false;
+
+        // Update state
+        if (isActive) controlledCO.SetControlledBy(this);
+        else controlledCO.SetControlledBy(null);
+
+        // Update physics
+        controlledCO.baseWO.isLoose = true;
+        controlledCO.baseWO.isFloating = false;
+        return true;
+    }
+
+    public override bool SetPaused(bool isPaused_)
+    {
+        if (!base.SetPaused(isPaused_)) return false;
+
+        // Offset upwards
+        if (isPaused) controlledCO.baseWO.transform.position += Vector3.up * controlledCO.baseWO.maxExtent * 1.5f;
+        else controlledCO.baseWO.transform.position -= Vector3.up * controlledCO.baseWO.maxExtent * 1.5f;
+        controlledCO.baseWO.isLoose = !isPaused;
+        controlledCO.baseWO.isFloating = isPaused;
+        return true;
     }
 }

@@ -48,7 +48,7 @@ public class WorldObject : MonoBehaviour
     public void setLayer(int layer) => setLayer(transform, layer);
 
 
-    public float getMaxExtent() => Mathf.Max(cl.bounds.extents.x, cl.bounds.extents.y, cl.bounds.extents.z);
+    public float maxExtent => Mathf.Max(cl.bounds.extents.x, cl.bounds.extents.y, cl.bounds.extents.z);
 
 
     #region Static

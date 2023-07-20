@@ -4,9 +4,7 @@ using UnityEngine;
 
 public class UIController : MonoBehaviour
 {
-    // Declare references
     [Header("References")]
-    //[SerializeField] private PlayerController playerController;
     [SerializeField] private GameObject ingameUI;
     [SerializeField] private GameObject forgingUI;
 

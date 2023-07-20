@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b1da0fd89c9fdd94b8b358f962b43ca7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - inspectableLabelPrefab: {fileID: 1098028696901874369, guid: c93200d9cd9dd454e9075e962eb00fbe,
+      type: 3}
+  - inspectableIcon: {fileID: 21300000, guid: 06c01adfb104b324fba14df339a40de9, type: 3}
+  - element: {fileID: 11400000, guid: f42aa62ab9f1a6648afdc73b81166989, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

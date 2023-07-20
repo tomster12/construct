@@ -3,23 +3,17 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Reflection;
 
 
 [Serializable]
 public class StatList : ISerializationCallbackReceiver
 {
-    // Declare variables
     [SerializeField] private bool randomizeStats;
     [HideInInspector] [SerializeField] private Dictionary<String, int> keys = new Dictionary<String, int>();
     [SerializeField] private List<Stat> stats = new List<Stat>();
 
-    // Customer getters / setters
     public float this[string s] { get { return GetFinal(s); } set { SetBase(s, value); } }
     public float[] this[string s, bool _] { get { return GetBaseRange(s); } set { SetBaseRange(s, value); } }
-
-
-    public void Randomize() { stats.ForEach(s => s.Randomize()); }
 
 
     public float GetBase(string name)
@@ -40,7 +34,6 @@ public class StatList : ISerializationCallbackReceiver
         else stats[keys[name]].baseValue = value;
     }
 
-
     public float[] GetBaseRange(string name)
     {
         // Get base range, default to { 0.0f, 0.0f }
@@ -59,14 +52,12 @@ public class StatList : ISerializationCallbackReceiver
         else stats[keys[name]].baseRange = range;
     }
 
-
     public float GetFinal(string name)
     {
         // Return if exists, default to 0.0f
         if (!keys.ContainsKey(name)) return 0.0f;
         else return stats[keys[name]].finalValue;
     }
-
 
     public int AddAffector(string name, float value, bool mult)
     {
@@ -82,8 +73,10 @@ public class StatList : ISerializationCallbackReceiver
         else return stats[keys[name]].RemoveAffector(id);
     }
 
+    public void Randomize() { stats.ForEach(s => s.Randomize()); }
 
-    #region - Serialization
+
+    #region Serialization
 
     public void OnBeforeSerialize()
     {
@@ -91,7 +84,6 @@ public class StatList : ISerializationCallbackReceiver
         float _;
         foreach (Stat stat in stats) _ = stat.finalValue;
     }
-
 
     public void OnAfterDeserialize()
     {
@@ -216,7 +208,6 @@ public class StatList : ISerializationCallbackReceiver
         }
     }
 
-
     [CustomPropertyDrawer(typeof(Affector))]
     public class AffectorDrawer : PropertyDrawer
     {
@@ -255,7 +246,6 @@ public class StatList : ISerializationCallbackReceiver
     [Serializable]
     private class Stat
     {
-        // Declare static, variables
         private static System.Random R = new System.Random();
 
         [SerializeField] public string name = "";

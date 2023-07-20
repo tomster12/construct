@@ -9,7 +9,6 @@ class CameraEffects : MonoBehaviour
 {
     public static CameraEffects instance { get; private set; }
 
-    // Initialize references
     [Header("References")]
     [SerializeField] private Volume vol;
 
@@ -30,7 +29,6 @@ class CameraEffects : MonoBehaviour
             yield return null;
         }
     }
-
 
     public IEnumerator Vfx_Chromatic(float time, float strength)
     {

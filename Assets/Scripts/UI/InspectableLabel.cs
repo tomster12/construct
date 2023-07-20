@@ -15,6 +15,7 @@ public class InspectableLabel : MonoBehaviour
     [Header("References")]
     [SerializeField] private Canvas canvas;
     [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private Image prompt;
     [SerializeField] private RectTransform mask;
     [SerializeField] private RectTransform background;
     [SerializeField] private Image icon;
@@ -68,7 +69,6 @@ public class InspectableLabel : MonoBehaviour
         // Initialize variables
         ResetDynamics();
     }
-
 
     private void ResetDynamics()
     {
@@ -125,7 +125,7 @@ public class InspectableLabel : MonoBehaviour
         
         // Lerp canvas position to set offsets
         float horizontalOffset = (state == LabelState.INFO ? 1.0f : 0.0f) * distanceScale;
-        Vector3 currentCentre = inspectedObject.II_GetPosition();
+        Vector3 currentCentre = inspectedObject.IIGetPosition();
         float maskWorldWidth = mask.rect.width * canvas.transform.localScale.x;
         float offsetHeight = GetCurrentStateSize(LabelState.TITLE).y * canvas.transform.localScale.y;
         Vector3 up = Vector3.up;
@@ -172,6 +172,10 @@ public class InspectableLabel : MonoBehaviour
         canvasGroup.blocksRaycasts = isNearby;
         float alphaPct = setAlpha ? 1.0f : alphaLerp * Time.deltaTime;
         canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, targetAlpha, alphaPct);
+
+        // Enable / Disable prompt
+        prompt.enabled = (state == LabelState.TITLE || state == LabelState.INFO) && isNearby;
+        prompt.transform.localPosition = new Vector3(-lerpedSize.x * 0.5f - 15.0f, -10.0f, 0.0f);
     }
 
     
@@ -204,7 +208,6 @@ public class InspectableLabel : MonoBehaviour
         else return standardAlpha;
     }
 
-
     public void SetObject(IInspectable inspectedObject_, float offset_)
     {
         // Set variables
@@ -214,17 +217,17 @@ public class InspectableLabel : MonoBehaviour
         UpdateDynamics(true, true, false);
 
         // Update all content values
-        icon.sprite = inspectedObject.II_GetIconSprite();
-        contentName.text = inspectedObject.II_GetName();
-        contentDescription.text = inspectedObject.II_GetDescription();
-        SetAttributeStrings(inspectedObject.II_GetAttributes());
-        contentElementImage.texture = inspectedObject.II_GetElement().sprite.texture;
-        contentElementName.text = inspectedObject.II_GetElement().name;
-        contentElementName.color = inspectedObject.II_GetElement().color;
-        if (inspectedObject.II_GetMass() != 0.0f)
-            contentWeight.text = inspectedObject.II_GetMass() + "kg";
+        icon.sprite = inspectedObject.IIGetIconSprite();
+        contentName.text = inspectedObject.IIGetName();
+        contentDescription.text = inspectedObject.IIGetDescription();
+        SetAttributeStrings(inspectedObject.IIGetAttributes());
+        contentElementImage.texture = inspectedObject.IIGetElement().sprite.texture;
+        contentElementName.text = inspectedObject.IIGetElement().name;
+        contentElementName.color = inspectedObject.IIGetElement().color;
+        if (inspectedObject.IIGetMass() != 0.0f)
+            contentWeight.text = inspectedObject.IIGetMass() + "kg";
         else contentWeight.text = "";
-        SetModifierStrings(inspectedObject.II_GetModifiers());
+        SetModifierStrings(inspectedObject.IIGetModifiers());
     }
 
     public void SetAttributeStrings(List<string> attributeStrings)

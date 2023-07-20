@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc0f96632ded27438b3eaab89f94d39, type: 3}
+  m_Name: Object Rock Long
+  m_EditorClassIdentifier: 
+  inspectableLabelPrefab: {fileID: 1098028696901874369, guid: c93200d9cd9dd454e9075e962eb00fbe,
+    type: 3}
+  inspectableIcon: {fileID: 21300000, guid: f893ba10e34e7cf4a9ef360840512e31, type: 3}
+  name: Long Rock
+  description: This is a long rock which you can use.
+  element: {fileID: 11400000, guid: 35cff016a4a64d14bb8f5d46675695a3, type: 2}
+  health: 90
+  energy: 190
+  energyRegen: 15
+  slotCount: 3
