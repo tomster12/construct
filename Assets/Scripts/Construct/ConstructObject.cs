@@ -16,9 +16,10 @@ public class ConstructObject : MonoBehaviour, IHighlightable, IInspectable
     public RuneHandler runeHandler => _runeHandler;
     public ObjectData objectData => _objectData;    
     public Construct construct { get; private set; }
-    public IObjectController controlledBy { get; private set; }
+    public IObjectController currentController { get; private set; }
     public bool isConstructed => construct != null;
-    public bool isControlled => controlledBy != null;
+    public bool isControlled => currentController != null;
+    public virtual bool isAttachable => true;
 
     protected virtual int movementPriority => 1;
     private GetRuneSkill getRuneSkill;
@@ -49,12 +50,11 @@ public class ConstructObject : MonoBehaviour, IHighlightable, IInspectable
 
     public virtual Quaternion GetForwardRot() => Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.forward, Vector3.up), Vector3.up);
 
-
     public void SetControlledBy(IObjectController controlledBy_)
     {
-        if (controlledBy == controlledBy_) return;
-        if (controlledBy != null && controlledBy_ != null) throw new System.Exception("Cannot SetControlledBy() when already controlled.");
-        controlledBy = controlledBy_;
+        if (currentController == controlledBy_) return;
+        if (currentController != null && controlledBy_ != null) throw new System.Exception("Cannot SetControlledBy() when already controlled.");
+        currentController = controlledBy_;
     }
     
 
@@ -62,19 +62,19 @@ public class ConstructObject : MonoBehaviour, IHighlightable, IInspectable
     {
         // Notify everything about joining construct
         construct = construct_;
-        construct.OnObjectJoined(this);
         runeHandler?.OnJoinConstruct(construct_);
         if (getRuneSkill != null) construct.skills.RequestBinding(getRuneSkill, "_0");
         construct.SubscribeMovement(inherentMovement, movementPriority);
+        construct.onStateChanged += OnConstructStateChanged;
     }
 
     public virtual void OnExitConstruct()
     {
         // Notify everything about exiting construct
+        construct.onStateChanged -= OnConstructStateChanged;
         construct.UnsubscribeMovement(inherentMovement);
         if (getRuneSkill != null) construct.skills.Unbind(getRuneSkill);
         runeHandler?.OnExitConstruct();
-        construct.OnObjectExit(this);
         construct = null;
     }
 
@@ -82,8 +82,13 @@ public class ConstructObject : MonoBehaviour, IHighlightable, IInspectable
 
     public void OnLeaveShape(ConstructShape shape) => shapesIncludedIn.Remove(shape);
 
+    public void OnConstructStateChanged(ConstructState state)
+    {
+        
+    }
 
-    #region IHoverable
+
+    #region IHighlightable
 
     public Vector3 IHGetPosition() => GetCentrePosition();
 
@@ -111,6 +116,7 @@ public class ConstructObject : MonoBehaviour, IHighlightable, IInspectable
         inspectableLabel = inspectableLabelGO.GetComponent<InspectableLabel>();
         inspectableLabel.SetObject(this, baseWO.maxExtent);
     }
+
 
     public virtual Sprite IIGetIconSprite() => objectData.inspectableIcon;
 

@@ -33,7 +33,6 @@ public class Rune : MonoBehaviour, IHighlightable, IInspectable
         baseWO.isColliding = !isSlotted;
         baseWO.isLoose = !isSlotted;
         baseWO.isFloating = isSlotted;
-
     }
 
 

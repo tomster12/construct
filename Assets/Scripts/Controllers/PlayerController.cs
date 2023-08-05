@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour
     public Construct construct => _construct;
     public Camera cam => _cam;
     public HoverComponentCache currentHover { get; private set; } = new HoverComponentCache();
+    public bool couldInteract => construct.core.GetCanAttach(currentHover.hoveredCO);
 
     private IngameState ingameState;
     private ForgingState forgingState;
@@ -73,14 +74,13 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateHovered()
     {
-        // Raycast out from the camera and detect hitting new transform
-        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        currentHover.Rehover(ray);
+        // Update hover
+        currentHover.Rehover(cam);
     }
 
     private void UpdateHighlighted()
     {
-        // Unhighlight previously hovered
+        // Unhighlight previously hovered if changed
         if (currentHover.hoveredIH != currentHover.prevHoveredIH && currentHover.prevHoveredIH != null) currentHover.prevHoveredIH.IHSetHighlighted(false);
 
         // Unhighlight / highlight hovered highlightable
@@ -138,6 +138,14 @@ public class PlayerController : MonoBehaviour
     public Vector3 GetBillboardTarget() => cam.transform.position;
 
     public Vector3 GetBillboardDirection() => cam.transform.forward;
+
+    public PromptState GetPromptStateAttachable()
+    {
+        if (construct.core == null) return PromptState.UNAVAILABLE;
+        return construct.core.isTransitioning ? PromptState.IN_PROGRESS
+            : construct.core.GetCanAttach(currentHover.hoveredCO) ? PromptState.AVAILABLE
+            : PromptState.UNAVAILABLE;
+    }
 
     private void SetState(State state_)
     {
@@ -235,7 +243,7 @@ public class PlayerController : MonoBehaviour
             // Try attach / detach
             if (Input.GetKeyDown("f"))
             {
-                if (pcn.construct.core.canAttach(pcn.currentHover.hoveredCO)) pcn.construct.core.Attach(pcn.currentHover.hoveredCO);
+                if (pcn.construct.core.GetCanAttach(pcn.currentHover.hoveredCO)) pcn.construct.core.Attach(pcn.currentHover.hoveredCO);
                 else if (pcn.construct.core.canDetach) pcn.construct.core.Detach();
             }
         }
@@ -397,49 +405,55 @@ public class PlayerController : MonoBehaviour
 
     public class HoverComponentCache
     {
-        public Transform prevHoveredT { get; private set; }
         public Vector3 prevHoveredPos { get; private set; }
-        public IHighlightable prevHoveredIH { get; private set; }
+        public Transform prevHoveredT { get; private set; }
         public WorldObject prevHoveredWO { get; private set; }
         public ConstructObject prevHoveredCO { get; private set; }
-        public Transform hoveredT { get; private set; }
+        public IHighlightable prevHoveredIH { get; private set; }
+        public IInspectable prevHoveredII { get; private set; }
+
         public Vector3 hoveredPos { get; private set; }
-        public IHighlightable hoveredIH { get; private set; }
+        public Transform hoveredT { get; private set; }
         public WorldObject hoveredWO { get; private set; }
         public ConstructObject hoveredCO { get; private set; }
+        public IHighlightable hoveredIH { get; private set; }
+        public IInspectable hoveredII { get; private set; }
 
 
-        public void Rehover(Ray ray)
+        public void Rehover(Camera cam)
         {
-            // Raycast the ray
+            // Raycast out from camera
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(ray, out RaycastHit hit, PlayerController.MAX_CAM_REACH);
 
-            // Update with variables
+            // Always update pos
             prevHoveredT = hoveredT;
             prevHoveredPos = hoveredPos;
             hoveredT = hit.transform;
             hoveredPos = hit.point;
-
-            // pos at max reach
             if (hoveredT == null) hoveredPos = ray.GetPoint(PlayerController.MAX_CAM_REACH);
 
-            // Update cache on new object
+            // Update component cache
             if (hoveredT != prevHoveredT)
             {
-                prevHoveredIH = hoveredIH;
                 prevHoveredWO = hoveredWO;
                 prevHoveredCO = hoveredCO;
+                prevHoveredIH = hoveredIH;
+                prevHoveredII = hoveredII;
+
                 if (hoveredT != null)
                 {
-                    hoveredIH = hoveredT.GetComponent<IHighlightable>();
                     hoveredWO = hoveredT.GetComponent<WorldObject>();
                     hoveredCO = hoveredT.GetComponent<ConstructObject>();
+                    hoveredIH = hoveredT.GetComponent<IHighlightable>();
+                    hoveredII = hoveredT.GetComponent<IInspectable>();
                 }
                 else
                 {
-                    hoveredIH = null;
                     hoveredWO = null;
                     hoveredCO = null;
+                    hoveredIH = null;
+                    hoveredII = null;
                 }
             }
         }

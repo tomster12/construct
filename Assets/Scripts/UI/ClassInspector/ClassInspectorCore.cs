@@ -22,7 +22,7 @@ public class ClassInspectorCore : ClassInspector
         SetVariable("canTransition", core.canTransition.ToString());
         SetVariable("canDetach", core.canDetach.ToString());
         SetVariable("isBlocking", core.isBlocking.ToString());
-        SetVariable("controlledBy", core.controlledBy == null ? "NA" : core.controlledBy.GetControllerType().ToString());
+        SetVariable("controlledBy", core.currentController == null ? "NA" : core.currentController.GetControllerType().ToString());
         SetVariable("isConstructed", core.isConstructed.ToString());
         SetVariable("isControlled", core.isControlled.ToString());
     }

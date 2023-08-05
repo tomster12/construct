@@ -44,6 +44,8 @@ public abstract class ConstructCoreMovement : ConstructObjectMovement
     protected abstract IEnumerator IE_RunDetach();
 
 
+    public virtual bool GetCanAttach(ConstructObject targetCO) => targetCO != null && !isBlocking && targetCO.isAttachable;
+
     protected virtual void SetTransitioning(bool isTransitioning_)
     {
         if (isPaused) throw new System.Exception("Cannot SetTransitioning() if isPaused");

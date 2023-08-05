@@ -7,10 +7,11 @@ using UnityEngine;
 public class Construct : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private ConstructCore _core;
+    [SerializeField] private ConstructCore initCore;
 
-    public Action onChanged;
-    public ConstructCore core => _core;
+    public Action onLayoutChanged;
+    public Action<ConstructState> onStateChanged;
+    public ConstructCore core { get; private set; }
     public HashSet<ConstructObject> trackedObjects { get; private set; } = new HashSet<ConstructObject>();
     public SkillBindings skills { get; private set; } = new SkillBindings(new List<string>() { "_0", "1", "2", "3", "4", "f" });
     public ConstructState state { get; private set; } = ConstructState.INACTIVE;
@@ -26,13 +27,13 @@ public class Construct : MonoBehaviour
     {
         // Initialize variables
         skills.Clear();
-        InitConstruct(core);
+        InitConstruct(initCore);
     }
 
-    public void InitConstruct(ConstructCore core_)
+    public void InitConstruct(ConstructCore core)
     {
-        if (core_ == null) return;
-        SetCore(core_);
+        if (core == null) throw new Exception("Need a core to InitConstruct");
+        SetCore(core);
         SetState(ConstructState.INACTIVE);
     }
 
@@ -110,6 +111,20 @@ public class Construct : MonoBehaviour
         }
     }
 
+    public void AddObject(ConstructObject trackedCO)
+    {
+        trackedObjects.Add(trackedCO);
+        trackedCO.OnJoinConstruct(this);
+        if (onLayoutChanged != null) onLayoutChanged();
+    }
+
+    public void RemoveObject(ConstructObject trackedCO)
+    {
+        trackedObjects.Remove(trackedCO);
+        trackedCO.OnExitConstruct();
+        if (onLayoutChanged != null) onLayoutChanged();
+    }
+
 
     public bool GetStateAccessible(ConstructState state_)
     {
@@ -138,8 +153,9 @@ public class Construct : MonoBehaviour
 
     private void SetCore(ConstructCore core_)
     {
-        _core = core_;
-        _core.OnJoinConstruct(this);
+        if (core != null) throw new Exception("core already set on Construct.");
+        core = core_;
+        AddObject(core);
     }
 
     public bool SetState(ConstructState state_)
@@ -152,33 +168,23 @@ public class Construct : MonoBehaviour
         {
             case ConstructState.INACTIVE:
                 currentMovement?.SetActive(false);
+                onStateChanged(state);
                 return true;
 
             case ConstructState.ACTIVE:
                 currentMovement?.SetActive(true);
                 currentMovement?.SetPaused(false);
+                onStateChanged(state);
                 return true;
 
             case ConstructState.FORGING:
                 currentMovement?.SetPaused(true);
+                onStateChanged(state);
                 return true;
         }
         return false;
     }
     
-
-    public void OnObjectJoined(ConstructObject trackedCO)
-    {
-        trackedObjects.Add(trackedCO);
-        if (onChanged != null) onChanged();
-    }
-
-    public void OnObjectExit(ConstructObject trackedCO)
-    {
-        trackedObjects.Remove(trackedCO);
-        if (onChanged != null) onChanged();
-    }
-
 
     [Serializable]
     public class MovementOption : IComparable<MovementOption>

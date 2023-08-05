@@ -17,7 +17,7 @@ public class ClassInspectorObject : ClassInspector
 
     protected void Update()
     {
-        SetVariable("controlledBy", obj.controlledBy == null ? "NA" : obj.controlledBy.GetControllerType().ToString());
+        SetVariable("controlledBy", obj.currentController == null ? "NA" : obj.currentController.GetControllerType().ToString());
         SetVariable("isConstructed", obj.isConstructed.ToString());
         SetVariable("isControlled", obj.isControlled.ToString());
     }

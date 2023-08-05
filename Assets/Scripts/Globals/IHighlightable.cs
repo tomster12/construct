@@ -1,7 +1,6 @@
 
 using UnityEngine;
 
-
 public interface IHighlightable
 {
     Vector3 IHGetPosition();

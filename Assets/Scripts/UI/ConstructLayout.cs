@@ -15,13 +15,13 @@ public class ConstructLayout : MonoBehaviour
 
     private void Awake()
     {
-        construct.onChanged += UpdateLayout;
+        construct.onLayoutChanged += UpdateLayout;
+        UpdateLayout();
     }
 
 
     private void UpdateLayout()
     {
-        Debug.Log("Updating to " + construct.trackedObjects.Count);
         foreach (Transform child in layoutElements.transform)
         {
             Destroy(child.gameObject);

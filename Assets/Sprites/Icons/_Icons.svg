@@ -782,9 +782,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
      showgrid="false"
-     inkscape:zoom="0.138102"
-     inkscape:cx="11578.399"
-     inkscape:cy="1922.4921"
+     inkscape:zoom="0.552408"
+     inkscape:cx="14801.56"
+     inkscape:cy="3923.7303"
      inkscape:window-width="2560"
      inkscape:window-height="1417"
      inkscape:window-x="-8"
@@ -1696,10 +1696,8 @@
      cx="16623.379"
      cy="4768.0566"
      r="191.08263" />
-  <circle
-     style="fill:none;stroke:#ffffff;stroke-width:53.26"
-     id="path19-4"
-     cx="16623.377"
-     cy="3961.1567"
-     r="242.3409" />
+  <path
+     id="path19-7"
+     style="fill:#ffffff;stroke:none;stroke-width:59.1125"
+     d="M 16623.378 3692.1856 A 268.97086 268.97086 0 0 0 16354.407 3961.157 A 268.97086 268.97086 0 0 0 16623.378 4230.1283 A 268.97086 268.97086 0 0 0 16892.347 3961.157 A 268.97086 268.97086 0 0 0 16623.378 3692.1856 z M 16623.378 3774.4187 A 186.73775 186.73775 0 0 1 16810.114 3961.157 A 186.73775 186.73775 0 0 1 16623.378 4147.8953 A 186.73775 186.73775 0 0 1 16436.64 3961.157 A 186.73775 186.73775 0 0 1 16623.378 3774.4187 z " />
 </svg>
