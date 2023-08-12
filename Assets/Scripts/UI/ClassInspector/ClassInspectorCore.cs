@@ -16,14 +16,14 @@ public class ClassInspectorCore : ClassInspector
 
     private void Update()
     {
-        SetVariable("isTransitioning", core.isTransitioning.ToString());
-        SetVariable("isAttached", core.isAttached.ToString());
-        SetVariable("isDetached", core.isDetached.ToString());
-        SetVariable("canTransition", core.canTransition.ToString());
-        SetVariable("canDetach", core.canDetach.ToString());
-        SetVariable("isBlocking", core.isBlocking.ToString());
-        SetVariable("controlledBy", core.currentController == null ? "NA" : core.currentController.GetControllerType().ToString());
-        SetVariable("isConstructed", core.isConstructed.ToString());
-        SetVariable("isControlled", core.isControlled.ToString());
+        SetVariable("isTransitioning", core.IsTransitioning().ToString());
+        SetVariable("isAttached", core.IsAttached().ToString());
+        SetVariable("isDetached", core.IsDetached().ToString());
+        SetVariable("canTransition", core.CanTransition().ToString());
+        SetVariable("canDetach", core.CanDetach().ToString());
+        SetVariable("isBlocking", core.IsBlocking().ToString());
+        SetVariable("controlledBy", core.GetIController() == null ? "NA" : core.GetIController().GetIControllerType().ToString());
+        SetVariable("isConstructed", core.IsConstructed().ToString());
+        SetVariable("isControlled", core.IsControlled().ToString());
     }
 }

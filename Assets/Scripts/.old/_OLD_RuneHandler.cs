@@ -6,7 +6,7 @@ public class RuneHandler : MonoBehaviour
 {
     // Declare references, variables
     [SerializeField] private Transform[] slotTransforms;
-    public WorldObject selfWJ { get; private set; }
+    public Object selfWJ { get; private set; }
 
     private Rune[] slottedRunes;
 
@@ -14,7 +14,7 @@ public class RuneHandler : MonoBehaviour
     public void Awake()
     {
         // Initialize references
-        selfWJ = GetComponent<WorldObject>();
+        selfWJ = GetComponent<Object>();
     }
 
 

@@ -17,7 +17,6 @@ public class GetRuneSkill : Skill
 
     public override void Use()
     {
-        Debug.Log("Trying to get rune");
         Transform hoveredTF = playerController.currentHover.hoveredT;
         if (hoveredTF != null)
         {

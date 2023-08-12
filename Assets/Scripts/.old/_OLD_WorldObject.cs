@@ -2,12 +2,12 @@
 using UnityEngine;
 
 
-public class WorldObject : MonoBehaviour
+public class Object : MonoBehaviour
 {
     // Declare static, references, variables
     private static float[] MOVE_RESIST = new float[] { 60.0f, 125f, 0.3f, 1.0f };
 
-    [SerializeField] public ObjectData objectData;
+    [SerializeField] public InspectedData objectData;
     public MeshFilter mf { get; private set; }
     public Collider cl { get; private set; }
     public Outline ol { get; private set; }
@@ -40,8 +40,8 @@ public class WorldObject : MonoBehaviour
         mass = volume * density;
 
         // Map mass from [0 - 1] to [2 - 3] and clamp as moveResist
-        moveResist = Mathf.Clamp((mass - WorldObject.MOVE_RESIST[0]) / (WorldObject.MOVE_RESIST[1] - WorldObject.MOVE_RESIST[0]), 0.0f, 1.0f);
-        moveResist = (1.0f - moveResist) * (WorldObject.MOVE_RESIST[3] - WorldObject.MOVE_RESIST[2]) + WorldObject.MOVE_RESIST[2];
+        moveResist = Mathf.Clamp((mass - Object.MOVE_RESIST[0]) / (Object.MOVE_RESIST[1] - Object.MOVE_RESIST[0]), 0.0f, 1.0f);
+        moveResist = (1.0f - moveResist) * (Object.MOVE_RESIST[3] - Object.MOVE_RESIST[2]) + Object.MOVE_RESIST[2];
     }
 
 

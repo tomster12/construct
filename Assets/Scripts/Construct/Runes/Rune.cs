@@ -8,11 +8,12 @@ public class Rune : MonoBehaviour, IHighlightable, IInspectable
 {
     [Header("References")]
     [SerializeField] protected Element element;
-    [SerializeField] protected WorldObject _baseWO;
+    [SerializeField] protected Object _baseObject;
     [SerializeField] protected RuneData _runeData;
 
-    public WorldObject baseWO => _baseWO;
+    public Object baseObject => _baseObject;
     public RuneData runeData => _runeData;
+    public InspectableLabel inspectableLabel { get; private set; }
 
     private RuneHandler slottedRuneHandler;
     private bool isSlotted => slottedRuneHandler != null;
@@ -24,66 +25,47 @@ public class Rune : MonoBehaviour, IHighlightable, IInspectable
         GenerateInspectableLabel();
     }
 
-
-    public Vector3 GetCentrePosition() => transform.position;
-
-    public void SetSlotted(RuneHandler runeHandler)
-    {
-        slottedRuneHandler = runeHandler;
-        baseWO.isColliding = !isSlotted;
-        baseWO.isLoose = !isSlotted;
-        baseWO.isFloating = isSlotted;
-    }
-
-
-    #region IHoverable
-
-    public Vector3 IHGetPosition() => GetCentrePosition();
-
-    public bool IHGetHighlighted() => baseWO.isHighlighted;
-
-    public ObjectType IHGetObjectType() => isSlotted ? ObjectType.CONSTRUCTED_CO : ObjectType.LOOSE_CO;
-
-    public void IHSetNearby(bool isNearby) => inspectableLabel.SetNearby(isNearby);
-
-    public void IHSetHighlighted(bool isHighlighted) { inspectableLabel.SetHighlighted(isHighlighted); baseWO.isHighlighted = isHighlighted; }
-
-    #endregion
-
-
-    #region IInspectable
-
-    public InspectableLabel inspectableLabel { get; private set; }
-
     protected virtual void GenerateInspectableLabel()
     {
         // Instantiate data label
         if (runeData.inspectableLabelPrefab == null) return;
         GameObject inspectableLabelGO = Instantiate(runeData.inspectableLabelPrefab);
         inspectableLabel = inspectableLabelGO.GetComponent<InspectableLabel>();
-        inspectableLabel.SetObject(this, baseWO.maxExtent);
+        inspectableLabel.SetObject(this, baseObject.maxExtent);
     }
 
-    public Sprite IIGetIconSprite() => runeData.inspectableIcon;
 
-    public string IIGetName() => runeData.name; // "Rune";
+    public virtual InspectedData Inspect() => runeData;
 
-    public string IIGetDescription() => runeData.description; // "A standard rune for use with a construct.";
+    public Vector3 GetPosition() => transform.position;
 
-    public Element IIGetElement() => runeData.element;
+    public bool GetIsHighlighted() => baseObject.isHighlighted;
 
-    public virtual List<string> IIGetAttributes() => new List<string>()
+    public bool GetIsNearby() => inspectableLabel.isNearby;
+
+    public ObjectType GetObjectType() => isSlotted ? ObjectType.PartNSTRUCTED : ObjectType.LOOSE;
+    
+    public Object GetObject() => baseObject;
+
+    public virtual List<string> GetAttributes() => new List<string>()
     {
         "Damage: 10",
         "Crit. Chance: 0%",
         "Energy Cost: 15"
     };
 
-    public virtual List<string> IIGetModifiers() => new List<string>();
+    public virtual List<string> GetModifiers() => new List<string>();
 
-    public Vector3 IIGetPosition() => GetCentrePosition();
 
-    public float IIGetMass() => 0.0f;
+    public void SetSlotted(RuneHandler runeHandler)
+    {
+        slottedRuneHandler = runeHandler;
+        baseObject.isColliding = !isSlotted;
+        baseObject.isLoose = !isSlotted;
+        baseObject.isFloating = isSlotted;
+    }
 
-    #endregion
+    public void SetIsNearby(bool isNearby) => inspectableLabel.SetIsNearby(isNearby);
+
+    public void SetIsHighlighted(bool isHighlighted) { inspectableLabel.SetIsHighlighted(isHighlighted); baseObject.isHighlighted = isHighlighted; }
 }

@@ -7,15 +7,18 @@ using UnityEngine;
 public class ConstructLayout : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Construct construct;
+    [SerializeReference] private Transform IConstructTransform;
     [SerializeField] private GameObject layoutElementPfb;
     [SerializeField] private RectTransform layoutElements;
     [SerializeField] private Canvas canvas;
 
+    private IConstruct IConstruct;
+
 
     private void Awake()
     {
-        construct.onLayoutChanged += UpdateLayout;
+        IConstruct = IConstructTransform.GetComponent<IConstruct>();
+        IConstruct.SubscribeOnLayoutChanged(UpdateLayout);
         UpdateLayout();
     }
 
@@ -26,11 +29,11 @@ public class ConstructLayout : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        foreach (ConstructObject targetCO in construct.trackedObjects)
+        foreach (IConstructPart ITargetPart in IConstruct.GetContainedIParts())
         {
             GameObject layoutElement = Instantiate(layoutElementPfb);
             layoutElement.transform.SetParent(layoutElements);
-            layoutElement.GetComponent<ConstructLayoutElement>().SetConstructObject(targetCO);
+            layoutElement.GetComponent<ConstructLayoutElement>().SetIConstructPart(ITargetPart);
         }
         Canvas.ForceUpdateCanvases();
     }

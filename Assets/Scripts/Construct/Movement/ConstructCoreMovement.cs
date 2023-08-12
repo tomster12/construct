@@ -3,55 +3,57 @@ using System.Collections;
 using UnityEngine;
 
 
-public abstract class ConstructCoreMovement : ConstructObjectMovement
+public abstract class  ConstructCoreMovement : ConstructPartMovement
 {
     [Header("Core References")]
-    [SerializeField] protected ConstructCore controlledCC;
+    [SerializeField] protected ConstructCore _controlledCore;
 
-    public ShapeCoreAttachment shapeCoreAttachment { get; protected set; }
+    public CoreAttachmentShape attachmentShape { get; protected set; }
     public bool isTransitioning { get; private set; } = false;
-    public override bool isBlocking => isTransitioning;
+    public override bool IsBlocking() => isTransitioning;
+
+    protected IConstructCore controlledICore => _controlledCore;
 
 
-    public IEnumerator IE_Attach(ConstructObject targetCO)
+    public virtual bool CanAttach(IConstructPart targetIPart) => targetIPart != null && !IsBlocking() && targetIPart.IsAttachable();
+
+    public IEnumerator IEAttach(IConstructPart targetIPart)
     {
-        if (isBlocking) yield break;
+        if (IsBlocking()) yield break;
 
-        // Update state and run main attach bits
+        // Update state and run main attachment
         SetTransitioning(true);
-        yield return StartCoroutine(IE_RunAttach(targetCO));
+        yield return StartCoroutine(IEAttachImpl(targetIPart));
         SetTransitioning(false);
         SetCanActivate(false);
         SetActive(false);
-        shapeCoreAttachment.SetActive(true);
+        attachmentShape.SetActive(true);
     }
 
-    public IEnumerator IE_Detach()
+    public IEnumerator IEDetach()
     {
-        if (isBlocking) yield break;
+        if (IsBlocking()) yield break;
 
-        // Update state and run main detach bits
-        shapeCoreAttachment.SetActive(false);
+        // Update state and run main detachment
+        attachmentShape.SetActive(false);
         SetTransitioning(true);
-        yield return StartCoroutine(IE_RunDetach());
+        yield return StartCoroutine(IEDetachImpl());
         SetTransitioning(false);
         SetCanActivate(true);
-        shapeCoreAttachment.Clear();
+        attachmentShape.Clear();
     }
 
-    protected abstract IEnumerator IE_RunAttach(ConstructObject targetCO);
 
-    protected abstract IEnumerator IE_RunDetach();
+    protected abstract IEnumerator IEAttachImpl(IConstructPart targetIPart);
 
-
-    public virtual bool GetCanAttach(ConstructObject targetCO) => targetCO != null && !isBlocking && targetCO.isAttachable;
+    protected abstract IEnumerator IEDetachImpl();
 
     protected virtual void SetTransitioning(bool isTransitioning_)
     {
         if (isPaused) throw new System.Exception("Cannot SetTransitioning() if isPaused");
         isTransitioning = isTransitioning_;
-        if (isTransitioning) controlledCC.SetControlledBy(this);
-        else if (isActive) controlledCC.SetControlledBy(this);
-        else controlledCC.SetControlledBy(null);
+        if (isTransitioning) controlledICore.SetControlledBy(this);
+        else if (isActive) controlledICore.SetControlledBy(this);
+        else controlledICore.SetControlledBy(null);
     }
 }

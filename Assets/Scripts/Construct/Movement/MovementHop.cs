@@ -2,12 +2,12 @@
 using UnityEngine;
 
 
-public class MovementHop : ConstructObjectMovement
+public class MovementHop : ConstructPartMovement
 {
     private static float JUMP_Z_PCT = 0.75f;
 
     [Header("References")]
-    [SerializeField] protected ConstructObject controlledCO;
+    [SerializeField] private ConstructPart _controlledPart;
     
     [Header("Prefabs")]
     [SerializeField] private GameObject rockParticleGeneratorPfb;
@@ -25,8 +25,9 @@ public class MovementHop : ConstructObjectMovement
         ["AttackCooldown"] = 2.0f
     };
 
-    public override bool isBlocking => !isGrounded;
+    public override bool IsBlocking() => !isGrounded;
 
+    protected IConstructPart controlledIPart => _controlledPart;
     private float jumpTimer = 0.0f;
     private bool isGrounded = true;
     private Vector3 aimedDirection;
@@ -43,7 +44,7 @@ public class MovementHop : ConstructObjectMovement
         if (!isGrounded && aimedDirection != Vector3.zero)
         {
             Vector3 dir = aimedDirection;
-            float rotAcc = controlledCO.baseWO.moveResist * stats["AimForce"] * Time.deltaTime;
+            float rotAcc = controlledIPart.GetObject().moveResist * stats["AimForce"] * Time.deltaTime;
             Quaternion dirRot = Quaternion.LookRotation(dir, transform.up);
             transform.rotation = Quaternion.Lerp(transform.rotation, dirRot, rotAcc);
         }
@@ -51,12 +52,12 @@ public class MovementHop : ConstructObjectMovement
 
     public override void MoveInDirection(Vector3 dir)
     {
-        if (!isAssigned || !isActive || isPaused || isBlocking || jumpTimer > 0.0f) return;
+        if (!isAssigned || !isActive || isPaused || IsBlocking() || jumpTimer > 0.0f) return;
 
         // Hop in the given direction
-        float hopVelocity = 1.0f * stats["MovementForce"] * controlledCO.baseWO.moveResist; // dV = dT * F / M
-        controlledCO.baseWO.rb.velocity = controlledCO.baseWO.rb.velocity + new Vector3(0.0f, hopVelocity * JUMP_Z_PCT, 0.0f);
-        controlledCO.baseWO.rb.velocity = controlledCO.baseWO.rb.velocity + dir * hopVelocity;
+        float hopVelocity = 1.0f * stats["MovementForce"] * controlledIPart.GetObject().moveResist; // dV = dT * F / M
+        controlledIPart.GetObject().rb.velocity = controlledIPart.GetObject().rb.velocity + new Vector3(0.0f, hopVelocity * JUMP_Z_PCT, 0.0f);
+        controlledIPart.GetObject().rb.velocity = controlledIPart.GetObject().rb.velocity + dir * hopVelocity;
 
         // Update variables
         jumpTimer = stats["MovementCooldown"];
@@ -78,9 +79,9 @@ public class MovementHop : ConstructObjectMovement
         if (collision.gameObject.layer == LayerMask.NameToLayer("Environment")) isGrounded = true;
 
         // Create particles
-        if (isAssigned && controlledCO.baseWO.rb.velocity.magnitude >= particleLimit)
+        if (isAssigned && controlledIPart.GetObject().rb.velocity.magnitude >= particleLimit)
         {
-            float mult = Mathf.Min(0.5f, controlledCO.baseWO.rb.velocity.magnitude / particleLimit - 1f) * (0.2f / 0.5f) + 0.8f;
+            float mult = Mathf.Min(0.5f, controlledIPart.GetObject().rb.velocity.magnitude / particleLimit - 1f) * (0.2f / 0.5f) + 0.8f;
             GameObject particles = Instantiate(rockParticleGeneratorPfb);
             particles.transform.position = collision.contacts[0].point;
             particles.transform.localScale = Vector3.one * mult * 0.4f;
@@ -94,7 +95,7 @@ public class MovementHop : ConstructObjectMovement
         if (
             !isGrounded
             && collision.gameObject.layer == LayerMask.NameToLayer("Environment")
-            && controlledCO.baseWO.rb.velocity.magnitude < 0.35f)
+            && controlledIPart.GetObject().rb.velocity.magnitude < 0.35f)
         {
             isGrounded = true;
         }
@@ -106,12 +107,12 @@ public class MovementHop : ConstructObjectMovement
         if (!base.SetActive(isActive_)) return false;
 
         // Update state
-        if (isActive) controlledCO.SetControlledBy(this);
-        else controlledCO.SetControlledBy(null);
+        if (isActive) controlledIPart.SetControlledBy(this);
+        else controlledIPart.SetControlledBy(null);
 
         // Update physics
-        controlledCO.baseWO.isLoose = true;
-        controlledCO.baseWO.isFloating = false;
+        controlledIPart.GetObject().isLoose = true;
+        controlledIPart.GetObject().isFloating = false;
         return true;
     }
 
@@ -120,10 +121,10 @@ public class MovementHop : ConstructObjectMovement
         if (!base.SetPaused(isPaused_)) return false;
 
         // Offset upwards
-        if (isPaused) controlledCO.baseWO.transform.position += Vector3.up * controlledCO.baseWO.maxExtent * 1.5f;
-        else controlledCO.baseWO.transform.position -= Vector3.up * controlledCO.baseWO.maxExtent * 1.5f;
-        controlledCO.baseWO.isLoose = !isPaused;
-        controlledCO.baseWO.isFloating = isPaused;
+        if (isPaused) controlledIPart.GetObject().transform.position += Vector3.up * controlledIPart.GetObject().maxExtent * 1.5f;
+        else controlledIPart.GetObject().transform.position -= Vector3.up * controlledIPart.GetObject().maxExtent * 1.5f;
+        controlledIPart.GetObject().isLoose = !isPaused;
+        controlledIPart.GetObject().isFloating = isPaused;
         return true;
     }
 }

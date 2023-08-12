@@ -14,6 +14,6 @@ public class ClassInspectorCoreShape : ClassInspector
 
     private void Update()
     {
-        SetVariable("isActive", core.shapeCoreAttachment == null ? "false" : core.shapeCoreAttachment.isActive.ToString());
+        SetVariable("isActive", core.GetAttachmentShape() == null ? "false" : core.GetAttachmentShape().isActive.ToString());
     }
 }

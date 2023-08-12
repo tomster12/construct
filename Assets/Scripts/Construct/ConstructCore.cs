@@ -1,87 +1,85 @@
 
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 
-public class ConstructCore : ConstructObject
+public class ConstructCore : ConstructPart, IConstructCore
 {
-    public CoreData coreData => (CoreData)_objectData;
-    public ConstructCoreMovement inherentCoreMovement => (ConstructCoreMovement)inherentMovement;
-    public ShapeCoreAttachment shapeCoreAttachment => inherentCoreMovement.shapeCoreAttachment;
-    public CoreState state { get; private set; } = CoreState.DETACHED;
-    public ConstructObject attachedCO { get; private set; }
-
+    private ConstructCoreData coreData => (ConstructCoreData)partData;
+    private ConstructCoreMovement inherentCoreMovement => (ConstructCoreMovement)inherentMovement;
+    private CoreAttachmentShape attachmentShape => inherentCoreMovement.attachmentShape;
+    private CoreAttachmentState state = CoreAttachmentState.DETACHED;
+    private IConstructPart attachedIPart;
     protected override int movementPriority => 0;
-    public bool canTransition => isConstructed && !construct.isBlocking && !inherentCoreMovement.isBlocking;
-    public bool canDetach => canTransition && isAttached;
-    public bool isAttached => state == CoreState.ATTACHED;
-    public bool isDetached => state == CoreState.DETACHED;
-    public bool isTransitioning => state == CoreState.ATTACHING || state == CoreState.DETACHING;
-    public bool isBlocking => isTransitioning;
-    public override bool isAttachable => false;
-
-
-    public void Attach(ConstructObject targetCO) => StartCoroutine(IE_Attach(targetCO));
-
-    public void Detach() => StartCoroutine(IE_Detach());
-
-    private IEnumerator IE_Attach(ConstructObject targetCO)
+    
+    public bool CanTransition() => IsConstructed() && !IConstruct.IsBlocking() && !inherentCoreMovement.IsBlocking();
+    public bool CanAttach(IConstructPart checkIPart)
     {
-        if (!GetCanAttach(targetCO)) yield break;
+        return checkIPart != null && !checkIPart.IsConstructed()
+            && CanTransition() && IsDetached()
+            && inherentCoreMovement.CanAttach(checkIPart);
+    }
+    public bool CanDetach() => CanTransition() && IsAttached();
+    public bool IsAttached() => state == CoreAttachmentState.ATTACHED;
+    public bool IsDetached() => state == CoreAttachmentState.DETACHED;
+    public bool IsTransitioning() => state == CoreAttachmentState.ATTACHING || state == CoreAttachmentState.DETACHING;
+    
+    public override bool IsBlocking() => IsTransitioning();
+    public override bool IsAttachable() => false;
 
-        // Tell movement to attach and update state
-        state = CoreState.ATTACHING;
-        yield return inherentCoreMovement.IE_Attach(targetCO);
-        state = CoreState.ATTACHED;
 
-        // Add object to construct and set movement
-        attachedCO = targetCO;
-        attachedCO.transform.parent = construct.transform;
-        construct.AddObject(attachedCO);
+    public void Attach(IConstructPart targetIPart)
+    {
+        StartCoroutine(IEAttach(targetIPart));
     }
 
-    private IEnumerator IE_Detach()
-    {
-        if (!canDetach) yield break;
+    public void Detach() => StartCoroutine(IEDetach());
 
-        // Remove object from construct and parent to world
-        attachedCO.transform.parent = construct.transform.parent;
-        construct.RemoveObject(attachedCO);
-        attachedCO = null;
+    public override bool ContainsObject(Object checkObject) => state == CoreAttachmentState.ATTACHED ? attachedIPart.ContainsObject(checkObject) : baseObject == checkObject;
 
-        // Tell movement to detach and update state
-        state = CoreState.DETACHING;
-        yield return inherentCoreMovement.IE_Detach();
-        state = CoreState.DETACHED;
-    }
+    public override bool ContainsIPart(IConstructPart checkIPart) => state == CoreAttachmentState.ATTACHED ? attachedIPart.ContainsIPart(checkIPart) : checkIPart == (IConstructCore)this;
 
+    public override IConstructPart GetCentreIPart() => state == CoreAttachmentState.ATTACHED ? attachedIPart.GetCentreIPart() : this;
 
-    public override bool GetContainsWO(WorldObject checkWO) => state == CoreState.ATTACHED ? attachedCO.GetContainsWO(checkWO) : baseWO == checkWO;
-
-    public override bool GetContainsCO(ConstructObject checkCO) => state == CoreState.ATTACHED ? attachedCO.GetContainsCO(checkCO) : checkCO == this;
-
-    public override ConstructObject GetCentreCO() => state == CoreState.ATTACHED ? attachedCO.GetCentreCO() : this;
-
-    public bool GetCanAttach(ConstructObject checkCO)
-    {
-        return checkCO != null && !checkCO.isConstructed
-            && canTransition && isDetached
-            && inherentCoreMovement.GetCanAttach(checkCO);
-    }
-
-
-    #region IInspectable override
-
-    public override List<string> IIGetAttributes() => new List<string>()
+    public override List<string> GetAttributes() => new List<string>()
     {
         "Health: " + coreData.health,
         "Energy: " + coreData.energy + " (" + coreData.energyRegen + "/s)",
         "Max Construct Size: " + coreData.maxConstructSize
     };
     
-    public override List<string> IIGetModifiers() => new List<string>();
+    public override List<string> GetModifiers() => new List<string>();
 
-    public override float IIGetMass() => 0.0f;
+    public CoreAttachmentShape GetAttachmentShape() => attachmentShape;
 
-    #endregion
+    private IEnumerator IEAttach(IConstructPart targetIPart)
+    {
+        if (!CanAttach(targetIPart)) yield break;
+
+        // Tell movement to attach and update state
+        state = CoreAttachmentState.ATTACHING;
+        yield return inherentCoreMovement.IEAttach(targetIPart);
+        state = CoreAttachmentState.ATTACHED;
+
+        // Add object to construct and set movement
+        attachedIPart = targetIPart;
+        attachedIPart.GetTransform().parent = IConstruct.GetTransform();
+        IConstruct.AddIPart(attachedIPart);
+    }
+
+    private IEnumerator IEDetach()
+    {
+        if (!CanDetach()) yield break;
+
+        // Remove object from construct and parent to world
+        attachedIPart.GetTransform().parent = IConstruct.GetTransform().parent;
+        IConstruct.RemoveIPart(attachedIPart);
+        attachedIPart = null;
+
+        // Tell movement to detach and update state
+        state = CoreAttachmentState.DETACHING;
+        yield return inherentCoreMovement.IEDetach();
+        state = CoreAttachmentState.DETACHED;
+    }
 }

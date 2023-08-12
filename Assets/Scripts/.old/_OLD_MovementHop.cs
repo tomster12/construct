@@ -14,7 +14,7 @@ public class MovementHop : MonoBehaviour, MovementI
 
     [SerializeField] private GameObject rockParticleGeneratorPfb;
     [SerializeField] private GameObject speedParticleGeneratorPfb;
-    private WorldObject WJ;
+    private Object WJ;
 
     private ParticleSystem speedParticleGenerator;
     [SerializeField] private float particleLimit = 0.9f;
@@ -41,7 +41,7 @@ public class MovementHop : MonoBehaviour, MovementI
     public void Awake()
     {
         // Initialize references
-        WJ = GetComponent<WorldObject>();
+        WJ = GetComponent<Object>();
 
         speedParticleGenerator = Instantiate(speedParticleGeneratorPfb).GetComponent<ParticleSystem>();
         speedParticleGenerator.Stop();
@@ -125,7 +125,7 @@ public class MovementHop : MonoBehaviour, MovementI
         aimedDirection = pos - transform.position;
     }
 
-    public void attack(WorldObject targetWJ, Vector3 aimedPos)
+    public void attack(Object targetWJ, Vector3 aimedPos)
     {
         // If grounded, and can attack
         if (canAttack(targetWJ, aimedPos))
@@ -153,7 +153,7 @@ public class MovementHop : MonoBehaviour, MovementI
 
     public bool canMove(Vector3 moveDir) => isGrounded && !isAttacking && jumpTimer <= 0.0f;
 
-    public bool canAttack(WorldObject targetWJ, Vector3 aimedPos) => isGrounded && !isAttacking && attackCooldown <= 0.0f;
+    public bool canAttack(Object targetWJ, Vector3 aimedPos) => isGrounded && !isAttacking && attackCooldown <= 0.0f;
 
     public void setActive(bool active_) => active = active_;
 

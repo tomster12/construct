@@ -16,8 +16,8 @@ public class ClassInspectorConstruct : ClassInspector
 
     private void Update()
     {
-        SetVariable("canMove", construct.canMove.ToString());
-        SetVariable("canUseSkill", construct.canUseSkill.ToString());
-        SetVariable("isBlocking", construct.isBlocking.ToString());
+        SetVariable("canMove", construct.CanMove().ToString());
+        SetVariable("canUseSkill", construct.CanUseSkill().ToString());
+        SetVariable("isBlocking", construct.IsBlocking().ToString());
     }
 }

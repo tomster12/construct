@@ -12,8 +12,8 @@ public class StatList : ISerializationCallbackReceiver
     [HideInInspector] [SerializeField] private Dictionary<String, int> keys = new Dictionary<String, int>();
     [SerializeField] private List<Stat> stats = new List<Stat>();
 
-    public float this[string s] { get { return GetFinal(s); } set { SetBase(s, value); } }
-    public float[] this[string s, bool _] { get { return GetBaseRange(s); } set { SetBaseRange(s, value); } }
+    public float this[string name] { get { return GetFinal(name); } set { SetBase(name, value); } }
+    public float[] this[string name, bool _] { get { return GetBaseRange(name); } set { SetBaseRange(name, value); } }
 
 
     public float GetBase(string name)

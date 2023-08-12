@@ -10,7 +10,7 @@ public class MovementHover : MonoBehaviour, CoreMovementI
     // #region - Setup
 
     // Declare references, variables
-    private WorldObject selfWJ;
+    private Object selfWJ;
     [SerializeField] private AudioClip hoverSFX;
     private AudioSource hoverSRC;
 
@@ -31,7 +31,7 @@ public class MovementHover : MonoBehaviour, CoreMovementI
     public void Awake()
     {
         // Initialize references
-        selfWJ = GetComponent<WorldObject>();
+        selfWJ = GetComponent<Object>();
         hoverSRC = gameObject.AddComponent<AudioSource>();
 
         // Initialize hoverSRC
@@ -145,10 +145,10 @@ public class MovementHover : MonoBehaviour, CoreMovementI
         }
     }
 
-    public void attack(WorldObject targetWJ, Vector3 aimedPos) { }
+    public void attack(Object targetWJ, Vector3 aimedPos) { }
 
 
-    public bool canAttack(WorldObject targetWJ, Vector3 aimedPos) => false;
+    public bool canAttack(Object targetWJ, Vector3 aimedPos) => false;
 
     public void setActive(bool active_)
     {
@@ -175,8 +175,8 @@ public class MovementHover : MonoBehaviour, CoreMovementI
     private AudioSource coreAudioSRC;
     private CameraEffects camFX;
 
-    private CoreState coreState;
-    private WorldObject attachedWJ;
+    private CoreAttachmentState coreAttachmentState;
+    private Object attachedWJ;
 
 
     private void coreAwake()
@@ -186,15 +186,15 @@ public class MovementHover : MonoBehaviour, CoreMovementI
         camFX = Camera.main.GetComponent<CameraEffects>();
 
         // Initialize variables
-        coreState = CoreState.Detached;
+        coreAttachmentState = CoreAttachmentState.Detached;
     }
 
 
-    public void attachCore(WorldObject targetWJ) { StartCoroutine(attachCoreIE(targetWJ)); }
+    public void attachCore(Object targetWJ) { StartCoroutine(attachCoreIE(targetWJ)); }
 
-    public IEnumerator attachCoreIE(WorldObject targetWJ)
+    public IEnumerator attachCoreIE(Object targetWJ)
     {
-        if (coreState == CoreState.Detached)
+        if (coreAttachmentState == CoreAttachmentState.Detached)
         {
 
             // Turn off physics / colliders, update state
@@ -202,7 +202,7 @@ public class MovementHover : MonoBehaviour, CoreMovementI
             selfWJ.rb.useGravity = false;
             selfWJ.rb.isKinematic = true;
             selfWJ.cl.enabled = false;
-            coreState = CoreState.Attaching;
+            coreAttachmentState = CoreAttachmentState.Attaching;
             coreAudioSRC.PlayOneShot(coreChargeSFX);
 
             // Move backwards, start spinning and point at targetWJ
@@ -222,12 +222,12 @@ public class MovementHover : MonoBehaviour, CoreMovementI
 
             // Update parent object, pass over control, update state
             selfWJ.transform.parent = targetWJ.transform;
-            coreState = CoreState.Attached;
+            coreAttachmentState = CoreAttachmentState.Attached;
             attachedWJ = targetWJ;
         }
     }
 
-    private IEnumerator _attachCoreIEMoveBackwards(WorldObject targetWJ)
+    private IEnumerator _attachCoreIEMoveBackwards(Object targetWJ)
     {
         // Initialize variables
         float startDist = (targetWJ.transform.position - selfWJ.transform.position).magnitude;
@@ -248,7 +248,7 @@ public class MovementHover : MonoBehaviour, CoreMovementI
         }
     }
 
-    private IEnumerator _attachCoreIELookAt(WorldObject targetWJ)
+    private IEnumerator _attachCoreIELookAt(Object targetWJ)
     {
         // Initialize variables
         Vector3 dir, startUp = selfWJ.transform.up;
@@ -268,7 +268,7 @@ public class MovementHover : MonoBehaviour, CoreMovementI
         }
     }
 
-    private IEnumerator _attachCoreIEJabInto(WorldObject targetWJ)
+    private IEnumerator _attachCoreIEJabInto(Object targetWJ)
     {
         // Initialize variables
         Vector3 dir;
@@ -302,7 +302,7 @@ public class MovementHover : MonoBehaviour, CoreMovementI
         selfWJ.rb.isKinematic = false;
         selfWJ.rb.useGravity = true;
         selfWJ.cl.enabled = true;
-        coreState = CoreState.Detaching;
+        coreAttachmentState = CoreAttachmentState.Detaching;
         attachedWJ = null;
 
         // Apply popping force and torque and wait 0.5s
@@ -314,15 +314,15 @@ public class MovementHover : MonoBehaviour, CoreMovementI
 
         // Reactive moveset and angular drag
         selfWJ.rb.angularDrag = prevDrag;
-        coreState = CoreState.Detached;
+        coreAttachmentState = CoreAttachmentState.Detached;
         setActive(true);
     }
 
 
-    public CoreState getCoreState()
+    public CoreAttachmentState getCoreAttachmentState()
     {
-        // Return current coreState
-        return coreState;
+        // Return current coreAttachmentState
+        return coreAttachmentState;
     }
 
     // #endregion

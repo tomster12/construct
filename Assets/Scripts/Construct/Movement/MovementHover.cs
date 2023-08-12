@@ -12,10 +12,10 @@ public class MovementHover : ConstructCoreMovement
     }
 
 
-    #region ConstructObjectMovement
+    #region ConstructPartMovement
 
     [Header("References")]
-    [SerializeField] protected ConstructObject controlledCO;
+    [SerializeField] protected ConstructPart _controlledPart;
     [SerializeField] private AudioClip hoverSFX;
     private AudioSource hoverAudio;
     private AudioSource sfxAudio;
@@ -39,8 +39,9 @@ public class MovementHover : ConstructCoreMovement
 
     public bool isGrounded { get; private set; } = false;
     public bool isMoving { get; private set; } = false;
-    public bool isSprinting => sprintTimer >= stats["MovementSprintTimer"];
+    public bool IsSprinting() => sprintTimer >= stats["MovementSprintTimer"];
     
+    protected IConstructPart controlledIPart => _controlledPart;
     private Vector3 groundPosition;
     private Vector3 movementDir;
     private float sprintTimer = 0.0f;
@@ -82,7 +83,7 @@ public class MovementHover : ConstructCoreMovement
             isGrounded = true;
             groundPosition = hit.point;
             targetY = groundPosition.y + GetCurrentHoverHeight();
-            hoverPct = stats["HoverForce"] * controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
+            hoverPct = stats["HoverForce"] * controlledIPart.GetObject().moveResist * Time.fixedDeltaTime;
         }
 
         // No valid hit so float downwards
@@ -91,25 +92,25 @@ public class MovementHover : ConstructCoreMovement
             isGrounded = false;
             groundPosition = Vector3.zero;
             targetY = transform.position.y - 1.0f;
-            hoverPct = controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
+            hoverPct = controlledIPart.GetObject().moveResist * Time.fixedDeltaTime;
         }
 
         // Lerp height and apply drag
         float lerpedY = Mathf.Lerp(transform.position.y, targetY, hoverPct);
-        controlledCO.baseWO.rb.position = new Vector3(transform.position.x, lerpedY, transform.position.z);
-        controlledCO.baseWO.rb.AddForce(-controlledCO.baseWO.rb.velocity * stats["MovementDrag"] * Time.fixedDeltaTime, ForceMode.VelocityChange);
+        controlledIPart.GetObject().rb.position = new Vector3(transform.position.x, lerpedY, transform.position.z);
+        controlledIPart.GetObject().rb.AddForce(-controlledIPart.GetObject().rb.velocity * stats["MovementDrag"] * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
         // Update hover SFX volume
-        float targetHoverVolume = Mathf.Min(controlledCO.baseWO.rb.velocity.magnitude / 3f, 1.0f) * 0.25f + 0.15f;
+        float targetHoverVolume = Mathf.Min(controlledIPart.GetObject().rb.velocity.magnitude / 3f, 1.0f) * 0.25f + 0.15f;
         hoverAudio.volume += (targetHoverVolume - hoverAudio.volume) * 0.08f;
 
         // Lean with a sprint
         if (isMoving)
         {
-            float tiltAmount = isSprinting ? stats["SprintTilt"] : stats["WalkTilt"];
+            float tiltAmount = IsSprinting() ? stats["SprintTilt"] : stats["WalkTilt"];
             Vector3 axis = -Vector3.Cross(movementDir, Vector3.up).normalized;
-            float torqueAmount = stats["TiltForce"] * tiltAmount * controlledCO.baseWO.moveResist;
-            controlledCO.baseWO.rb.AddTorque(axis * torqueAmount, ForceMode.Acceleration);
+            float torqueAmount = stats["TiltForce"] * tiltAmount * controlledIPart.GetObject().moveResist;
+            controlledIPart.GetObject().rb.AddTorque(axis * torqueAmount, ForceMode.Acceleration);
         }
 
         // Handle sprint timer
@@ -123,14 +124,14 @@ public class MovementHover : ConstructCoreMovement
         if (!isPaused) return;
 
         // Lerp height to baseline
-        float hoverPct = stats["HoverForce"] * controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
+        float hoverPct = stats["HoverForce"] * controlledIPart.GetObject().moveResist * Time.fixedDeltaTime;
         float targetY = GetHoverHeight(0.0f);
         float lerpedY = Mathf.Lerp(transform.position.y, targetY, hoverPct);
         transform.position = new Vector3(transform.position.x, lerpedY, transform.position.z);
 
         // Lerp rotation to baseline
-        float rotAcc = stats["AimForce"] * controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
-        transform.rotation = Quaternion.Lerp(controlledCO.baseWO.rb.rotation, controlledCO.GetForwardRot(), rotAcc);
+        float rotAcc = stats["AimForce"] * controlledIPart.GetObject().moveResist * Time.fixedDeltaTime;
+        transform.rotation = Quaternion.Lerp(controlledIPart.GetObject().rb.rotation, controlledIPart.GetForwardRot(), rotAcc);
     }
 
     public override void MoveInDirection(Vector3 dir)
@@ -138,9 +139,9 @@ public class MovementHover : ConstructCoreMovement
         if (!isAssigned || !isActive || isPaused || isTransitioning) return;
 
         // Move in the given direction
-        float force = isSprinting ? stats["MovementSprintForce"] : stats["MovementWalkForce"];
-        float moveAcc = force * controlledCO.baseWO.moveResist * Time.fixedDeltaTime;
-        controlledCO.baseWO.rb.AddForce(dir.normalized * moveAcc, ForceMode.VelocityChange);
+        float force = IsSprinting() ? stats["MovementSprintForce"] : stats["MovementWalkForce"];
+        float moveAcc = force * controlledIPart.GetObject().moveResist * Time.fixedDeltaTime;
+        controlledIPart.GetObject().rb.AddForce(dir.normalized * moveAcc, ForceMode.VelocityChange);
         movementDir = dir;
         isMoving = true;
     }
@@ -150,15 +151,15 @@ public class MovementHover : ConstructCoreMovement
         if (!isAssigned || !isActive || isPaused || isTransitioning) return;
 
         // Aim at the given position rotation
-        Quaternion newRot = Quaternion.LookRotation((pos - controlledCO.baseWO.rb.position).normalized, Vector3.up);
-        float adjustFactor = stats["AimForce"] * controlledCO.baseWO.moveResist;
-        Quaternion rotTorque = newRot * Quaternion.Inverse(controlledCO.baseWO.rb.rotation);
+        Quaternion newRot = Quaternion.LookRotation((pos - controlledIPart.GetObject().rb.position).normalized, Vector3.up);
+        float adjustFactor = stats["AimForce"] * controlledIPart.GetObject().moveResist;
+        Quaternion rotTorque = newRot * Quaternion.Inverse(controlledIPart.GetObject().rb.rotation);
         Vector3 rotTorqueVec = new Vector3(rotTorque.x, rotTorque.y, rotTorque.z) * adjustFactor;
-        controlledCO.baseWO.rb.AddTorque(rotTorqueVec, ForceMode.Acceleration);
+        controlledIPart.GetObject().rb.AddTorque(rotTorqueVec, ForceMode.Acceleration);
 
         //float dampenFactor = 0.8f;
-        //Vector3 dampenTorqueVec = -controlledCO.baseWO.rb.angularVelocity * dampenFactor;
-        //controlledCO.baseWO.rb.AddTorque(dampenTorqueVec, ForceMode.Acceleration);
+        //Vector3 dampenTorqueVec = -controlledIPart.GetObject().rb.angularVelocity * dampenFactor;
+        //controlledIPart.GetObject().rb.AddTorque(dampenTorqueVec, ForceMode.Acceleration);
 
         //var x = Vector3.Cross(currentDir.normalized, newDir.normalized);
         //float theta = Mathf.Asin(x.magnitude);
@@ -187,7 +188,7 @@ public class MovementHover : ConstructCoreMovement
         if (!isAssigned) return 0.0f;
 
         // Calculate current hover height based on pct
-        float targetY = controlledCO.baseWO.maxExtent * (1.0f + 2.0f * stats["HoverHeight"]);
+        float targetY = controlledIPart.GetObject().maxExtent * (1.0f + 2.0f * stats["HoverHeight"]);
         targetY += Mathf.Sin(pct) * stats["HoverSinRange"];
         return targetY;
     }
@@ -201,12 +202,12 @@ public class MovementHover : ConstructCoreMovement
         if (!base.SetActive(isActive_)) return false;
 
         // Update state
-        if (isActive) controlledCO.SetControlledBy(this);
-        else controlledCO.SetControlledBy(null);
+        if (isActive) controlledIPart.SetControlledBy(this);
+        else controlledIPart.SetControlledBy(null);
 
         // Update physics and play sfx
-        controlledCO.baseWO.isLoose = true;
-        controlledCO.baseWO.isFloating = isActive;
+        controlledIPart.GetObject().isLoose = true;
+        controlledIPart.GetObject().isFloating = isActive;
         if (!isActive) StartCoroutine(Sfx_FadeOut(hoverAudio, 0.15f));
         return true;
     }
@@ -216,8 +217,8 @@ public class MovementHover : ConstructCoreMovement
         if (!base.SetPaused(isPaused_)) return false;
 
         // Update physics
-        controlledCO.baseWO.isLoose = !isPaused;
-        controlledCO.baseWO.isFloating = true;
+        controlledIPart.GetObject().isLoose = !isPaused;
+        controlledIPart.GetObject().isFloating = true;
         return true;
     }
 
@@ -234,27 +235,27 @@ public class MovementHover : ConstructCoreMovement
     private void CoreAwake()
     {
         // Initialize shape
-        shapeCoreAttachment = gameObject.AddComponent<ShapeHoverAttachment>();
+        attachmentShape = gameObject.AddComponent<CoreAttachmentShapeHover>();
     }
 
 
-    protected override IEnumerator IE_RunAttach(ConstructObject targetCO)
+    protected override IEnumerator IEAttachImpl(IConstructPart IPart)
     {
         // Turn off physics / colliders, update state
-        controlledCC.baseWO.isFloating = true;
-        controlledCC.baseWO.isLoose = false;
-        controlledCC.baseWO.isColliding = false;
+        controlledICore.GetObject().isFloating = true;
+        controlledICore.GetObject().isLoose = false;
+        controlledICore.GetObject().isColliding = false;
         if (coreChargeSFX != null) sfxAudio.PlayOneShot(coreChargeSFX);
 
-        // Move backwards, start spinning and point at targetCO
+        // Move backwards, start spinning and point at IPart
         Vector3 targetPos = PlayerController.instance.currentHover.hoveredPos;
-        Coroutine moveBackwardsCR = StartCoroutine(IE_AttachMoveBackwards(targetCO, targetPos));
-        Coroutine lookAtCR = StartCoroutine(IE_AttachLookAt(targetCO, targetPos));
+        Coroutine moveBackwardsCR = StartCoroutine(IEAttachMoveBackwards(IPart, targetPos));
+        Coroutine lookAtCR = StartCoroutine(IEAttachLookAt(IPart, targetPos));
         yield return moveBackwardsCR;
         yield return lookAtCR;
 
-        // Jab forwards into targetCO
-        Coroutine jabIntoCR = StartCoroutine(IE_AttachJabInto(targetCO, targetPos));
+        // Jab forwards into IPart
+        Coroutine jabIntoCR = StartCoroutine(IEAttachJabInto(IPart, targetPos));
         yield return jabIntoCR;
 
         // Update variables, Play VFX (chromatic aberration / camera shake) and play SFX
@@ -263,92 +264,92 @@ public class MovementHover : ConstructCoreMovement
         if (coreAttachSFX != null) sfxAudio.PlayOneShot(coreAttachSFX);
 
         // Create core attachment shape
-        shapeCoreAttachment.SetAttachingCC(controlledCC);
-        shapeCoreAttachment.SetAttachedCO(targetCO);
+        attachmentShape.SetAttachingICore(controlledICore);
+        attachmentShape.SetAttachedIPart(IPart);
     }
 
-    private IEnumerator IE_AttachMoveBackwards(ConstructObject targetCO, Vector3 targetPos)
+    private IEnumerator IEAttachMoveBackwards(IConstructPart IPart, Vector3 targetPos)
     {
         // Initialize variables
-        Vector3 rawOffset = Quaternion.Inverse(targetCO.transform.rotation) * (targetPos - targetCO.transform.position);
-        float startDist = (targetPos - controlledCC.transform.position).magnitude;
+        Vector3 rawOffset = Quaternion.Inverse(IPart.GetTransform().rotation) * (targetPos - IPart.GetTransform().position);
+        float startDist = (targetPos - controlledICore.GetTransform().position).magnitude;
         Vector3 dir, start, end;
 
         // Move towards a point which is start + 1.0 distance away
         for (float t = 0, movePct; t < 0.65f;)
         {
-            Vector3 newTargetPos = targetCO.transform.position + targetCO.transform.rotation * rawOffset;
-            dir = newTargetPos - controlledCC.transform.position;
+            Vector3 newTargetPos = IPart.GetTransform().position + IPart.GetTransform().rotation * rawOffset;
+            dir = newTargetPos - controlledICore.GetTransform().position;
             start = newTargetPos + -dir.normalized * startDist;
             end = start + -dir.normalized * 1.0f;
 
             movePct = Util.Easing.EaseOutSine(Mathf.Min(t, 0.65f) / 0.65f);
-            controlledCC.baseWO.transform.position = Vector3.Lerp(start, end, movePct);
+            controlledICore.GetObject().transform.position = Vector3.Lerp(start, end, movePct);
 
             t += Time.deltaTime;
             yield return null;
         }
     }
 
-    private IEnumerator IE_AttachLookAt(ConstructObject targetCO, Vector3 targetPos)
+    private IEnumerator IEAttachLookAt(IConstructPart IPart, Vector3 targetPos)
     {
         // Initialize variables
-        Vector3 rawOffset = Quaternion.Inverse(targetCO.transform.rotation) * (targetPos - targetCO.transform.position);
-        Vector3 dir, startUp = controlledCC.baseWO.transform.up;
+        Vector3 rawOffset = Quaternion.Inverse(IPart.GetTransform().rotation) * (targetPos - IPart.GetTransform().position);
+        Vector3 dir, startUp = controlledICore.GetObject().transform.up;
 
-        // Lerp rotate local y towards targetCO, lerp rotate around local y
+        // Lerp rotate local y towards IPart, lerp rotate around local y
         for (float t = 0, aimPct, spinPct; t < 0.85f;)
         {
-            Vector3 newTargetPos = targetCO.transform.position + targetCO.transform.rotation * rawOffset;
-            dir = newTargetPos - controlledCC.transform.position;
+            Vector3 newTargetPos = IPart.GetTransform().position + IPart.GetTransform().rotation * rawOffset;
+            dir = newTargetPos - controlledICore.GetTransform().position;
 
             aimPct = Util.Easing.EaseOutSine(Mathf.Min(t / 0.65f, 1.0f));
             spinPct = Util.Easing.EaseInSine(Mathf.Min(t / 0.85f, 1.0f));
-            controlledCC.baseWO.transform.up = Vector3.Lerp(startUp, dir, aimPct);
-            controlledCC.baseWO.transform.rotation *= Quaternion.AngleAxis(360 * spinPct, Vector3.up);
+            controlledICore.GetObject().transform.up = Vector3.Lerp(startUp, dir, aimPct);
+            controlledICore.GetObject().transform.rotation *= Quaternion.AngleAxis(360 * spinPct, Vector3.up);
 
             t += Time.deltaTime;
             yield return null;
         }
     }
 
-    private IEnumerator IE_AttachJabInto(ConstructObject targetCO, Vector3 targetPos)
+    private IEnumerator IEAttachJabInto(IConstructPart IPart, Vector3 targetPos)
     {
         // Initialize variables
-        Vector3 rawOffset = Quaternion.Inverse(targetCO.transform.rotation) * (targetPos - targetCO.transform.position);
+        Vector3 rawOffset = Quaternion.Inverse(IPart.GetTransform().rotation) * (targetPos - IPart.GetTransform().position);
         Vector3 dir;
         float speed;
 
-        // Raycast then move towards targetCO
+        // Raycast then move towards IPart
         while (true)
         {
-            Vector3 newTargetPos = targetCO.transform.position + targetCO.transform.rotation * rawOffset;
-            dir = newTargetPos - controlledCC.transform.position;
+            Vector3 newTargetPos = IPart.GetTransform().position + IPart.GetTransform().rotation * rawOffset;
+            dir = newTargetPos - controlledICore.GetTransform().position;
 
             speed = 12.0f * Time.deltaTime;
             bool reached = dir.magnitude < speed;
-            controlledCC.baseWO.transform.position += dir.normalized * Mathf.Min(dir.magnitude, speed);
+            controlledICore.GetObject().transform.position += dir.normalized * Mathf.Min(dir.magnitude, speed);
 
             if (reached) break;
             yield return null;
         }
     }
 
-    protected override IEnumerator IE_RunDetach()
+    protected override IEnumerator IEDetachImpl()
     {
         // Detach but without control
-        Vector3 popDir = (controlledCC.baseWO.transform.position - controlledCC.shapeCoreAttachment.attachedCO.transform.position).normalized;
-        controlledCC.baseWO.isFloating = false;
-        controlledCC.baseWO.isLoose = true;
-        controlledCC.baseWO.isColliding = true;
+        Vector3 popDir = (controlledICore.GetPosition() - controlledICore.GetAttachmentShape().attachedIPart.GetPosition()).normalized;
+        controlledICore.GetObject().isFloating = false;
+        controlledICore.GetObject().isLoose = true;
+        controlledICore.GetObject().isColliding = true;
 
         // Apply popping force and torque and wait 0.5s
-        float prevDrag = controlledCC.baseWO.rb.angularDrag;
-        controlledCC.baseWO.rb.angularDrag = 0.0f;
-        controlledCC.baseWO.rb.AddForce(popDir * 2.5f, ForceMode.VelocityChange);
-        controlledCC.baseWO.rb.AddTorque(controlledCC.transform.right * 15.0f, ForceMode.VelocityChange); // FIX
+        float prevDrag = controlledICore.GetObject().rb.angularDrag;
+        controlledICore.GetObject().rb.angularDrag = 0.0f;
+        controlledICore.GetObject().rb.AddForce(popDir * 2.5f, ForceMode.VelocityChange);
+        controlledICore.GetObject().rb.AddTorque(controlledICore.GetTransform().right * 15.0f, ForceMode.VelocityChange); // FIX
         yield return new WaitForSeconds(0.5f);
-        controlledCC.baseWO.rb.angularDrag = prevDrag;
+        controlledICore.GetObject().rb.angularDrag = prevDrag;
     }
 
     #endregion

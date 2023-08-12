@@ -11,7 +11,7 @@ public class PlayerConstructController : MonoBehaviour
 
     // Declare references, variables
     [HeaderAttribute("Construct Config")]
-    [SerializeField] private WorldObject initialCoreWJ;
+    [SerializeField] private Object initialCoreWJ;
     [SerializeField] private Transform objectContainer;
     [SerializeField] DataViewer dataViewer;
     public PlayerConstructCamera pcam { get; private set; }
@@ -40,7 +40,7 @@ public class PlayerConstructController : MonoBehaviour
     }
 
 
-    private void initConstruct(WorldObject coreWJ)
+    private void initConstruct(Object coreWJ)
     {
         // Initialize a construct on the given core WJ
         GameObject constructGO = new GameObject();
@@ -102,7 +102,7 @@ public class PlayerConstructController : MonoBehaviour
             {
                 if (!pcam.aimedWJ.isHighlighted) pcam.aimedWJ.isHighlighted = true;
                 dataViewer.setActive(true);
-                dataViewer.setWorldObject(pcam.aimedWJ);
+                dataViewer.setObject(pcam.aimedWJ);
             }
 
             // [Unhighlight]: Unhover

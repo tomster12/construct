@@ -38,8 +38,8 @@ public class PlayerController : MonoBehaviour
         {
 
             if (gameState == GameState.Playing
-            && constructController.controlledConstruct.getCoreState() != CoreState.Attaching
-            && constructController.controlledConstruct.getCoreState() != CoreState.Detaching)
+            && constructController.controlledConstruct.getCoreAttachmentState() != CoreAttachmentState.Attaching
+            && constructController.controlledConstruct.getCoreAttachmentState() != CoreAttachmentState.Detaching)
             {
                 setState(GameState.Forging);
 

@@ -23,12 +23,12 @@ public class PlayerConstructCamera : MonoBehaviour
         ["offsetSpeed"] = 4.0f
     };
     private Construct followConstruct;
-    private WorldObject followPrevWJ;
+    private Object followPrevWJ;
     private float[] zoomRange;
     private Vector3 camOffset;
     public Vector3 aimedPos { get; private set; }
-    public WorldObject prevAimedWJ { get; private set; }
-    public WorldObject aimedWJ { get; private set; }
+    public Object prevAimedWJ { get; private set; }
+    public Object aimedWJ { get; private set; }
 
 
     private void Awake()
@@ -96,7 +96,7 @@ public class PlayerConstructCamera : MonoBehaviour
         if (hasHit)
         {
             aimedPos = hit.point;
-            aimedWJ = hit.transform.GetComponent<WorldObject>();
+            aimedWJ = hit.transform.GetComponent<Object>();
 
             // Not hovering anything
         }

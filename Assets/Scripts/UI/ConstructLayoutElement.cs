@@ -12,13 +12,13 @@ public class ConstructLayoutElement : MonoBehaviour
     [SerializeField] private RectTransform hpBarFill;
     [SerializeField] private RectTransform xpBarFill;
 
-    private ConstructObject targetCO;
+    private IConstructPart ITargetPart;
 
 
-    public void SetConstructObject(ConstructObject targetCO_)
+    public void SetIConstructPart(IConstructPart ITargetPart_)
     {
-        targetCO = targetCO_;
-        imageIcon.sprite = targetCO.IIGetIconSprite();
+        ITargetPart = ITargetPart_;
+        imageIcon.sprite = ITargetPart.Inspect().icon;
         UpdateContents();
     }
 

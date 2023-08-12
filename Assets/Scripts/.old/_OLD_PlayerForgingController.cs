@@ -12,7 +12,7 @@ public class PlayerForgingController : MonoBehaviour
     private PlayerConstructController constructController;
 
     public Construct mainConstruct { get; private set; }
-    public WorldObject mainOrbWJ { get; private set; }
+    public Object mainOrbWJ { get; private set; }
     private Vector3 centreTargetPos;
     private Quaternion centreTargetRot;
 

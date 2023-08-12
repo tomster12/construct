@@ -10,8 +10,8 @@ public class PlayerController : MonoBehaviour
     public static float MAX_CAM_REACH { get; private set; } = 100.0f;
 
     [Header("References")]
+    [SerializeReference] private Construct _construct;
     [SerializeField] private UIController uiController;
-    [SerializeField] private Construct _construct;
     [SerializeField] private Transform camPivot;
     [SerializeField] private Transform camOrbit;
     [SerializeField] private Camera _cam;
@@ -28,23 +28,23 @@ public class PlayerController : MonoBehaviour
         ["nearbyRange"] = 10.0f
     };
 
-    public Construct construct => _construct;
-    public Camera cam => _cam;
-    public HoverComponentCache currentHover { get; private set; } = new HoverComponentCache();
-    public bool couldInteract => construct.core.GetCanAttach(currentHover.hoveredCO);
-
+    private IConstruct IConstruct => _construct;
     private IngameState ingameState;
     private ForgingState forgingState;
     private State state;
-    private HashSet<IHighlightable> nearbyIH = new HashSet<IHighlightable>();
+    private HashSet<IHighlightable>  nearbyHighlightables = new HashSet<IHighlightable>();
     private bool toHighlightNearby = false;
     private bool toHighlightHovered = false;
-    private Dictionary<ObjectType, bool> highlightable = new Dictionary<ObjectType, bool>()
+    private Dictionary<ObjectType, bool> highlightableObjects = new Dictionary<ObjectType, bool>()
     {
         [ObjectType.INTERACTABLE] = true,
-        [ObjectType.CONSTRUCTED_CO] = false,
-        [ObjectType.LOOSE_CO] = false
+        [ObjectType.PartNSTRUCTED] = false,
+        [ObjectType.LOOSE] = false
     };
+
+    public Camera cam => _cam;
+    public HoverComponentCache currentHover { get; private set; } = new HoverComponentCache();
+    public bool isHoveringInteractable => IConstruct.GetICore().CanAttach(currentHover.hoveredIPart);
 
 
     private void Awake()
@@ -61,6 +61,19 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         SetStateIngame();
+    }
+
+
+    public Vector3 GetBillboardTarget() => cam.transform.position;
+
+    public Vector3 GetBillboardDirection() => cam.transform.forward;
+
+    public InteractionState GetAttachmentInteractionState()
+    {
+        if (IConstruct.GetICore() == null) return InteractionState.CLOSED;
+        return IConstruct.GetICore().IsTransitioning() ? InteractionState.BLOCKED
+            : IConstruct.GetICore().CanAttach(currentHover.hoveredIPart) ? InteractionState.OPEN
+            : InteractionState.CLOSED;
     }
 
 
@@ -81,18 +94,18 @@ public class PlayerController : MonoBehaviour
     private void UpdateHighlighted()
     {
         // Unhighlight previously hovered if changed
-        if (currentHover.hoveredIH != currentHover.prevHoveredIH && currentHover.prevHoveredIH != null) currentHover.prevHoveredIH.IHSetHighlighted(false);
+        if (currentHover.hoveredIH != currentHover.prevHoveredIH && currentHover.prevHoveredIH != null) currentHover.prevHoveredIH.SetIsHighlighted(false);
 
-        // Unhighlight / highlight hovered highlightable
+        // Unhighlight / highlight hovered highlightableObjects
         if (currentHover.hoveredIH != null)
         {
-            float dist = Vector3.Distance(currentHover.hoveredIH.IHGetPosition(), construct.GetCentrePosition());
-            bool isHighlightable = toHighlightHovered && highlightable[currentHover.hoveredIH.IHGetObjectType()] && dist < camStats["nearbyRange"];
-            if (!isHighlightable) currentHover.hoveredIH.IHSetHighlighted(false);
-            else currentHover.hoveredIH.IHSetHighlighted(true);
+            float dist = Vector3.Distance(currentHover.hoveredIH.GetPosition(), IConstruct.GetPosition());
+            bool ishighlightableObjects = toHighlightHovered && highlightableObjects[currentHover.hoveredIH.GetObjectType()] && dist < camStats["nearbyRange"];
+            if (!ishighlightableObjects) currentHover.hoveredIH.SetIsHighlighted(false);
+            else currentHover.hoveredIH.SetIsHighlighted(true);
         }
 
-        // Unhighlight / highlight nearby highlightable
+        // Unhighlight / highlight nearby highlightableObjects
         if (toHighlightNearby)
         {
             // Loop over all world objects of type IHighlightable
@@ -100,16 +113,16 @@ public class PlayerController : MonoBehaviour
             foreach (IHighlightable currentIH in allIH)
             {
                 // Make visible if is in range
-                float dist = Vector3.Distance(currentIH.IHGetPosition(), construct.GetCentrePosition());
-                if (dist < camStats["nearbyRange"] && highlightable[currentIH.IHGetObjectType()])
+                float dist = Vector3.Distance(currentIH.GetPosition(), IConstruct.GetPosition());
+                if (dist < camStats["nearbyRange"] && highlightableObjects[currentIH.GetObjectType()])
                 {
-                    if (!nearbyIH.Contains(currentIH)) nearbyIH.Add(currentIH);
-                    currentIH.IHSetNearby(true);
+                    if (! nearbyHighlightables.Contains(currentIH))  nearbyHighlightables.Add(currentIH);
+                    currentIH.SetIsNearby(true);
                 }
                 else
                 {
-                    if (nearbyIH.Contains(currentIH)) nearbyIH.Remove(currentIH);
-                    currentIH.IHSetNearby(false);
+                    if ( nearbyHighlightables.Contains(currentIH))  nearbyHighlightables.Remove(currentIH);
+                    currentIH.SetIsNearby(false);
                 }
             }
         }
@@ -117,8 +130,8 @@ public class PlayerController : MonoBehaviour
         // Hide all nearby shown hoverables
         else
         {
-            foreach (IHighlightable currentIH in nearbyIH) currentIH.IHSetNearby(false);
-            nearbyIH.Clear();
+            foreach (IHighlightable currentIH in  nearbyHighlightables) currentIH.SetIsNearby(false);
+             nearbyHighlightables.Clear();
         }
     }
 
@@ -132,19 +145,6 @@ public class PlayerController : MonoBehaviour
     {
         // Run late updates
         state.LateUpdate();
-    }
-
-
-    public Vector3 GetBillboardTarget() => cam.transform.position;
-
-    public Vector3 GetBillboardDirection() => cam.transform.forward;
-
-    public PromptState GetPromptStateAttachable()
-    {
-        if (construct.core == null) return PromptState.UNAVAILABLE;
-        return construct.core.isTransitioning ? PromptState.IN_PROGRESS
-            : construct.core.GetCanAttach(currentHover.hoveredCO) ? PromptState.AVAILABLE
-            : PromptState.UNAVAILABLE;
     }
 
     private void SetState(State state_)
@@ -163,16 +163,14 @@ public class PlayerController : MonoBehaviour
 
     public abstract class State
     {
-        protected PlayerController pcn;
+        protected PlayerController controller;
 
 
-        public State(PlayerController pcn_) { pcn = pcn_; }
+        public State(PlayerController controller_) { controller = controller_; }
 
 
         public virtual void Set() { }
         public virtual void Unset() { }
-
-
         public virtual void Update() { }
         public virtual void FixedUpdate() { }
         public virtual void LateUpdate() { }
@@ -183,37 +181,36 @@ public class PlayerController : MonoBehaviour
         private static float[] ZOOM_RANGE = new float[] { -35f, -3.5f };
 
         private Vector3 inputMoveDir;
-        private ConstructObject centreCO;
+        private IConstructPart centreIPart;
         private float[] zoomRange;
         private Vector3 camOffset;
         private float lastPivotUpdateTime;
 
 
-        public IngameState(PlayerController pcn_) : base(pcn_) { }
+        public IngameState(PlayerController controller_) : base(controller_) { }
 
 
         public override void Set()
         {
             // Initialize variables
-            pcn.uiController.SetIngame(true);
-            pcn.construct.SetState(ConstructState.ACTIVE);
+            controller.uiController.SetIngame(true);
+            controller.IConstruct.SetState(ConstructState.ACTIVE);
             Cursor.lockState = CursorLockMode.Locked;
-            SetCentre(pcn.construct.GetCentreCO());
+            SetCentre(controller.IConstruct.GetCentreIPart());
 
             // Update UI
-            pcn.toHighlightNearby = true;
-            pcn.toHighlightHovered = true;
-            pcn.highlightable[ObjectType.LOOSE_CO] = true;
-            pcn.highlightable[ObjectType.CONSTRUCTED_CO] = false;
+            controller.toHighlightNearby = true;
+            controller.toHighlightHovered = true;
+            controller.highlightableObjects[ObjectType.LOOSE] = true;
+            controller.highlightableObjects[ObjectType.PartNSTRUCTED] = false;
         }
 
         public override void Unset()
         {
             // Update variables
-            pcn.uiController.SetIngame(false);
+            controller.uiController.SetIngame(false);
             Cursor.lockState = CursorLockMode.None;
         }
-
 
         public override void Update()
         {
@@ -222,57 +219,7 @@ public class PlayerController : MonoBehaviour
             UpdateCamera();
 
             // Handle changing state
-            if (Input.GetKeyDown("tab") && pcn.construct.GetStateAccessible(ConstructState.FORGING)) pcn.SetStateForging();
-        }
-
-        private void UpdateConstruct()
-        {
-            // Input movement with "Horizontal" and "Vertical"
-            inputMoveDir = Vector3.zero;
-            if (Input.GetAxisRaw("Horizontal") != 0.0f || Input.GetAxisRaw("Vertical") != 0.0f)
-            {
-                Transform camPivot = pcn.camPivot;
-                Vector3 flatForward = Vector3.ProjectOnPlane(camPivot.forward, Vector3.up).normalized;
-                inputMoveDir += camPivot.right * Input.GetAxisRaw("Horizontal");
-                inputMoveDir += flatForward * Input.GetAxisRaw("Vertical");
-            }
-
-            // Send ability skill controls
-            pcn.construct.skills.UpdateInput();
-
-            // Try attach / detach
-            if (Input.GetKeyDown("f"))
-            {
-                if (pcn.construct.core.GetCanAttach(pcn.currentHover.hoveredCO)) pcn.construct.core.Attach(pcn.currentHover.hoveredCO);
-                else if (pcn.construct.core.canDetach) pcn.construct.core.Detach();
-            }
-        }
-
-        private void UpdateCamera()
-        {
-            // Update current CO and offset
-            SetCentre(pcn.construct.GetCentreCO());
-
-            // Update pivot position and rotation
-            pcn.camPivot.Rotate(0, Input.GetAxis("Mouse X") * pcn.camStats["rotateSpeed"], 0, Space.World);
-            pcn.camPivot.Rotate(-Input.GetAxis("Mouse Y") * pcn.camStats["rotateSpeed"], 0, 0, Space.Self);
-
-            // Zoom in / out offset z based on scroll wheel
-            float zoom = Input.GetAxis("Mouse ScrollWheel");
-            if (zoom != 0.0f) camOffset.z = Mathf.Clamp(camOffset.z + zoom * pcn.camStats["zoomSpeed"], zoomRange[0], zoomRange[1]);
-
-            // Raycast out towards target offset position to prevent clipping
-            Vector3 rayDir = pcn.camPivot.rotation * camOffset;
-            LayerMask layer = LayerMask.GetMask("Environment");
-            if (Physics.Raycast(pcn.camPivot.position, rayDir, out RaycastHit hit, camOffset.magnitude, layer))
-            {
-                Vector3 clampedDir = (hit.point - pcn.camPivot.position);
-                Vector3 clampedPos = pcn.camPivot.position + clampedDir + clampedDir.normalized * -pcn.camStats["clipDistance"];
-                pcn.camOrbit.position = clampedPos;
-            }
-
-            // No clipping so lerp offset towards target offset
-            else pcn.camOrbit.localPosition = Vector3.Lerp(pcn.camOrbit.localPosition, camOffset, pcn.camStats["offsetSpeed"] * Time.deltaTime);
+            if (Input.GetKeyDown("tab") && controller.IConstruct.GetStateAccessible(ConstructState.FORGING)) controller.SetStateForging();
         }
 
         public override void FixedUpdate()
@@ -282,10 +229,58 @@ public class PlayerController : MonoBehaviour
             FixedUpdateCamera();
         }
 
+
+        private void UpdateConstruct()
+        {
+            // Input movement with "Horizontal" and "Vertical"
+            inputMoveDir = Vector3.zero;
+            if (Input.GetAxisRaw("Horizontal") != 0.0f || Input.GetAxisRaw("Vertical") != 0.0f)
+            {
+                Transform camPivot = controller.camPivot;
+                Vector3 flatForward = Vector3.ProjectOnPlane(camPivot.forward, Vector3.up).normalized;
+                inputMoveDir += camPivot.right * Input.GetAxisRaw("Horizontal");
+                inputMoveDir += flatForward * Input.GetAxisRaw("Vertical");
+            }
+
+            // Try attach / detach
+            if (Input.GetKeyDown("f"))
+            {
+                if (controller.IConstruct.GetICore().CanAttach(controller.currentHover.hoveredIPart)) controller.IConstruct.GetICore().Attach(controller.currentHover.hoveredIPart);
+                else if (controller.IConstruct.GetICore().CanDetach()) controller.IConstruct.GetICore().Detach();
+            }
+        }
+
+        private void UpdateCamera()
+        {
+            // Update current Part and offset
+            SetCentre(controller.IConstruct.GetCentreIPart());
+
+            // Update pivot position and rotation
+            controller.camPivot.Rotate(0, Input.GetAxis("Mouse X") * controller.camStats["rotateSpeed"], 0, Space.World);
+            controller.camPivot.Rotate(-Input.GetAxis("Mouse Y") * controller.camStats["rotateSpeed"], 0, 0, Space.Self);
+
+            // Zoom in / out offset z based on scroll wheel
+            float zoom = Input.GetAxis("Mouse ScrollWheel");
+            if (zoom != 0.0f) camOffset.z = Mathf.Clamp(camOffset.z + zoom * controller.camStats["zoomSpeed"], zoomRange[0], zoomRange[1]);
+
+            // Raycast out towards target offset position to prevent clipping
+            Vector3 rayDir = controller.camPivot.rotation * camOffset;
+            LayerMask layer = LayerMask.GetMask("Environment");
+            if (Physics.Raycast(controller.camPivot.position, rayDir, out RaycastHit hit, camOffset.magnitude, layer))
+            {
+                Vector3 clampedDir = (hit.point - controller.camPivot.position);
+                Vector3 clampedPos = controller.camPivot.position + clampedDir + clampedDir.normalized * -controller.camStats["clipDistance"];
+                controller.camOrbit.position = clampedPos;
+            }
+
+            // No clipping so lerp offset towards target offset
+            else controller.camOrbit.localPosition = Vector3.Lerp(controller.camOrbit.localPosition, camOffset, controller.camStats["offsetSpeed"] * Time.deltaTime);
+        }
+
         private void FixedUpdateConstruct()
         {
-            if (!pcn.construct.GetContainsWO(pcn.currentHover.hoveredWO)) pcn.construct.AimAtPosition(pcn.currentHover.hoveredPos);
-            if (inputMoveDir != Vector3.zero) pcn.construct.MoveInDirection(inputMoveDir);
+            if (!controller.IConstruct.ContainsObject(controller.currentHover.hoveredObject)) controller.IConstruct.AimAtPosition(controller.currentHover.hoveredPos);
+            if (inputMoveDir != Vector3.zero) controller.IConstruct.MoveInDirection(inputMoveDir);
         }
 
         private void FixedUpdateCamera()
@@ -293,18 +288,17 @@ public class PlayerController : MonoBehaviour
             // Calculate delta time and update position
             float deltaTime = Time.time - lastPivotUpdateTime;
             lastPivotUpdateTime = Time.time;
-            pcn.camPivot.position = Vector3.Lerp(pcn.camPivot.position, centreCO.transform.position, pcn.camStats["followSpeed"] * deltaTime);
+            controller.camPivot.position = Vector3.Lerp(controller.camPivot.position, centreIPart.GetPosition(), controller.camStats["followSpeed"] * deltaTime);
         }
 
-
-        private void SetCentre(ConstructObject centreCO_)
+        private void SetCentre(IConstructPart centreIPart_)
         {
-            // Setting to new centre CO
-            if (centreCO == centreCO_) return;
-            centreCO = centreCO_;
+            // Setting to new centre Part
+            if (centreIPart == centreIPart_) return;
+            centreIPart = centreIPart_;
 
             // Update zoom range and target offset
-            float maxExtent = centreCO.baseWO.maxExtent;
+            float maxExtent = centreIPart.GetObject().maxExtent;
             zoomRange = new float[] { maxExtent * ZOOM_RANGE[0], maxExtent * ZOOM_RANGE[1] };
             camOffset = new Vector3(
                 Mathf.Max(0.25f, maxExtent + 0.2f),
@@ -318,7 +312,7 @@ public class PlayerController : MonoBehaviour
     {
         private static float[] ZOOM_RANGE = new float[] { -35f, -3.5f };
 
-        private ConstructObject centreCO;
+        private IConstructPart centreIPart;
         private float[] zoomRange;
         private Vector3 camOffset;
         private bool isDragging;
@@ -327,35 +321,34 @@ public class PlayerController : MonoBehaviour
         private float prevLocalZ;
 
 
-        public ForgingState(PlayerController pcn_) : base(pcn_) { }
+        public ForgingState(PlayerController controller_) : base(controller_) { }
 
 
         public override void Set()
         {
-            // Update construct and offset
-            pcn.uiController.SetForging(true);
-            pcn.construct.SetState(ConstructState.FORGING);
-            SetCentre(pcn.construct.GetCentreCO());
+            // Update IConstruct and offset
+            controller.uiController.SetForging(true);
+            controller.IConstruct.SetState(ConstructState.FORGING);
+            SetCentre(controller.IConstruct.GetCentreIPart());
 
             // Set camera variables TODO: Look into
-            prevRot = pcn.camPivot.rotation;
-            pcn.camPivot.rotation = Quaternion.AngleAxis(180, Vector3.up) * centreCO.GetForwardRot();
-            prevLocalZ = pcn.camOrbit.localPosition.z;
+            prevRot = controller.camPivot.rotation;
+            controller.camPivot.rotation = Quaternion.AngleAxis(180, Vector3.up) * centreIPart.GetForwardRot();
+            prevLocalZ = controller.camOrbit.localPosition.z;
 
             // Update UI
-            pcn.toHighlightNearby = false;
-            pcn.toHighlightHovered = true;
-            pcn.highlightable[ObjectType.LOOSE_CO] = true;
-            pcn.highlightable[ObjectType.CONSTRUCTED_CO] = true;
+            controller.toHighlightNearby = false;
+            controller.toHighlightHovered = true;
+            controller.highlightableObjects[ObjectType.LOOSE] = true;
+            controller.highlightableObjects[ObjectType.PartNSTRUCTED] = true;
         }
 
         public override void Unset()
         {
             // Set camera variables
-            pcn.camPivot.rotation = prevRot;
-            pcn.camOrbit.localPosition = new Vector3(pcn.camOrbit.localPosition.x, pcn.camOrbit.localPosition.y, prevLocalZ);
+            controller.camPivot.rotation = prevRot;
+            controller.camOrbit.localPosition = new Vector3(controller.camOrbit.localPosition.x, controller.camOrbit.localPosition.y, prevLocalZ);
         }
-
 
         public override void Update()
         {
@@ -363,8 +356,9 @@ public class PlayerController : MonoBehaviour
             UpdateCamera();
 
             // Handle changing state
-            if (Input.GetKeyDown("tab")) pcn.SetStateIngame();
+            if (Input.GetKeyDown("tab")) controller.SetStateIngame();
         }
+
 
         private void UpdateCamera()
         {
@@ -373,28 +367,27 @@ public class PlayerController : MonoBehaviour
             else if (!Input.GetMouseButton(0)) isDragging = false;
             if (isDragging)
             {
-                pcn.camPivot.Rotate(0, Input.GetAxis("Mouse X") * pcn.camStats["rotateSpeed"] * 2.0f, 0, Space.World);
-                pcn.camPivot.Rotate(-Input.GetAxis("Mouse Y") * pcn.camStats["rotateSpeed"] * 2.0f, 0, 0, Space.Self);
+                controller.camPivot.Rotate(0, Input.GetAxis("Mouse X") * controller.camStats["rotateSpeed"] * 2.0f, 0, Space.World);
+                controller.camPivot.Rotate(-Input.GetAxis("Mouse Y") * controller.camStats["rotateSpeed"] * 2.0f, 0, 0, Space.Self);
             }
 
             // Zoom in / out based on scroll wheel
             float zoom = Input.GetAxis("Mouse ScrollWheel");
-            if (zoom != 0.0f) camOffset.z = Mathf.Clamp(camOffset.z + zoom * pcn.camStats["zoomSpeed"], zoomRange[0], zoomRange[1]);
+            if (zoom != 0.0f) camOffset.z = Mathf.Clamp(camOffset.z + zoom * controller.camStats["zoomSpeed"], zoomRange[0], zoomRange[1]);
 
             // Move camera towards centre object
-            pcn.camPivot.position = Vector3.Lerp(pcn.camPivot.position, centreCO.transform.position, pcn.camStats["followSpeed"] * Time.deltaTime);
-            pcn.camOrbit.localPosition = Vector3.Lerp(pcn.camOrbit.localPosition, camOffset, pcn.camStats["offsetSpeed"] * Time.deltaTime);
+            controller.camPivot.position = Vector3.Lerp(controller.camPivot.position, centreIPart.GetPosition(), controller.camStats["followSpeed"] * Time.deltaTime);
+            controller.camOrbit.localPosition = Vector3.Lerp(controller.camOrbit.localPosition, camOffset, controller.camStats["offsetSpeed"] * Time.deltaTime);
         }
 
-
-        private void SetCentre(ConstructObject centreCO_)
+        private void SetCentre(IConstructPart centreIPart_)
         {
-            // Setting to new centre CO
-            if (centreCO == centreCO_) return;
-            centreCO = centreCO_;
+            // Setting to new centre Part
+            if (centreIPart == centreIPart_) return;
+            centreIPart = centreIPart_;
 
             // Update zoom range and target offset
-            float maxExtent = centreCO.baseWO.maxExtent;
+            float maxExtent = centreIPart.GetObject().maxExtent;
             zoomRange = new float[] { maxExtent * ZOOM_RANGE[0], maxExtent * ZOOM_RANGE[1] };
             camOffset = new Vector3(
                 0.0f, 0.0f, (zoomRange[0] + zoomRange[1]) / 2.0f
@@ -407,15 +400,15 @@ public class PlayerController : MonoBehaviour
     {
         public Vector3 prevHoveredPos { get; private set; }
         public Transform prevHoveredT { get; private set; }
-        public WorldObject prevHoveredWO { get; private set; }
-        public ConstructObject prevHoveredCO { get; private set; }
+        public Object prevHoveredObject { get; private set; }
+        public ConstructPart prevHoveredPart { get; private set; }
         public IHighlightable prevHoveredIH { get; private set; }
         public IInspectable prevHoveredII { get; private set; }
 
         public Vector3 hoveredPos { get; private set; }
         public Transform hoveredT { get; private set; }
-        public WorldObject hoveredWO { get; private set; }
-        public ConstructObject hoveredCO { get; private set; }
+        public Object hoveredObject { get; private set; }
+        public ConstructPart hoveredIPart { get; private set; }
         public IHighlightable hoveredIH { get; private set; }
         public IInspectable hoveredII { get; private set; }
 
@@ -436,22 +429,22 @@ public class PlayerController : MonoBehaviour
             // Update component cache
             if (hoveredT != prevHoveredT)
             {
-                prevHoveredWO = hoveredWO;
-                prevHoveredCO = hoveredCO;
+                prevHoveredObject = hoveredObject;
+                prevHoveredPart = hoveredIPart;
                 prevHoveredIH = hoveredIH;
                 prevHoveredII = hoveredII;
 
                 if (hoveredT != null)
                 {
-                    hoveredWO = hoveredT.GetComponent<WorldObject>();
-                    hoveredCO = hoveredT.GetComponent<ConstructObject>();
+                    hoveredObject = hoveredT.GetComponent<Object>();
+                    hoveredIPart = hoveredT.GetComponent<ConstructPart>();
                     hoveredIH = hoveredT.GetComponent<IHighlightable>();
                     hoveredII = hoveredT.GetComponent<IInspectable>();
                 }
                 else
                 {
-                    hoveredWO = null;
-                    hoveredCO = null;
+                    hoveredObject = null;
+                    hoveredIPart = null;
                     hoveredIH = null;
                     hoveredII = null;
                 }

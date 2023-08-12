@@ -1,10 +1,10 @@
 
-public enum ObjectType { DESTRUCTABLE, INTERACTABLE, LOOSE_CO, CONSTRUCTED_CO };
+public enum ObjectType { DESTRUCTABLE, INTERACTABLE, LOOSE, PartNSTRUCTED };
 
 public enum ConstructState { INACTIVE, ACTIVE, FORGING };
 
-public enum CoreState { DETACHED, ATTACHING, ATTACHED, DETACHING };
+public enum CoreAttachmentState { DETACHED, ATTACHING, ATTACHED, DETACHING };
 
 public enum ObjectControllerType { SHAPE, MOVEMENT };
 
-public enum PromptState { UNAVAILABLE, AVAILABLE, IN_PROGRESS }
+public enum InteractionState { CLOSED, OPEN, BLOCKED }

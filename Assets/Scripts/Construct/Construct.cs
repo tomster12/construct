@@ -4,57 +4,64 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class Construct : MonoBehaviour
+public class Construct : MonoBehaviour, IConstruct
 {
     [Header("References")]
-    [SerializeField] private ConstructCore initCore;
+    [SerializeField] private ConstructCore initConstructCore;
 
-    public Action onLayoutChanged;
-    public Action<ConstructState> onStateChanged;
-    public ConstructCore core { get; private set; }
-    public HashSet<ConstructObject> trackedObjects { get; private set; } = new HashSet<ConstructObject>();
-    public SkillBindings skills { get; private set; } = new SkillBindings(new List<string>() { "_0", "1", "2", "3", "4", "f" });
-    public ConstructState state { get; private set; } = ConstructState.INACTIVE;
-    public bool canMove => state == ConstructState.ACTIVE && !core.isBlocking && currentMovement != null;
-    public bool canUseSkill => state == ConstructState.ACTIVE && !isBlocking;
-    public bool isBlocking => core.isBlocking || currentMovement == null || currentMovement.isBlocking || skills.isBlocking;
-
+    private IConstructCore IConstructCore;
+    private HashSet<IConstructPart> containedIParts = new HashSet<IConstructPart>();
+    private SkillBindings skills = new SkillBindings(new List<string>() { "_0", "1", "2", "3", "4", "f" });
+    private ConstructState state = ConstructState.INACTIVE;
     private List<MovementOption> movementOptions = new List<MovementOption>();
-    private ConstructObjectMovement currentMovement = null;
+    private ConstructPartMovement currentMovement = null;
+    private Action onLayoutChanged;
+    private Action<ConstructState> onStateChanged;
+
+    public bool CanMove() => state == ConstructState.ACTIVE && !IConstructCore.IsBlocking() && currentMovement != null;
+    public bool CanUseSkill() => state == ConstructState.ACTIVE && !IsBlocking();
+    public bool IsBlocking() => IConstructCore.IsBlocking() || currentMovement == null || currentMovement.IsBlocking() || skills.IsBlocking;
 
 
     private void Start()
     {
         // Initialize variables
         skills.Clear();
-        InitConstruct(initCore);
+        InitConstruct(initConstructCore);
     }
 
-    public void InitConstruct(ConstructCore core)
-    {
-        if (core == null) throw new Exception("Need a core to InitConstruct");
-        SetCore(core);
-        SetState(ConstructState.INACTIVE);
-    }
-
-
-    public void Update()
+    private void Update()
     {
         // Update binded skills
         skills.UpdateSkills();
     }
 
+
     public void MoveInDirection(Vector3 dir)
     {
-        if (canMove) currentMovement?.MoveInDirection(dir);
+        if (CanMove()) currentMovement?.MoveInDirection(dir);
     }
 
     public void AimAtPosition(Vector3 pos)
     {
-        if (canMove) currentMovement?.AimAtPosition(pos);
+        if (CanMove()) currentMovement?.AimAtPosition(pos);
     }
 
-    public void SubscribeMovement(ConstructObjectMovement movement_, int priority_)
+    public void AddIPart(IConstructPart IPart)
+    {
+        containedIParts.Add(IPart);
+        IPart.OnJoinConstruct(this);
+        onLayoutChanged?.Invoke();
+    }
+
+    public void RemoveIPart(IConstructPart IPart)
+    {
+        containedIParts.Remove(IPart);
+        IPart.OnExitConstruct();
+        onLayoutChanged?.Invoke();
+    }
+
+    public void SubscribeMovement(ConstructPartMovement movement_, int priority_)
     {
         if (movement_ == null) return;
 
@@ -64,7 +71,7 @@ public class Construct : MonoBehaviour
         PickBestMovement();
     }
 
-    public void UnsubscribeMovement(ConstructObjectMovement movement_)
+    public void UnsubscribeMovement(ConstructPartMovement movement_)
     {
         if (movement_ == null) return;
 
@@ -81,82 +88,36 @@ public class Construct : MonoBehaviour
         PickBestMovement();
     }
 
-    public void PickBestMovement()
+    public void SubscribeSkill(Skill skill, string binding) => skills.RequestBinding(skill, binding);
+
+    public void UnsubscribeSkill(Skill skill) => skills.Unbind(skill);
+
+    public bool ContainsObject(Object checkObject) => IConstructCore.ContainsObject(checkObject);
+
+    public bool ContainsIPart(IConstructPart IPart) => IConstructCore.ContainsIPart(IPart);
+
+    public IConstructPart GetCentreIPart() => IConstructCore.GetCentreIPart();
+
+    public HashSet<IConstructPart> GetContainedIParts() => containedIParts;
+
+    public IConstructCore GetICore() => IConstructCore;
+
+    public Vector3 GetPosition() => GetCentreIPart().GetPosition();
+
+    public Transform GetTransform() => transform;
+
+    public bool GetStateAccessible(ConstructState newState)
     {
-        // Find new best movement
-        movementOptions.Sort();
-        ConstructObjectMovement newMovement = null;
-        for (int i = 0; i < movementOptions.Count; i++)
+        return newState switch
         {
-            if (movementOptions[i].movement.canActivate)
-            {
-                newMovement = movementOptions[i].movement;
-                break;
-            }
-        }
-
-        // Transfer to new movement
-        if (newMovement != currentMovement)
-        {
-            if (currentMovement != null)
-            {
-                currentMovement.OnUnassign();
-            }
-            if (newMovement != null)
-            {
-                newMovement.OnAssign();
-                if (state == ConstructState.ACTIVE) newMovement.SetActive(true);
-            }
-            currentMovement = newMovement;
-        }
+            ConstructState.INACTIVE => (state == ConstructState.ACTIVE && !IsBlocking()),
+            ConstructState.ACTIVE => (state == ConstructState.INACTIVE && currentMovement != null) || (state == ConstructState.FORGING),
+            ConstructState.FORGING => (state == ConstructState.ACTIVE && !IsBlocking()),
+            _ => false,
+        };
     }
 
-    public void AddObject(ConstructObject trackedCO)
-    {
-        trackedObjects.Add(trackedCO);
-        trackedCO.OnJoinConstruct(this);
-        if (onLayoutChanged != null) onLayoutChanged();
-    }
-
-    public void RemoveObject(ConstructObject trackedCO)
-    {
-        trackedObjects.Remove(trackedCO);
-        trackedCO.OnExitConstruct();
-        if (onLayoutChanged != null) onLayoutChanged();
-    }
-
-
-    public bool GetStateAccessible(ConstructState state_)
-    {
-        switch (state_)
-        {
-            case ConstructState.INACTIVE:
-                return (state == ConstructState.ACTIVE && !isBlocking);
-
-            case ConstructState.ACTIVE:
-                return (state == ConstructState.INACTIVE && currentMovement != null) || (state == ConstructState.FORGING);
-
-            case ConstructState.FORGING:
-                return (state == ConstructState.ACTIVE && !isBlocking);
-            
-            default: return false;
-        }
-    }
-
-    public bool GetContainsWO(WorldObject checkWO) => core.GetContainsWO(checkWO);
-
-    public bool GetContainsCO(ConstructObject checkCO) => core.GetContainsCO(checkCO);
-
-    public ConstructObject GetCentreCO() => core.GetCentreCO();
-
-    public Vector3 GetCentrePosition() => core.GetCentrePosition();
-
-    private void SetCore(ConstructCore core_)
-    {
-        if (core != null) throw new Exception("core already set on Construct.");
-        core = core_;
-        AddObject(core);
-    }
+    public ConstructState GetState() => state;
 
     public bool SetState(ConstructState state_)
     {
@@ -184,15 +145,70 @@ public class Construct : MonoBehaviour
         }
         return false;
     }
+
+    public void SubscribeOnLayoutChanged(System.Action action) => onLayoutChanged += action;
     
+    public void UnsubscribeOnLayoutChanged(System.Action action) => onLayoutChanged -= action;
+
+    public void SubscribeOnStateChanged(System.Action<ConstructState> action) => onStateChanged += action;
+    
+    public void UnsubscribeOnStateChanged(System.Action<ConstructState> action) => onStateChanged -= action;
+    
+    public void OnMovementUpdate() => PickBestMovement();
+
+
+    private void InitConstruct(IConstructCore newICore)
+    {
+        if (newICore == null) throw new Exception("Need a core to InitConstruct");
+        SetCore(newICore);
+    }
+
+    private void PickBestMovement()
+    {
+        // Find new best movement
+        movementOptions.Sort();
+        ConstructPartMovement newMovement = null;
+        for (int i = 0; i < movementOptions.Count; i++)
+        {
+            if (movementOptions[i].movement.canActivate)
+            {
+                newMovement = movementOptions[i].movement;
+                break;
+            }
+        }
+
+        // Transfer to new movement
+        if (newMovement != currentMovement)
+        {
+            if (currentMovement != null)
+            {
+                currentMovement.OnUnassign();
+            }
+            if (newMovement != null)
+            {
+                newMovement.OnAssign();
+                if (state == ConstructState.ACTIVE) newMovement.SetActive(true);
+            }
+            currentMovement = newMovement;
+        }
+    }
+
+    private void SetCore(IConstructCore newICore)
+    {
+        if (IConstructCore != null) throw new Exception("Core already set on Construct.");
+        IConstructCore = newICore;
+        AddIPart(IConstructCore);
+        IConstructCore.GetTransform().parent = GetTransform();
+    }
+
 
     [Serializable]
     public class MovementOption : IComparable<MovementOption>
     {
-        public ConstructObjectMovement movement { get; private set; }
+        public ConstructPartMovement movement { get; private set; }
         public int priority { get; private set; }
 
-        public MovementOption(ConstructObjectMovement movement_, int priority_)
+        public MovementOption(ConstructPartMovement movement_, int priority_)
         {
             movement = movement_;
             priority = priority_;

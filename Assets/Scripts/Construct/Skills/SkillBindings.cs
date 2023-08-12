@@ -8,7 +8,7 @@ public class SkillBindings
     public List<string> bindableButtons { get; private set; } = new List<string>() { "_0", "_1", "1", "2", "3", "4" };
     private Dictionary<string, Skill> bindedButtons = new Dictionary<string, Skill>();
 
-    public bool isBlocking => false;
+    public bool IsBlocking => false;
 
 
     public SkillBindings(List<string> bindableButtons_)

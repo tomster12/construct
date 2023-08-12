@@ -1,14 +1,14 @@
 //    private class AttackSkill : Skill
 //    {
 //        // Declare variables
-//        private COMovementHop movement;
+//        private PartMovementHop movement;
 //        private ParticleSystem speedParticleGenerator;
 //        public Vector3 attackPoint { get; private set; }
 //        private float attackTimer;
 //        private float attackTimerMax;
 
 
-//        public AttackSkill(COMovementHop movement_) : base(movement_.stats["AttackCooldown"])
+//        public AttackSkill(PartMovementHop movement_) : base(movement_.stats["AttackCooldown"])
 //        {
 //            // Initialize variables
 //            movement = movement_;
@@ -22,8 +22,8 @@
 
 //            // Jump towards target
 //            Vector3 dir = (PlayerController.instance.hovered.pos - movement.transform.position).normalized;
-//            float jumpStrength = movement.stats["AttackStrength"] * movement.controlledCO.baseWO.moveResist;
-//            movement.controlledCO.baseWO.rb.velocity = movement.controlledCO.baseWO.rb.velocity + dir * jumpStrength;
+//            float jumpStrength = movement.stats["AttackStrength"] * movement.controlledPart.GetObject().moveResist;
+//            movement.controlledPart.GetObject().rb.velocity = movement.controlledPart.GetObject().rb.velocity + dir * jumpStrength;
 
 //            // Update variables
 //            attackPoint = PlayerController.instance.hovered.pos;
@@ -59,15 +59,15 @@
 //                    if (movement.aimedDirection != Vector3.zero)
 //                    {
 //                        Vector3 dir = (attackPoint - movement.transform.position).normalized;
-//                        float aimStrength = 0.5f * movement.controlledCO.baseWO.moveResist * movement.stats["AimLerp"] * Time.deltaTime;
-//                        float jumpStrength = 2.0f * movement.stats["AttackStrength"] * movement.controlledCO.baseWO.moveResist * Time.deltaTime;
+//                        float aimStrength = 0.5f * movement.controlledPart.GetObject().moveResist * movement.stats["AimLerp"] * Time.deltaTime;
+//                        float jumpStrength = 2.0f * movement.stats["AttackStrength"] * movement.controlledPart.GetObject().moveResist * Time.deltaTime;
 //                        Quaternion dirRot = Quaternion.LookRotation(dir, movement.transform.up);
 //                        movement.transform.rotation = Quaternion.Lerp(movement.transform.rotation, dirRot, aimStrength);
-//                        movement.controlledCO.baseWO.rb.velocity = movement.controlledCO.baseWO.rb.velocity + dir * jumpStrength;
+//                        movement.controlledPart.GetObject().rb.velocity = movement.controlledPart.GetObject().rb.velocity + dir * jumpStrength;
 //                    }
 
 //                    // Activate speed particle effects
-//                    Quaternion speedDir = Quaternion.LookRotation(-movement.controlledCO.baseWO.rb.velocity, Vector3.up);
+//                    Quaternion speedDir = Quaternion.LookRotation(-movement.controlledPart.GetObject().rb.velocity, Vector3.up);
 //                    speedParticleGenerator.transform.position = movement.transform.position;
 //                    speedParticleGenerator.transform.rotation = speedDir;
 //                    if (!speedParticleGenerator.isPlaying) speedParticleGenerator.Play();

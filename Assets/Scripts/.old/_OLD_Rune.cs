@@ -5,7 +5,7 @@ using UnityEngine;
 public class Rune : MonoBehaviour
 {
     // Declare references, variables
-    public WorldObject selfWJ { get; private set; }
+    public Object selfWJ { get; private set; }
 
     public bool isSlotted { get; protected set; }
     public RuneHandler slottedHandler { get; protected set; }
@@ -14,7 +14,7 @@ public class Rune : MonoBehaviour
     public void Awake()
     {
         // Initialize references
-        selfWJ = GetComponent<WorldObject>();
+        selfWJ = GetComponent<Object>();
     }
 
 

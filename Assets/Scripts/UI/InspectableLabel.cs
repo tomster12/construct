@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System;
 
 [Serializable]
-public enum LabelState { ICON, TITLE, INFO }
+public enum LabelState { IPartN, TITLE, INFO }
 
 
 public class InspectableLabel : MonoBehaviour
@@ -16,16 +16,16 @@ public class InspectableLabel : MonoBehaviour
     [SerializeField] private Canvas canvas;
     [SerializeField] private CanvasGroup canvasGroupMain;
     [SerializeField] private CanvasGroup canvasGroupPrompt;
-    [SerializeField] private Image promptAttachablePrompt;
-    [SerializeField] private Image promptAttachableIcon;
+    [SerializeField] private Image promptInput;
+    [SerializeField] private Image promptIcon;
     [SerializeField] private RectTransform mask;
     [SerializeField] private RectTransform background;
     [SerializeField] private Image icon;
     [SerializeField] private VerticalLayoutGroup layout;
 
     [Header("Prefabs")]
-    [SerializeField] private Sprite promptAttachableIconAvailable;
-    [SerializeField] private Sprite promptAttachableIconInProgress;
+    [SerializeField] private Sprite promptIconAvailable;
+    [SerializeField] private Sprite promptIconInProgress;
     [SerializeField] private GameObject attributePfb;
     [SerializeField] private GameObject modifierPfb;
 
@@ -58,12 +58,15 @@ public class InspectableLabel : MonoBehaviour
 
     [SerializeField] float[] DISTANCE_MAP = new float[] { 0.5f, 2.0f, 0.5f, 1.0f };
     
-    private IInspectable inspectedObject;
-    private LabelState state;
+    public bool isNearby { get; private set; }
+    public bool isHighlighted { get; private set; }
+
+    private IInspectable inspectable;
+    private Object inspectedObject;
+    private InspectedData inspectedData;
+    private LabelState currentState;
     private float offset;
     private float distanceScale = 1.0f;
-    private bool isNearby;
-    private bool isHighlighted;
     private float hoverTimer = 0.0f;
 
 
@@ -76,7 +79,7 @@ public class InspectableLabel : MonoBehaviour
     private void ResetDynamics()
     {
         // Intialize with default values
-        state = LabelState.ICON;
+        currentState = LabelState.IPartN;
         isNearby = false;
         isHighlighted = false;
         UpdateDynamics(true, true, true);
@@ -98,13 +101,13 @@ public class InspectableLabel : MonoBehaviour
             hoverTimer += Time.deltaTime;
             if ((hoverTimer - expandHoverOffset) >= expandHoverTime)
             {
-                state = LabelState.INFO;
+                currentState = LabelState.INFO;
                 hoverTimer = expandHoverOffset + expandHoverTime;
             }
         }
 
         // Update UI layer based on state
-        if (state == LabelState.ICON)
+        if (currentState == LabelState.IPartN)
         {
             if (canvas.gameObject.layer != LayerMask.NameToLayer("UI")) Util.SetLayer(canvas.transform, LayerMask.NameToLayer("UI"));
         }
@@ -113,7 +116,8 @@ public class InspectableLabel : MonoBehaviour
 
     private void UpdateDynamics(bool setPos = false, bool setSize = false, bool setAlpha = false)
     {
-        if (inspectedObject == null) return;
+        if (inspectable == null) return;
+        inspectedData = inspectable.Inspect();
 
         // Calculate distanceScale
         Vector3 billboardPos = PlayerController.instance.GetBillboardTarget();
@@ -127,36 +131,36 @@ public class InspectableLabel : MonoBehaviour
         transform.forward = billboardDir;
         
         // Lerp canvas position to set offsets
-        float horizontalOffset = (state == LabelState.INFO ? 1.0f : 0.0f) * distanceScale;
-        Vector3 currentCentre = inspectedObject.IIGetPosition();
+        float horizontalOffset = (currentState == LabelState.INFO ? 1.0f : 0.0f) * distanceScale;
+        Vector3 currentCentre = inspectable.GetPosition();
         float maskWorldWidth = mask.rect.width * canvas.transform.localScale.x;
-        float offsetHeight = GetCurrentStateSize(LabelState.TITLE).y * canvas.transform.localScale.y;
+        float offsetHeight = GetMaskSize(LabelState.TITLE).y * canvas.transform.localScale.y;
         Vector3 right = Vector3.Cross(Vector3.up, billboardDir).normalized;
         Vector3 targetPosition = currentCentre + offset * (Vector3.up + right * horizontalOffset) + offsetHeight * Vector3.up;
-        if (state == LabelState.INFO) targetPosition += maskWorldWidth * 0.5f * right;
+        if (currentState == LabelState.INFO) targetPosition += maskWorldWidth * 0.5f * right;
         float positionPct = setPos ? 1.0f : posLerp * Time.deltaTime;
         Vector3 lerpedPosition = Vector3.Lerp(canvas.transform.position, targetPosition, positionPct);
         canvas.transform.position = lerpedPosition;
 
         // Lerp canvas scale
-        Vector3 targetScale = Vector3.one * (state == LabelState.INFO ? infoCanvasScale : baseCanvasScale) * distanceScale;
+        Vector3 targetScale = Vector3.one * (currentState == LabelState.INFO ? infoCanvasScale : baseCanvasScale) * distanceScale;
         float scalePct = setSize ? 1.0f : sizeUpLerp * Time.deltaTime;
         canvas.transform.localScale = Vector3.Lerp(canvas.transform.localScale, targetScale, scalePct);
 
         // Lerp mask size to background
-        Vector2 targetSize = GetCurrentStateSize();
+        Vector2 targetSize = GetMaskSize();
         float sizePct = setSize ? 1.0f : (targetSize.x > mask.rect.size.x ? sizeUpLerp : sizeDownLerp) * Time.deltaTime;
         Vector2 lerpedSize = Vector2.Lerp(mask.rect.size, targetSize, sizePct);
         mask.sizeDelta = lerpedSize;
 
         // Lerp icon size
-        float iconSize = state == LabelState.ICON ? iconBaseSize : iconSmallSize;
+        float iconSize = currentState == LabelState.IPartN ? iconBaseSize : iconSmallSize;
         float iconSizePct = setSize ? 1.0f : (iconSize > icon.rectTransform.rect.size.x ? sizeUpLerp : sizeDownLerp) * Time.deltaTime;
         icon.rectTransform.sizeDelta = Vector2.Lerp(icon.rectTransform.rect.size, Vector2.one * iconSize, iconSizePct);
 
         // Lerp main bar sized
         Vector2 mainBarTargetSize = contentMainBar.rectTransform.sizeDelta;
-        if (state == LabelState.ICON) mainBarTargetSize.x = ((icon.rectTransform.localPosition.x - layout.padding.left) - contentMainBar.rectTransform.anchoredPosition.x) * 2;
+        if (currentState == LabelState.IPartN) mainBarTargetSize.x = ((icon.rectTransform.localPosition.x - layout.padding.left) - contentMainBar.rectTransform.anchoredPosition.x) * 2;
         else mainBarTargetSize.x = contentBarParent.sizeDelta.x + (contentMainBar.rectTransform.anchoredPosition.x * -2);
         contentMainBar.rectTransform.sizeDelta = Vector2.Lerp(contentMainBar.rectTransform.sizeDelta, mainBarTargetSize, sizePct);
 
@@ -165,33 +169,33 @@ public class InspectableLabel : MonoBehaviour
         contentProgressBar.rectTransform.sizeDelta = new Vector2(pct * contentMainBar.rectTransform.sizeDelta.x, contentProgressBar.rectTransform.sizeDelta.y);
 
         // Lerp alpha values
-        float targetAlpha = GetCurrentStateAlpha();
+        float targetAlpha = GetCanvasAlpha();
         canvasGroupMain.interactable = isNearby;
         canvasGroupMain.blocksRaycasts = isNearby;
         float alphaPct = setAlpha ? 1.0f : alphaLerp * Time.deltaTime;
         canvasGroupMain.alpha = Mathf.Lerp(canvasGroupMain.alpha, targetAlpha, alphaPct);
 
         // Enable / Disable prompt
-        PromptState promptAttachableState = PlayerController.instance.GetPromptStateAttachable();
-        bool promptAttachableEnabled =
-            (state == LabelState.TITLE || state == LabelState.INFO)
-            && isNearby && promptAttachableState != PromptState.UNAVAILABLE;
+        InteractionState promptState = PlayerController.instance.GetAttachmentInteractionState();
+        bool promptEnabled =
+            (currentState == LabelState.TITLE || currentState == LabelState.INFO)
+            && isNearby && (promptState != InteractionState.CLOSED);
 
-        promptAttachablePrompt.transform.localPosition = new Vector3(-lerpedSize.x * 0.5f - 15.0f, -30.0f, 0.0f);
-        if (promptAttachableState == PromptState.IN_PROGRESS)
+        promptInput.transform.localPosition = new Vector3(-lerpedSize.x * 0.5f - 15.0f, -30.0f, 0.0f);
+        if (promptState == InteractionState.BLOCKED)
         {
-            promptAttachablePrompt.color = Color.gray;
-            promptAttachableIcon.color = Color.gray;
-            promptAttachableIcon.sprite = promptAttachableIconInProgress;
+            promptInput.color = Color.gray;
+            promptIcon.color = Color.gray;
+            promptIcon.sprite = promptIconInProgress;
         }
-        else if (promptAttachableState == PromptState.AVAILABLE)
+        else if (promptState == InteractionState.OPEN)
         {
-            promptAttachablePrompt.color = Color.white;
-            promptAttachableIcon.color = Color.white;
-            promptAttachableIcon.sprite = promptAttachableIconAvailable;
+            promptInput.color = Color.white;
+            promptIcon.color = Color.white;
+            promptIcon.sprite = promptIconAvailable;
         }
 
-        float promptTargetAlpha = promptAttachableEnabled ? 1.0f : 0.0f;
+        float promptTargetAlpha = promptEnabled ? 1.0f : 0.0f;
         float promptAlphaPct = setAlpha ? 1.0f : alphaLerp * Time.deltaTime;
         canvasGroupPrompt.interactable = isNearby;
         canvasGroupPrompt.blocksRaycasts = isNearby;
@@ -199,55 +203,55 @@ public class InspectableLabel : MonoBehaviour
     }
 
 
-    private Vector2 GetCurrentStateSize(LabelState? overrideState = null)
+    private Vector2 GetMaskSize(LabelState? state = null)
     {
-        switch (overrideState == null ? state : overrideState.Value)
+        state = (state == null) ? currentState : state;
+        return state switch
         {
-            case LabelState.ICON:
-                return new Vector2(
-                    layout.padding.left + layout.spacing + contentName.rectTransform.rect.height,
-                    layout.padding.top + layout.spacing * 2 + contentName.rectTransform.rect.height);
-
-            case LabelState.TITLE:
-                return new Vector2(
-                    background.rect.width,
-                    layout.padding.top + layout.spacing * 2 + contentName.rectTransform.rect.height);
-
-            case LabelState.INFO:
-                return new Vector2(background.rect.width, background.rect.height);
-
-            default:
-                return Vector2.zero;
-        }
+            LabelState.IPartN => new Vector2(
+                                layout.padding.left + layout.spacing + contentName.rectTransform.rect.height,
+                                layout.padding.top + layout.spacing * 2 + contentName.rectTransform.rect.height),
+            LabelState.TITLE => new Vector2(
+                                background.rect.width,
+                                layout.padding.top + layout.spacing * 2 + contentName.rectTransform.rect.height),
+            LabelState.INFO => new Vector2(background.rect.width, background.rect.height),
+            _ => Vector2.zero,
+        };
     }
 
-    private float GetCurrentStateAlpha()
+    private float GetCanvasAlpha(LabelState? state = null)
     {
         if (!isNearby && !isHighlighted) return 0.0f;
-        else if (state == LabelState.ICON) return iconAlpha;
-        else return standardAlpha;
+        state = (state == null) ? currentState : state;
+        return state switch
+        {
+            LabelState.IPartN => iconAlpha,
+            _ => standardAlpha,
+        };
     }
 
-    public void SetObject(IInspectable inspectedObject_, float offset_)
+    public void SetObject(IInspectable inspectable_, float offset_)
     {
         // Set variables
-        inspectedObject = inspectedObject_;
+        inspectable = inspectable_;
+        inspectedObject = inspectable.GetObject();
+        inspectedData = inspectable.Inspect();
         offset = offset_;
-        state = LabelState.ICON;
+        currentState = LabelState.IPartN;
         UpdateDynamics(true, true, false);
 
         // Update all content values
-        icon.sprite = inspectedObject.IIGetIconSprite();
-        contentName.text = inspectedObject.IIGetName();
-        contentDescription.text = inspectedObject.IIGetDescription();
-        SetAttributeStrings(inspectedObject.IIGetAttributes());
-        contentElementImage.texture = inspectedObject.IIGetElement().sprite.texture;
-        contentElementName.text = inspectedObject.IIGetElement().name;
-        contentElementName.color = inspectedObject.IIGetElement().color;
-        if (inspectedObject.IIGetMass() != 0.0f)
-            contentWeight.text = inspectedObject.IIGetMass() + "kg";
+        icon.sprite = inspectedData.icon;
+        contentName.text = inspectedData.name;
+        contentDescription.text = inspectedData.description;
+        SetAttributeStrings(inspectable.GetAttributes());
+        contentElementImage.texture = inspectedData.element.sprite.texture;
+        contentElementName.text = inspectedData.element.name;
+        contentElementName.color = inspectedData.element.color;
+        if (inspectedObject.rb.mass != 0.0f)
+            contentWeight.text = inspectedObject.rb.mass + "kg";
         else contentWeight.text = "";
-        SetModifierStrings(inspectedObject.IIGetModifiers());
+        SetModifierStrings(inspectable.GetModifiers());
     }
 
     public void SetAttributeStrings(List<string> attributeStrings)
@@ -289,7 +293,7 @@ public class InspectableLabel : MonoBehaviour
         }
     }
 
-    public void SetNearby(bool isNearby_)
+    public void SetIsNearby(bool isNearby_)
     {
         // Handle updating state and set isNearby
         if (isNearby == isNearby_) return;
@@ -297,13 +301,13 @@ public class InspectableLabel : MonoBehaviour
 
         if (isNearby)
         {
-            state = LabelState.ICON;
+            currentState = LabelState.IPartN;
             hoverTimer = 0.0f;
             UpdateDynamics(true, true, false);
         }
     }
 
-    public void SetHighlighted(bool isHighlighted_)
+    public void SetIsHighlighted(bool isHighlighted_)
     {
         // Handle updating state and set isHighlighted
         if (isHighlighted == isHighlighted_) return;
@@ -311,12 +315,12 @@ public class InspectableLabel : MonoBehaviour
 
         if (isHighlighted)
         {
-            state = LabelState.TITLE;
+            currentState = LabelState.TITLE;
             hoverTimer = 0.0f;
         }
         else if (isNearby)
         {
-            state = LabelState.ICON;
+            currentState = LabelState.IPartN;
             hoverTimer = 0.0f;
         }
     }

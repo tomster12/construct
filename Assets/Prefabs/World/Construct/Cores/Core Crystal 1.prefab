@@ -15,8 +15,8 @@ GameObject:
   - component: {fileID: 5599741621151703972}
   - component: {fileID: 493833736717395438}
   - component: {fileID: 8112258505789309867}
-  - component: {fileID: 6910207892686875202}
   - component: {fileID: 2596124815980446874}
+  - component: {fileID: 6910207892686875202}
   m_Layer: 0
   m_Name: Core Crystal 1
   m_TagString: Untagged
@@ -152,24 +152,6 @@ MonoBehaviour:
   _cl: {fileID: 1362583151538932757}
   _rb: {fileID: 5599741621151703972}
   _ol: {fileID: 493833736717395438}
---- !u!114 &6910207892686875202
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2938071069643155041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d72a0860449b2541b0c6f8124322615, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _inherentMovement: {fileID: 2596124815980446874}
-  _baseWO: {fileID: 8112258505789309867}
-  _runeHandler: {fileID: 0}
-  _objectData: {fileID: 0}
-  inspectableLabelPrefab: {fileID: 0}
-  inspectableIcon: {fileID: 0}
 --- !u!114 &2596124815980446874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,8 +164,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b238af5af19fd894c8ea16f373b1c439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controlledCC: {fileID: 6910207892686875202}
-  controlledCO: {fileID: 6910207892686875202}
+  _controlledCore: {fileID: 6910207892686875202}
+  _controlledPart: {fileID: 6910207892686875202}
   hoverSFX: {fileID: 8300000, guid: 2a904ba49ee186644ae773226f380246, type: 3}
   stats:
     randomizeStats: 0
@@ -193,16 +175,16 @@ MonoBehaviour:
       baseRange:
       - 0
       - 0
-      baseValue: 6
-      _finalValue: 6
+      baseValue: 5
+      _finalValue: 5
       affectors: []
     - name: MovementSprintForce
       isRandom: 0
       baseRange:
       - 0
       - 0
-      baseValue: 11
-      _finalValue: 11
+      baseValue: 9
+      _finalValue: 9
       affectors: []
     - name: MovementSprintTimer
       isRandom: 0
@@ -265,16 +247,16 @@ MonoBehaviour:
       baseRange:
       - 0
       - 0
-      baseValue: 0.14
-      _finalValue: 0.14
+      baseValue: 0.06
+      _finalValue: 0.06
       affectors: []
     - name: HoverSinFrequency
       isRandom: 0
       baseRange:
       - 0
       - 0
-      baseValue: 0.6
-      _finalValue: 0.6
+      baseValue: 0.15
+      _finalValue: 0.15
       affectors: []
     - name: HoverForce
       isRandom: 0
@@ -286,6 +268,22 @@ MonoBehaviour:
       affectors: []
   coreAttachSFX: {fileID: 8300000, guid: 5e5554165b12a8842b3893268bac8092, type: 3}
   coreChargeSFX: {fileID: 0}
+--- !u!114 &6910207892686875202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2938071069643155041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d72a0860449b2541b0c6f8124322615, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseObject: {fileID: 8112258505789309867}
+  partData: {fileID: 11400000, guid: e522a14be1deaa44089bb801f41914b5, type: 2}
+  inherentMovement: {fileID: 2596124815980446874}
+  runeHandler: {fileID: 0}
 --- !u!1 &4472640853496875036
 GameObject:
   m_ObjectHideFlags: 0

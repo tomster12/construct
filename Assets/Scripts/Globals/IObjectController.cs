@@ -1,6 +1,6 @@
 
 public interface IObjectController
 {
-    ObjectControllerType GetControllerType();
-    void SetPaused(bool isPaused);
+    ObjectControllerType GetIControllerType();
+    bool SetPaused(bool isPaused);
 }

@@ -3,9 +3,10 @@ using UnityEngine;
 
 public interface IHighlightable
 {
-    Vector3 IHGetPosition();
-    bool IHGetHighlighted();
-    ObjectType IHGetObjectType();
-    void IHSetNearby(bool isNearby);
-    void IHSetHighlighted(bool isHighlighted);
+    ObjectType GetObjectType();
+    Vector3 GetPosition();
+    bool GetIsNearby();
+    bool GetIsHighlighted();
+    void SetIsNearby(bool isNearby);
+    void SetIsHighlighted(bool isHighlighted);
 }
