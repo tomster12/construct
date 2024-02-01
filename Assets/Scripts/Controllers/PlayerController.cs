@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour
     private IngameState ingameState;
     private ForgingState forgingState;
     private State state;
-    private HashSet<IHighlightable>  nearbyHighlightables = new HashSet<IHighlightable>();
+    private HashSet<IHighlightable> nearbyHighlightables = new HashSet<IHighlightable>();
     private bool toHighlightNearby = false;
     private bool toHighlightHovered = false;
     private Dictionary<ObjectType, bool> highlightableObjects = new Dictionary<ObjectType, bool>()
@@ -116,12 +116,12 @@ public class PlayerController : MonoBehaviour
                 float dist = Vector3.Distance(currentIH.GetPosition(), IConstruct.GetPosition());
                 if (dist < camStats["nearbyRange"] && highlightableObjects[currentIH.GetObjectType()])
                 {
-                    if (! nearbyHighlightables.Contains(currentIH))  nearbyHighlightables.Add(currentIH);
+                    if (!nearbyHighlightables.Contains(currentIH)) nearbyHighlightables.Add(currentIH);
                     currentIH.SetIsNearby(true);
                 }
                 else
                 {
-                    if ( nearbyHighlightables.Contains(currentIH))  nearbyHighlightables.Remove(currentIH);
+                    if (nearbyHighlightables.Contains(currentIH)) nearbyHighlightables.Remove(currentIH);
                     currentIH.SetIsNearby(false);
                 }
             }
@@ -130,8 +130,8 @@ public class PlayerController : MonoBehaviour
         // Hide all nearby shown hoverables
         else
         {
-            foreach (IHighlightable currentIH in  nearbyHighlightables) currentIH.SetIsNearby(false);
-             nearbyHighlightables.Clear();
+            foreach (IHighlightable currentIH in nearbyHighlightables) currentIH.SetIsNearby(false);
+            nearbyHighlightables.Clear();
         }
     }
 
@@ -440,6 +440,7 @@ public class PlayerController : MonoBehaviour
                     hoveredIPart = hoveredT.GetComponent<ConstructPart>();
                     hoveredIH = hoveredT.GetComponent<IHighlightable>();
                     hoveredII = hoveredT.GetComponent<IInspectable>();
+                    po[ipoi[]]
                 }
                 else
                 {

@@ -12,7 +12,7 @@ public class ConstructCore : ConstructPart, IConstructCore
     private CoreAttachmentState state = CoreAttachmentState.DETACHED;
     private IConstructPart attachedIPart;
     protected override int movementPriority => 0;
-    
+
     public bool CanTransition() => IsConstructed() && !IConstruct.IsBlocking() && !inherentCoreMovement.IsBlocking();
     public bool CanAttach(IConstructPart checkIPart)
     {
@@ -24,7 +24,7 @@ public class ConstructCore : ConstructPart, IConstructCore
     public bool IsAttached() => state == CoreAttachmentState.ATTACHED;
     public bool IsDetached() => state == CoreAttachmentState.DETACHED;
     public bool IsTransitioning() => state == CoreAttachmentState.ATTACHING || state == CoreAttachmentState.DETACHING;
-    
+
     public override bool IsBlocking() => IsTransitioning();
     public override bool IsAttachable() => false;
 
@@ -48,7 +48,7 @@ public class ConstructCore : ConstructPart, IConstructCore
         "Energy: " + coreData.energy + " (" + coreData.energyRegen + "/s)",
         "Max Construct Size: " + coreData.maxConstructSize
     };
-    
+
     public override List<string> GetModifiers() => new List<string>();
 
     public CoreAttachmentShape GetAttachmentShape() => attachmentShape;
