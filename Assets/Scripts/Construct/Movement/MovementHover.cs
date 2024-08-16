@@ -2,7 +2,6 @@
 using System.Collections;
 using UnityEngine;
 
-
 public class MovementHover : ConstructCoreMovement
 {
     private void Awake()
@@ -10,7 +9,6 @@ public class MovementHover : ConstructCoreMovement
         ObjectAwake();
         CoreAwake();
     }
-
 
     #region ConstructPartMovement
 
@@ -46,7 +44,6 @@ public class MovementHover : ConstructCoreMovement
     private Vector3 movementDir;
     private float sprintTimer = 0.0f;
 
-
     private void ObjectAwake()
     {
         // Initialize references
@@ -62,7 +59,6 @@ public class MovementHover : ConstructCoreMovement
             hoverAudio.Play();
         }
     }
-
 
     private void FixedUpdate()
     {
@@ -181,7 +177,6 @@ public class MovementHover : ConstructCoreMovement
             yield return null;
         }
     }
-
 
     private float GetHoverHeight(float pct)
     {
